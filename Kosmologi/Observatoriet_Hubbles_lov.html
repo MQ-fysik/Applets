@@ -1,0 +1,1024 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Observatoriet Fjeldlys – Hubbles lov</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Samme system som Kosmologisk rødforskydning ver18: én bred "filmstrimmel" der skaleres til vinduet.
+   Bredformat: scene + figurkort til venstre, tal + knapper til højre. */
+:root{
+  --bg:#0a0d14; --panel:#121825; --line:#243048; --fg:#e5e9f0; --muted:#8994a8;
+  --accent:#f0a64a; --lab:#1f9d3a; --gal:#e0312b; --paper:#ffffff; --ink:#1b1b1b; --ok:#3ccf6e;
+  --display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:14px;line-height:1.45}
+.wrap{max-width:1100px;margin:0 auto;padding-block:20px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:12px}
+h1{font-family:var(--display);font-weight:600;font-size:21px;margin:0;text-wrap:balance}
+.ver{font-family:var(--mono);font-size:12px;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:1px 6px;vertical-align:middle;margin-left:10px;font-weight:400}
+.caption{min-height:3.1em;margin:0;font-size:16px}
+.caption b{color:var(--accent);font-weight:600}
+.caption i,.ro small i,.lbl i{font-family:"Times New Roman",Times,serif;font-size:1.08em}
+.steps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;list-style:none;margin:0;padding:0}
+@media (max-width:640px){.steps{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.steps button{width:100%;text-align:left;padding:7px 10px;font-size:13px;color:var(--muted);position:relative;overflow:hidden}
+.steps button .k{font-family:var(--mono);color:var(--accent);margin-right:6px}
+.steps button.on{color:var(--fg);border-color:var(--accent)}
+.steps button.done{color:var(--fg)}
+.steps button:disabled{opacity:.45;cursor:not-allowed}
+.stage{position:relative}
+canvas{display:block;width:100%;height:auto;border-radius:8px}
+#scene{aspect-ratio:1000/520;background:#04060b;touch-action:none}
+.paper{position:relative;background:var(--paper);border-radius:8px;padding:6px}
+#spec{aspect-ratio:1000/330;background:var(--paper);touch-action:none}
+.ptext{position:absolute;inset:6px;overflow:auto;color:var(--ink);font-family:"Times New Roman",Times,serif;font-size:16.5px;line-height:1.42;padding:8px 14px;background:var(--paper)}
+.ptext h3{font-family:var(--body);font-size:16px;margin:0 0 6px}
+.ptext p{margin:0 0 7px}
+.ptext ol,.ptext ul{margin:0 0 6px;padding-left:22px}
+.ptext li{margin:0 0 3px}
+.ptext table{border-collapse:collapse;font-size:14.5px;margin-top:4px;color:var(--ink);font-family:"Times New Roman",Times,serif}
+.ptext th,.ptext td{border:1px solid #c9ced8;padding:2px 8px;text-align:right}
+.ptext th{background:#e7f1fb;font-family:var(--body);font-size:12.5px;text-align:center}
+.ptext td:first-child,.ptext td:nth-child(2){text-align:left}
+.ptext .note{color:#555;font-size:14px}
+/* login og terminal */
+.startov{position:absolute;inset:0;display:grid;place-items:center;background:rgba(5,7,12,.62);border-radius:8px}
+.login{display:grid;gap:10px;justify-items:stretch;width:min(380px,90%);padding:20px 22px;background:rgba(14,19,29,.94);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.st-t{margin:0;font-family:var(--display);font-size:24px;font-weight:600;text-align:center}
+.st-sub{margin:-6px 0 4px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:12.5px;letter-spacing:.06em;text-transform:uppercase}
+.login label.f{display:grid;gap:3px;font-size:13px;color:var(--muted)}
+.st-fs{display:inline-flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;user-select:none;justify-self:center}
+.st-fs input{width:18px;height:18px;margin:0;accent-color:var(--accent);cursor:pointer}
+.st-msg{margin:0;font-size:14px;color:var(--accent);text-align:center}
+button.big{font-size:17px;padding:11px 20px;background:var(--accent);border-color:var(--accent);color:#1a1206;font-weight:600}
+.term{position:absolute;left:18px;bottom:16px;right:18px;font-family:var(--mono);font-size:15px;color:#7dff9b;text-shadow:0 0 8px rgba(80,255,140,.5);background:rgba(2,6,4,.82);border:1px solid #1d4a2a;border-radius:8px;padding:12px 14px;min-height:150px;white-space:pre-wrap}
+#autoBan{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:50;font-size:19px;font-weight:600;padding:12px 22px;border-radius:999px;background:var(--accent);border:0;color:#1a1206;box-shadow:0 6px 30px rgba(0,0,0,.55);cursor:pointer}
+/* logbog */
+.logwrap{position:absolute;inset:0;overflow:auto;background:#0b0f18;border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.logwrap table{border-collapse:collapse;width:100%;font-size:13px;color:var(--fg)}
+.logwrap th{font-weight:500;color:var(--muted);text-align:right;padding:5px 6px;border-bottom:1px solid var(--line);font-size:12px}
+.logwrap td{font-family:var(--mono);text-align:right;padding:5px 6px;border-bottom:1px solid #1a2233;font-variant-numeric:tabular-nums}
+.logwrap td:nth-child(-n+2),.logwrap th:nth-child(-n+2){text-align:left}
+.logwrap th i{font-family:"Times New Roman",Times,serif;font-size:14px}
+.logwrap .empty{color:var(--muted);padding:30px;text-align:center;font-size:15px}
+/* tal og knapper */
+.readouts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:640px){.readouts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ro{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+.ro small{display:block;font-size:12px;color:var(--muted)}
+.ro b{font-family:var(--mono);font-weight:500;font-size:17px;font-variant-numeric:tabular-nums;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ro .sub{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.ro.gal b{color:#ff7a70}
+.ro.okc b{color:var(--ok)}
+.bar{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.grp{display:contents}
+.lbl{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.hint{font-size:12px;color:var(--muted);line-height:1.35}
+button{font:inherit;font-size:13px;color:var(--fg);background:#0e131d;border:1px solid var(--line);border-radius:6px;padding:6px 11px;cursor:pointer}
+button:hover:not(:disabled){border-color:var(--muted)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#1a1206;font-weight:600}
+button.go{background:var(--accent);border-color:var(--accent);color:#1a1206;font-weight:600}
+button.go:disabled{background:#0e131d;color:var(--fg);border-color:var(--line);font-weight:400}
+button:focus-visible,input:focus-visible{outline:2px solid #7cc8ff;outline-offset:2px}
+input[type=text],input[type=number]{font:inherit;font-size:15px;background:#0e131d;color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:7px 9px;width:100%;box-sizing:border-box;font-family:var(--mono)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.seg{display:flex;flex-wrap:wrap;gap:4px}
+.inrow{display:flex;gap:6px;align-items:center}
+.inrow input{flex:1 1 auto;min-width:0}
+details.about{font-size:12px;color:var(--muted)}
+details.about summary{cursor:pointer;width:max-content;max-width:100%}
+details.about p{margin:6px 0 0;max-width:90ch}
+[hidden]{display:none!important}
+:fullscreen{overflow:auto}
+/* tilpasning til boksen (som ver18) */
+html.fitmode,html.fitmode body{height:100%;overflow:hidden}
+html.fitmode .wrap{position:absolute;top:0;left:0;width:1100px;max-width:none;margin:0;transform-origin:0 0;padding-block:10px 12px}
+html.fitmode .steps{grid-template-columns:repeat(6,minmax(0,1fr))}
+html.fitmode .readouts{grid-template-columns:repeat(4,minmax(0,1fr))}
+.side{display:contents}
+.side .bar{order:1}
+details.about{order:2}
+/* ---------- bredformat ---------- */
+html.wide .wrap{width:1280px;font-size:15px;grid-template-columns:minmax(0,1fr) 330px;column-gap:14px;row-gap:10px;
+  grid-template-areas:"title title" "steps steps" "cap cap" "stage side" "paper side";align-items:start}
+html.wide h1{grid-area:title;font-size:24px}
+html.wide .steps{grid-area:steps}
+html.wide .steps button{font-size:14.5px;padding:8px 12px}
+html.wide .caption{grid-area:cap;font-size:18px;line-height:1.42;min-height:0;height:2.9em;overflow:hidden}
+html.wide .stage{grid-area:stage}
+html.wide .paper{grid-area:paper}
+html.wide .side{grid-area:side;display:flex;flex-direction:column;gap:10px;align-self:stretch;min-height:0;overflow:hidden}
+html.wide .side .bar{order:0}
+html.wide .readouts{grid-template-columns:1fr 1fr;gap:8px}
+html.wide .ro{padding:9px 12px}
+html.wide .ro small{font-size:13px}
+html.wide .ro b{font-size:21px;line-height:1.25}
+html.wide .ro .sub{font-size:12.5px}
+html.wide .bar{flex:1 1 auto;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start;padding:12px}
+html.wide .bar button{font-size:14px;padding:8px 8px;text-align:center}
+html.wide .bar .full,html.wide .bar .seg,html.wide .bar .hint,html.wide .bar .inrow{grid-column:1/-1}
+html.wide .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+html.wide .seg.two{grid-template-columns:repeat(2,1fr)}
+html.wide .seg button{padding:7px 4px}
+html.wide details.about{grid-area:title;justify-self:end;align-self:center;font-size:13px;position:static}
+html.wide details.about[open] p{position:absolute;z-index:5;right:16px;top:52px;width:640px;max-width:none;margin:0;padding:14px 16px;font-size:14px;line-height:1.5;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.guide{background:#17130b;border:1px solid #6a4c1e;border-radius:8px;padding:9px 12px}
+.guide .gt{font-size:11.5px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:5px}
+.guide ol{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.guide li{position:relative;padding-left:24px;font-size:14px;color:var(--muted);line-height:1.3}
+.guide li::before{content:'';position:absolute;left:0;top:1px;width:15px;height:15px;border:1.5px solid #4a5468;border-radius:4px;box-sizing:border-box;font-size:11px;line-height:12px;text-align:center}
+.guide li.done{color:#8fb79d}
+.guide li.done::before{content:'✓';background:var(--ok);border-color:var(--ok);color:#06210f;font-weight:700}
+.guide li.now{color:var(--fg);font-weight:600}
+.guide li.now::before{border-color:var(--accent);box-shadow:0 0 0 3px rgba(240,166,74,.25)}
+.guide .tip{margin-top:6px;font-size:13px;color:#ffcf8a}
+.guide .prog{margin-top:6px;font-size:12px;color:var(--muted)}
+.pulse{border-color:var(--accent)!important;animation:pulse 1.5s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(240,166,74,.75)}70%{box-shadow:0 0 0 10px rgba(240,166,74,0)}100%{box-shadow:0 0 0 0 rgba(240,166,74,0)}}
+.seg.pulse{border:1px solid var(--accent);border-radius:8px;padding:3px}
+.logwrap tr[data-g]{cursor:pointer}
+.logwrap tr[data-g]:hover td{background:#141c2b}
+.st{font-family:var(--body);font-size:12px;padding:2px 7px;border-radius:999px;white-space:nowrap}
+.st.ok{background:#12351f;color:#7cf0a0}
+.st.miss{background:#3a2a12;color:#ffcf8a}
+.loghead{font-size:13px;color:var(--muted);margin:0 0 6px}
+.loghead b{color:var(--accent);font-family:var(--mono)}
+.loghint{font-size:12px;color:var(--muted);margin-top:8px}
+html.wide .guide li{font-size:15px}
+html.wide .bar .inrow{grid-column:1/-1}
+.mini{font-size:11.5px;padding:2px 7px;margin-right:4px;border-radius:5px;font-family:var(--body)}
+.logwrap td.imgs{white-space:nowrap}
+.pv{position:fixed;inset:0;z-index:60;background:rgba(3,5,10,.82);display:grid;place-items:center;padding:20px}
+.pvbox{max-width:min(1400px,96vw);max-height:94vh;display:grid;gap:10px;justify-items:center}
+.pvbox img{max-width:100%;max-height:calc(94vh - 60px);border-radius:6px;background:#fff;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+.pvbar{display:flex;gap:10px}
+.pvbar button{font-size:15px;padding:8px 16px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:70;background:#12351f;color:#bff5cf;border:1px solid #2c7a47;border-radius:999px;padding:9px 18px;font:500 15px "IBM Plex Sans",sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+</style>
+
+<div class="wrap">
+  <h1>Observatoriet Fjeldlys · Hubbles lov<span class="ver">Version 5 · 03.11.2026</span></h1>
+  <ol class="steps" id="steps">
+    <li><button data-i="0"><span class="k">1</span>Log ind</button></li>
+    <li><button data-i="1" disabled><span class="k">2</span>Kuplen</button></li>
+    <li><button data-i="2" disabled><span class="k">3</span>Søgekikkert</button></li>
+    <li><button data-i="3" disabled><span class="k">4</span>Kamera</button></li>
+    <li><button data-i="4" disabled><span class="k">5</span>Spektrograf</button></li>
+    <li><button data-i="5" disabled><span class="k">6</span>Logbog</button></li>
+  </ol>
+  <p class="caption" id="caption" aria-live="polite"></p>
+
+  <div class="stage">
+    <canvas id="scene" aria-label="Observatoriet: kuppel, søgekikkert, kamera og spektrograf"></canvas>
+    <div class="logwrap" id="logwrap" hidden></div>
+    <div class="term" id="term" hidden></div>
+    <div class="startov" id="loginOv">
+      <form class="login" id="loginForm" autocomplete="off">
+        <p class="st-t">Observatoriet Fjeldlys</p>
+        <p class="st-sub">Fjernstyring af teleskop T1</p>
+        <label class="f">Jeres navne (gruppe)<input type="text" id="inGroup" maxlength="40" required></label>
+        <label class="f">Klassekode (kun hvis læreren har givet jer en)<input type="text" id="inCode" maxlength="20"></label>
+        <label class="st-fs"><input type="checkbox" id="startFs" checked> <span id="startFsTxt">Start i fuld skærm</span></label>
+        <button class="big" type="submit">Log ind</button>
+        <p class="st-msg" id="startMsg" hidden></p>
+      </form>
+    </div>
+  </div>
+
+  <div class="side">
+    <div class="guide" id="guide" hidden></div>
+    <div class="readouts" id="ro">
+      <div class="ro" id="ro0"><small></small><b>–</b><span class="sub"></span></div>
+      <div class="ro" id="ro1"><small></small><b>–</b><span class="sub"></span></div>
+      <div class="ro" id="ro2"><small></small><b>–</b><span class="sub"></span></div>
+      <div class="ro" id="ro3"><small></small><b>–</b><span class="sub"></span></div>
+    </div>
+    <div class="bar" id="bar">
+      <div class="grp" data-s="1">
+        <button id="bDome" class="full">Åbn kuplen</button>
+        <button id="bTrack" class="full" aria-pressed="false">Tracking: fra</button>
+        <button id="go2" class="go full" disabled>Til søgekikkerten →</button>
+      </div>
+      <div class="grp" data-s="2">
+        <span class="hint">Galaksehobe:</span>
+        <div class="seg" id="hobBtns"></div>
+        <button id="go3" class="go full" disabled>Til kameraet →</button>
+      </div>
+      <div class="grp" data-s="3">
+        <span class="hint">Forstørrelse (synsfelt):</span>
+        <div class="seg" id="zoomBtns">
+          <button data-f="0.5" aria-pressed="false">0,50°</button>
+          <button data-f="0.125" aria-pressed="true">0,125°</button>
+          <button data-f="0.05" aria-pressed="false">0,050°</button>
+        </div>
+        <label class="hint" for="inPx">Udstrækning i pixel (udfyldes når I trækker linjen, men kan rettes):</label>
+        <div class="inrow"><input type="number" id="inPx" min="0" step="1" inputmode="numeric"></div>
+        <button id="go4" class="go full">Til spektrografen →</button>
+        <button id="bPngImg" class="full">Gem billede (PNG)</button>
+      </div>
+      <div class="grp" data-s="4">
+        <button id="bExpose" class="go">Start måling</button>
+        <button id="bReset">Nulstil måling</button>
+        <button id="bMinus">◀ K −0,05 nm</button>
+        <button id="bPlus">K +0,05 nm ▶</button>
+        <button id="bClearMk" class="full">Fjern markørerne</button>
+        <div class="full"><div class="lbl"><label for="fitS">Sammenlign: træk laboratorielinjerne hen over galaksens linjer</label></div><input type="range" id="fitS" min="0" max="0.1" step="0.0002" value="0"></div>
+        <button id="bNextGal" class="go full">Vælg næste galakse →</button>
+        <button id="bPngSpec" class="full">Gem spektrum (PNG)</button>
+      </div>
+      <div class="grp" data-s="5">
+        <span class="hint">Hent logbogen, og kopiér tallene ind i jeres grafprogram:</span>
+        <button id="bXlsx" class="go full">Excel med decimalkomma (3,14)</button>
+        <button id="bXlsxDot" class="go full">Excel med decimalpunktum (3.14)</button>
+        <button id="bNextGal5" class="full">Mål flere galakser →</button>
+        <button id="bFacit" class="full" hidden>Hent facit (Excel)</button>
+        <button id="bZip" class="full">Hent alle billeder (ZIP)</button>
+        <button id="bNewSky" class="full">Ny himmel (ny observationsnat)</button>
+        <span class="hint">Decimalkomma: til at regne og tegne grafer i dansk Excel. Decimalpunktum: til at kopiere tallene over i TI-Nspire eller GeoGebra.</span>
+      </div>
+      <div class="grp" data-s="all">
+        <button id="bSound" aria-pressed="true">Lyd: til</button>
+        <button id="fs" hidden>Fuld skærm</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="paper"><canvas id="spec" aria-label="Figur: geometri eller spektrum"></canvas><div class="ptext" id="ptext"></div></div>
+
+  <details class="about"><summary>Om simuleringen</summary><p>Observatoriet Fjeldlys er opdigtet, og galakserne er simulerede. Hver gruppe får sin egen tilfældige himmel med seks galaksehobe mellem ca. 60 og 1000 mio. lysår væk og et observationsnummer der hører til. Logger gruppen ind igen med samme navn på samme computer, fortsætter den med samme himmel og logbog. Galakserne er spiralgalakser hvis diameter varierer ca. ±15 % omkring 150 kly, og de har en egenhastighed på op til ca. 400 km/s, så punkterne på Hubble-grafen spreder sig som rigtige målinger. Rødforskydningen følger bogens model <i>v</i><sub>0</sub> = <i>z</i> · <i>c</i> og holdes under <i>z</i> = 0,1. Spektret opbygges af enkelte fotoner med tilfældig støj, og jo mindre galaksen ser ud på himlen, jo færre fotoner falder gennem spalten. Kameraet har 1000 pixel i bredden, så 1 pixel svarer til synsfeltet divideret med 1000.</p></details>
+</div>
+
+<script>
+window.__SRC='<!doctype html>\n'+document.documentElement.outerHTML;
+(()=>{
+/* ---------- hjælpere ---------- */
+const $=id=>document.getElementById(id);
+const fmt=(x,d=2)=>x.toFixed(d).replace('.',',');
+const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+const sup=n=>String(n).split('').map(ch=>SUP[ch]||ch).join('');
+function sci(x,d=2){ if(!isFinite(x)||x===0) return '0'; let e=Math.floor(Math.log10(Math.abs(x))), m=x/10**e; if(+m.toFixed(d)>=10){ m/=10; e++; } return fmt(m,d)+'·10'+sup(e); }
+const fint=n=>Math.round(n).toLocaleString('da-DK');
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+function hashStr(s){ let h=2166136261>>>0; for(const ch of s){ h^=ch.charCodeAt(0); h=Math.imul(h,16777619)>>>0; } return h; }
+function mulberry(a){ return ()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function gaussR(R){ let u=0,v=0; while(!u)u=R(); while(!v)v=R(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+const gauss=()=>gaussR(Math.random);
+function poisson(mu){ if(mu<=0) return 0; if(mu>30) return Math.max(0,Math.round(mu+Math.sqrt(mu)*gauss())); const L=Math.exp(-mu); let k=0,p=1; do{ k++; p*=Math.random(); }while(p>L); return k-1; }
+
+/* ---------- fysik og univers ---------- */
+const LK=393.37, LH=396.85, CKMS=299792.458, DMW=150;          // nm, nm, km/s, kly
+const OBS='Observatoriet Fjeldlys';
+const FOV_FINDER=2.0, SLIT_L=0.03;                              // grader
+const L0=370, L1=470, NB=400, BW=(L1-L0)/NB;                    // spektrograf: 370–470 nm i 0,25 nm-kanaler
+const RMAX=5200, CLICKDIV=160, SIMX=30;                         // fotoner/s ved fuld spalte; klik-dæmpning; simuleret tid pr. sekund
+
+function makeArt(R){
+  const pts=[], n=170, pitch=3.4+R()*1.8, off=R()*6.283;
+  for(let k=0;k<2;k++) for(let i=0;i<n;i++){
+    const t=i/n, r=0.1+0.88*t, th=off+k*Math.PI+pitch*t*2.8, j=0.05*(1-0.3*t);
+    const x=r*Math.cos(th)+(R()-.5)*j*2, y=r*Math.sin(th)+(R()-.5)*j*2;
+    if(Math.hypot(x,y)>0.985) continue;
+    const blue=R()<.25; pts.push({x,y,a:(0.25+R()*0.45)*(1-0.3*t),c:blue?'170,195,255':'228,218,240',s:blue?1.35:1});
+  }
+  for(let i=0;i<150;i++){ const r=Math.sqrt(R())*0.96, th=R()*6.283; pts.push({x:r*Math.cos(th),y:r*Math.sin(th),a:.1+R()*.18,c:'210,205,225',s:.9}); }
+  return pts;
+}
+function makeUniverse(code){
+  const key=String(code).replace(/[^A-Z0-9]/gi,'').toUpperCase();
+  const R=mulberry(hashStr('fjeldlys:'+key));
+  const H0=21.5*(1+0.05*(2*R()-1));
+  const base=[70,150,260,420,640,930];
+  for(let i=base.length-1;i>0;i--){ const j=Math.floor(R()*(i+1)); [base[i],base[j]]=[base[j],base[i]]; }
+  const hobs=base.map((b,i)=>{
+    const rh=b*(1+0.15*(2*R()-1)), hob={i, id:i+1, name:'Hob '+(i+1), r:rh, gals:[], stars:[]};
+    for(let k=0;k<4;k++){
+      let dx,dy,tries=0;
+      do{ dx=(2*R()-1)*0.72; dy=(2*R()-1)*0.36; tries++; } while(tries<60 && hob.gals.some(g=>Math.hypot(g.dx-dx,g.dy-dy)<0.3));
+      const r=rh*(1+0.04*(2*R()-1));
+      const D=DMW*(1+clamp(0.12*gaussR(R),-0.25,0.25));
+      const theta=2*Math.asin((D*1e3/2)/(r*1e6))*180/Math.PI;
+      const vpec=clamp(200*gaussR(R),-400,400), v=H0*r+vpec, z=v/CKMS;
+      const inc=(25+R()*55)*Math.PI/180;
+      hob.gals.push({id:(i+1)+'ABCD'[k], name:'FJ '+(i+1)+'-'+'ABCD'[k], hob:i, dx, dy, r, D, theta, v, z, q:Math.max(.25,Math.cos(inc)), pa:R()*Math.PI, art:makeArt(R)});
+    }
+    for(let s=0;s<520;s++) hob.stars.push({dx:(2*R()-1)*1.4, dy:(2*R()-1)*0.8, m:R()**3, tint:R()});
+    return hob;
+  });
+  return {H0, hobs, key, temp:-1-Math.floor(R()*7)};
+}
+
+/* galaksespektrum i hvilesystemet (bygget på stjernespektret fra Kosmologisk rødforskydning) */
+const LINES=[[LK,.62,1.3],[LH,.58,1.3],[382.0,.2,.8],[383.8,.16,.7],[388.9,.18,.8],[404.58,.15,.6],[406.36,.1,.5],[410.17,.24,.9],
+  [413.2,.1,.5],[416.7,.08,.5],[422.67,.2,.7],[427.2,.12,.6],[430.8,.24,1.4],[434.05,.26,.9],[438.35,.13,.6],[440.5,.1,.5],[446.0,.08,.5],[452.8,.1,.6]];
+function noise1(x){ const s=Math.sin(x*12.9898)*43758.5453; return s-Math.floor(s); }
+function GI0(l){
+  let c=0.3+0.7/(1+Math.exp(-(l-388)/6));
+  c*=1+0.1*clamp((l-388)/80,0,1);
+  for(const [l0,d,w] of LINES) c*=1-d*Math.exp(-0.5*((l-l0)/w)**2);
+  return c*(1+0.018*(noise1(Math.round(l*6))-.5));
+}
+
+/* ---------- tilstand ---------- */
+const S={step:0, maxStep:0, logged:false, teacher:false, rmode:false, group:'', code:'', U:null,
+  dome:{phase:'closed', rot:0, open:0, t:0}, tracking:false,
+  view:{hob:-1, cx:0, cy:0, scale:FOV_FINDER/1000}, slew:null, sel:null, fov:0.125,
+  meas:null, drag:null, spec:{}, exposing:false, mkA:'K', fitS:0, log:{}, t0:performance.now(), sound:true, flashes:[], obs:'', csvDone:false, facitU:null, facitObs:null};
+const isDone=id=>{ const e=S.log[id]; return !!(e&&e.theta&&e.lamK&&e.lamH); };
+const viewScale=()=>S.step===2?FOV_FINDER/1000:S.fov/1000;
+
+/* ---------- lyd (alt laves i browseren): metalliske kuppel- og motorlyde ---------- */
+let AC=null, master=null, NB_=null;
+function ac(){ if(!AC){ const C=window.AudioContext||window.webkitAudioContext; if(!C) return null; AC=new C(); master=AC.createGain(); master.gain.value=.7; master.connect(AC.destination); } return AC; }
+function canPlay(){ return S.sound && AC && AC.state==='running'; }
+function noiseBuf(){ if(!NB_){ const len=AC.sampleRate*2; NB_=AC.createBuffer(1,len,AC.sampleRate); const d=NB_.getChannelData(0); for(let i=0;i<len;i++) d[i]=Math.random()*2-1; } return NB_; }
+function noiseSrc(){ const s=AC.createBufferSource(); s.buffer=noiseBuf(); s.loop=true; return s; }
+function envGain(t0,a,hold,rel,peak){ const g=AC.createGain(); g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(peak,t0+a); g.gain.setValueAtTime(peak,t0+a+hold); g.gain.linearRampToValueAtTime(0,t0+a+hold+rel); return g; }
+function beep(f=880,dur=.07,vol=.08,type='square',delay=0){ if(!canPlay()) return; const t=AC.currentTime+delay, o=AC.createOscillator(); o.type=type; o.frequency.value=f; const g=envGain(t,.005,dur,.03,vol); o.connect(g).connect(master); o.start(t); o.stop(t+dur+.05); }
+/* lavt brum fra en elmotor */
+function hum(t,dur,f,vol){ const o=AC.createOscillator(); o.type='square'; o.frequency.value=f;
+  const lp=AC.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=220; lp.Q.value=2;
+  const g=envGain(t,.25,Math.max(0,dur-.55),.3,vol); o.connect(lp).connect(g).connect(master); o.start(t); o.stop(t+dur+.05); }
+/* tandhjul der klaprer: korte metalliske tik */
+function ticks(t,dur,rate,vol,freq=2600){ let x=t+.05; const end=t+dur-.1;
+  while(x<end){ const p=(x-t)/dur, env=Math.min(1,p*6,(1-p)*6);
+    const n=AC.createBufferSource(); n.buffer=noiseBuf(); const bp=AC.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=freq*(.85+Math.random()*.3); bp.Q.value=6;
+    const g=AC.createGain(); g.gain.setValueAtTime(vol*env*(.6+Math.random()*.4),x); g.gain.exponentialRampToValueAtTime(.0005,x+.025);
+    n.connect(bp).connect(g).connect(master); n.start(x,Math.random()*1.5,.03);
+    x+=1/(rate*(.85+Math.random()*.3)); } }
+/* metallisk rumlen: støj gennem smalle resonanser, som en stor stålkuppel */
+function metalRumble(t,dur,vol,freqs=[233,377,611,989,1453]){ const n=noiseSrc(), lp=AC.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=2200;
+  const sum=AC.createGain();
+  for(const f of freqs){ const bp=AC.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=f; bp.Q.value=28; const gg=AC.createGain(); gg.gain.value=3.2; n.connect(bp).connect(gg).connect(sum); }
+  const lfo=AC.createOscillator(), lg=AC.createGain(), am=AC.createGain(); am.gain.value=.7; lfo.frequency.value=5.3; lg.gain.value=.3; lfo.connect(lg).connect(am.gain);
+  const g=envGain(t,.4,Math.max(0,dur-.8),.4,vol); sum.connect(am).connect(lp).connect(g).connect(master);
+  n.start(t); lfo.start(t); n.stop(t+dur+.1); lfo.stop(t+dur+.1); }
+/* relæ der slår til eller fra */
+function relay(t){ const n=AC.createBufferSource(); n.buffer=noiseBuf(); const bp=AC.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1800; bp.Q.value=3;
+  const g=AC.createGain(); g.gain.setValueAtTime(.35,t); g.gain.exponentialRampToValueAtTime(.001,t+.04); n.connect(bp).connect(g).connect(master); n.start(t,Math.random(),.05);
+  const o=AC.createOscillator(); o.frequency.value=140; const og=AC.createGain(); og.gain.setValueAtTime(.2,t); og.gain.exponentialRampToValueAtTime(.001,t+.06); o.connect(og).connect(master); o.start(t); o.stop(t+.07); }
+/* kuplen drejer */
+function motor(dur){ if(!canPlay()) return; const t=AC.currentTime; relay(t); hum(t,dur,50,.11); metalRumble(t,dur,.1); ticks(t,dur,13,.09); relay(t+dur); }
+/* lugen glider op: tungere rumlen og skraben */
+function grind(dur){ if(!canPlay()) return; const t=AC.currentTime; relay(t); hum(t,dur,42,.1); metalRumble(t,dur,.14,[187,301,512,733,1187,1931]); ticks(t,dur,8,.12,1700);
+  const n=noiseSrc(), bp=AC.createBiquadFilter(); bp.type='bandpass'; bp.Q.value=14; bp.frequency.setValueAtTime(700,t); bp.frequency.linearRampToValueAtTime(980,t+dur);
+  const g=envGain(t,.5,Math.max(0,dur-1),.5,.08); n.connect(bp).connect(g).connect(master); n.start(t); n.stop(t+dur+.1); }
+/* lugen går i stop: tungt metalslag med uharmoniske overtoner der klinger ud */
+function clank(){ if(!canPlay()) return; const t=AC.currentTime;
+  [[112,.35,1.6],[287,.22,1.2],[531,.16,.9],[877,.11,.7],[1319,.07,.5],[2087,.05,.35]].forEach(([f,a,d])=>{ const o=AC.createOscillator(); o.frequency.value=f*(1+(Math.random()-.5)*.01); const g=AC.createGain(); g.gain.setValueAtTime(a,t); g.gain.exponentialRampToValueAtTime(.0005,t+d); o.connect(g).connect(master); o.start(t); o.stop(t+d+.05); });
+  const n=AC.createBufferSource(); n.buffer=noiseBuf(); const lp=AC.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=900; const g=AC.createGain(); g.gain.setValueAtTime(.6,t); g.gain.exponentialRampToValueAtTime(.001,t+.12); n.connect(lp).connect(g).connect(master); n.start(t,0,.15); }
+/* teleskopet drejer: gear og motor, uden tonehøjde der stiger */
+function servo(dur){ if(!canPlay()) return; const t=AC.currentTime; relay(t); hum(t,dur,62,.07); metalRumble(t,dur,.05,[320,540,870]); ticks(t,dur,18,.06,3000); relay(t+dur); }
+function shutter(){ if(!canPlay()) return; const t=AC.currentTime, n=noiseSrc(), hp=AC.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=2200; const g=AC.createGain(); g.gain.setValueAtTime(.35,t); g.gain.exponentialRampToValueAtTime(.001,t+.05); n.connect(hp).connect(g).connect(master); n.start(t); n.stop(t+.06); }
+function photonClick(when){ if(!canPlay()) return; const t=Math.max(AC.currentTime,when), n=AC.createBufferSource(); n.buffer=noiseBuf();
+  const hp=AC.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=1800; const g=AC.createGain(); g.gain.setValueAtTime(.22,t); g.gain.exponentialRampToValueAtTime(.001,t+.012);
+  n.connect(hp).connect(g).connect(master); n.start(t,Math.random()*1.5,.015); }
+
+/* ---------- lærred ---------- */
+const sc=$('scene'), sp=$('spec'), cs=sc.getContext('2d'), cp=sp.getContext('2d');
+const SW=1000, SH=520, PW=1000, PH=330;
+function fit(){
+  const dpr=(window.devicePixelRatio||1)*Math.max(1,window.__fitScale||1);
+  for(const [c,ctx,W,H] of [[sc,cs,SW,SH],[sp,cp,PW,PH]]){
+    const w=c.clientWidth||W, k=Math.min(dpr,4096/w); c.width=Math.round(w*k); c.height=Math.round(w*H/W*k);
+    ctx.setTransform(c.width/W,0,0,c.height/H,0,0);
+  }
+}
+new ResizeObserver(fit).observe(document.querySelector('.wrap')); fit(); window.__fitCanvas=fit;
+const SKY=(()=>{ const R=mulberry(77); return Array.from({length:230},()=>({x:R()*SW,y:R()*330,r:R()*1.2+.25,a:.25+R()*.65,ph:R()*6.28})); })();
+const patCache=new WeakMap();
+function noisePattern(ctx){ if(patCache.has(ctx)) return patCache.get(ctx); const t=document.createElement('canvas'); t.width=t.height=160; const x=t.getContext('2d'); const R=mulberry(9);
+  for(let i=0;i<2600;i++){ const v=Math.floor(60+R()*120); x.fillStyle=`rgba(${v},${v},${v+12},${.05+R()*.09})`; x.fillRect(Math.floor(R()*160),Math.floor(R()*160),1,1); }
+  const p=ctx.createPattern(t,'repeat'); patCache.set(ctx,p); return p; }
+
+/* tekst med kursive symboler (som bogens figurer) */
+function rich(c,x,y,parts,col='#1b1b1b',align='left',size=17,bg=null){
+  const F={i:`italic ${size}px "Times New Roman",Times,serif`, n:`${size}px "Times New Roman",Times,serif`, s:`${Math.round(size*.7)}px "Times New Roman",Times,serif`, b:`600 ${size-2}px "IBM Plex Sans",sans-serif`};
+  let w=0; for(const [t,k] of parts){ c.font=F[k]; w+=c.measureText(t).width; }
+  let xx=align==='right'?x-w:align==='center'?x-w/2:x;
+  if(bg){ c.fillStyle=bg; c.fillRect(xx-3,y-size*.85,w+6,size*1.25); }
+  c.fillStyle=col; c.textAlign='left';
+  for(const [t,k] of parts){ c.font=F[k]; c.fillText(t,xx,k==='s'?y+size*.3:y); xx+=c.measureText(t).width; }
+  return w;
+}
+
+/* ---------- tegning af galakser og himmel ---------- */
+function drawGalaxy(ctx,x,y,Rpx,g,alpha=1){
+  if(Rpx<1.8){ ctx.fillStyle=`rgba(255,240,220,${.85*alpha})`; ctx.beginPath(); ctx.arc(x,y,1.8,0,7); ctx.fill(); return; }
+  ctx.save(); ctx.translate(x,y); ctx.rotate(g.pa); ctx.scale(1,g.q);
+  const gr=ctx.createRadialGradient(0,0,0,0,0,Rpx);
+  gr.addColorStop(0,`rgba(255,248,230,${alpha})`); gr.addColorStop(.07,`rgba(255,234,200,${.95*alpha})`); gr.addColorStop(.22,`rgba(232,216,208,${.58*alpha})`);
+  gr.addColorStop(.55,`rgba(182,190,228,${.33*alpha})`); gr.addColorStop(.88,`rgba(160,170,220,${.2*alpha})`); gr.addColorStop(.97,`rgba(150,160,215,${.1*alpha})`); gr.addColorStop(1,'rgba(150,160,215,0)');
+  ctx.fillStyle=gr; ctx.beginPath(); ctx.arc(0,0,Rpx,0,7); ctx.fill();
+  if(Rpx>6){ const s=Math.max(1,Rpx*.016); for(const p of g.art){ ctx.fillStyle=`rgba(${p.c},${Math.min(1,p.a*1.35)*alpha})`; const ss=s*p.s; ctx.fillRect(p.x*Rpx-ss/2,p.y*Rpx-ss/2,ss,ss); } }
+  ctx.restore();
+}
+function toPx(v,dx,dy){ return [SW/2+(dx-v.cx)/v.scale, SH/2-(dy-v.cy)/v.scale]; }
+function drawSky(ctx,v,opt={}){
+  ctx.fillStyle='#04060b'; ctx.fillRect(0,0,SW,SH);
+  if(v.hob<0) return;
+  const hob=S.U.hobs[v.hob], hw=SW/2*v.scale+.02, hh=SH/2*v.scale+.02;
+  for(const s of hob.stars){ if(Math.abs(s.dx-v.cx)>hw||Math.abs(s.dy-v.cy)>hh) continue; const [x,y]=toPx(v,s.dx,s.dy);
+    const r=.6+2.4*s.m, col=s.tint<.3?'255,215,180':s.tint>.8?'190,210,255':'235,238,255';
+    if(r>1.6){ const g=ctx.createRadialGradient(x,y,0,x,y,r*2.4); g.addColorStop(0,`rgba(${col},.9)`); g.addColorStop(1,`rgba(${col},0)`); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r*2.4,0,7); ctx.fill(); }
+    ctx.fillStyle=`rgba(${col},${.55+.45*s.m})`; ctx.beginPath(); ctx.arc(x,y,r*.6,0,7); ctx.fill(); }
+  for(const g of hob.gals){ const Rpx=g.theta/2/v.scale, [x,y]=toPx(v,g.dx,g.dy); if(x<-Rpx||x>SW+Rpx||y<-Rpx||y>SH+Rpx) continue; drawGalaxy(ctx,x,y,Rpx,g,opt.alpha??1); }
+  if(opt.noise){ ctx.save(); ctx.fillStyle=noisePattern(ctx); ctx.fillRect(0,0,SW,SH); ctx.restore(); }
+}
+function hud(ctx,lines,x=16,y=26){ lines=lines.filter(Boolean); ctx.font='500 13px "IBM Plex Mono",monospace'; ctx.textAlign='left';
+  lines.forEach((t,i)=>{ const w=ctx.measureText(t).width; ctx.fillStyle='rgba(4,6,11,.7)'; ctx.fillRect(x-6,y+i*20-15,w+12,20); ctx.fillStyle=i?'#c9d2e3':'#f0a64a'; ctx.fillText(t,x,y+i*20); }); }
+
+/* ---------- scener ---------- */
+function drawDome(ctx,t){
+  const g=ctx.createLinearGradient(0,0,0,SH); g.addColorStop(0,'#03050b'); g.addColorStop(.6,'#0b1426'); g.addColorStop(1,'#101a2c'); ctx.fillStyle=g; ctx.fillRect(0,0,SW,SH);
+  for(const s of SKY){ const a=s.a*(.75+.25*Math.sin(t*1.7+s.ph)); ctx.fillStyle=`rgba(225,232,255,${a})`; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,7); ctx.fill(); }
+  ctx.fillStyle='#070a10'; ctx.beginPath(); ctx.moveTo(0,420); ctx.lineTo(120,372); ctx.lineTo(230,398); ctx.lineTo(330,360); ctx.lineTo(430,388); ctx.lineTo(560,350); ctx.lineTo(700,392); ctx.lineTo(820,366); ctx.lineTo(1000,404); ctx.lineTo(1000,520); ctx.lineTo(0,520); ctx.fill();
+  const cx=500, cy=318, R=128, D=S.dome;
+  // bygning
+  ctx.fillStyle='#252c3a'; ctx.fillRect(cx-108,cy,216,150); ctx.fillStyle='#1b212c'; ctx.fillRect(cx-108,cy,216,10);
+  ctx.fillStyle='#11151c'; ctx.fillRect(cx-22,cy+92,44,58);
+  ctx.fillStyle=`rgba(255,120,80,${.55+.2*Math.sin(t*3)})`; ctx.fillRect(cx-70,cy+40,14,10);
+  const tr=S.tracking; ctx.fillStyle=tr?'#3ccf6e':'#24382b'; ctx.beginPath(); ctx.arc(cx+62,cy+45,5,0,7); ctx.fill();
+  if(tr){ ctx.fillStyle='rgba(60,207,110,.25)'; ctx.beginPath(); ctx.arc(cx+62,cy+45,12,0,7); ctx.fill(); }
+  ctx.font='500 10px "IBM Plex Mono",monospace'; ctx.fillStyle=tr?'#7cf0a0':'#56645a'; ctx.textAlign='left'; ctx.fillText('TRACKING',cx+72,cy+49);
+  // kuppel
+  const dg=ctx.createLinearGradient(cx-R,0,cx+R,0); dg.addColorStop(0,'#3a4352'); dg.addColorStop(.45,'#8a95a6'); dg.addColorStop(1,'#2e3542');
+  ctx.fillStyle=dg; ctx.beginPath(); ctx.arc(cx,cy,R,Math.PI,2*Math.PI); ctx.closePath(); ctx.fill();
+  const mer=(phi,l)=>[cx+R*Math.sin(phi)*Math.cos(l), cy-R*Math.sin(l)];
+  ctx.strokeStyle='rgba(20,24,32,.35)'; ctx.lineWidth=1;
+  for(let k=-8;k<=8;k++){ const phi=k*.24+D.rot*1.3; if(Math.cos(phi)<=0) continue; ctx.beginPath(); for(let l=0;l<=1.5708;l+=.06){ const [x,y]=mer(phi,l); l?ctx.lineTo(x,y):ctx.moveTo(x,y); } ctx.stroke(); }
+  // spalte
+  const phiS=(1-D.rot)*1.15, w=.2, lTop=1.5708, lBot=.08;
+  if(Math.cos(phiS)>0.05){
+    const poly=(l0,l1)=>{ ctx.beginPath(); for(let l=l0;l<=l1+1e-9;l+=.03){ const [x,y]=mer(phiS-w,l); l===l0?ctx.moveTo(x,y):ctx.lineTo(x,y); } for(let l=l1;l>=l0-1e-9;l-=.03){ const [x,y]=mer(phiS+w,l); ctx.lineTo(x,y); } ctx.closePath(); };
+    poly(lBot,lTop); ctx.fillStyle='#4a5466'; ctx.fill(); ctx.strokeStyle='rgba(15,18,25,.6)'; ctx.stroke();
+    if(D.open>0){
+      const l0=lTop-D.open*(lTop-lBot);
+      ctx.save(); poly(l0,lTop); ctx.clip();
+      ctx.fillStyle='#070a12'; ctx.fillRect(0,0,SW,SH);
+      const rg=ctx.createRadialGradient(cx,cy-30,5,cx,cy-30,120); rg.addColorStop(0,'rgba(180,40,30,.35)'); rg.addColorStop(1,'rgba(180,40,30,0)'); ctx.fillStyle=rg; ctx.fillRect(cx-140,cy-160,280,170);
+      const tilt=-.35+.35*D.open+(S.tracking?Math.sin(t*.25)*.02:0);
+      ctx.translate(cx,cy-18); ctx.rotate(tilt); const tg=ctx.createLinearGradient(-10,0,10,0); tg.addColorStop(0,'#5b6474'); tg.addColorStop(.5,'#aab2c0'); tg.addColorStop(1,'#4a5262'); ctx.fillStyle=tg; ctx.fillRect(-9,-92,18,96); ctx.fillStyle='#2b313c'; ctx.fillRect(-11,-96,22,7); ctx.fillStyle='#1d222b'; ctx.fillRect(-14,2,28,16);
+      ctx.restore();
+    }
+  }
+  ctx.fillStyle='#1b212c'; ctx.fillRect(cx-R-4,cy-4,2*R+8,8);
+  if(D.phase==='rotating'||D.phase==='opening'){ ctx.font='500 14px "IBM Plex Mono",monospace'; ctx.textAlign='center'; ctx.fillStyle='#f0a64a'; ctx.fillText(D.phase==='rotating'?'Kuplen drejer …':'Spalten åbner …',cx,cy-R-24); }
+}
+function drawFinder(ctx,t){
+  const v=S.view;
+  if(S.slew&&S.slew.streak){ const p=S.slew.p; ctx.fillStyle='#04060b'; ctx.fillRect(0,0,SW,SH);
+    const sp=Math.sin(Math.PI*clamp(p,0,1)); const R=mulberry(5); ctx.lineCap='round';
+    for(let i=0;i<150;i++){ const y=R()*SH, x=(R()*SW*1.6+p*2600)%(SW*1.3)-150, L=10+sp*260*R(); ctx.strokeStyle=`rgba(220,228,255,${.25+.5*R()})`; ctx.lineWidth=.6+R()*1.2; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+L,y+L*.08); ctx.stroke(); }
+    if(p>.72){ ctx.globalAlpha=(p-.72)/.28; drawSky(ctx,v); ctx.globalAlpha=1; }
+  } else drawSky(ctx,v);
+  if(v.hob<0){ ctx.fillStyle='#04060b'; ctx.fillRect(0,0,SW,SH); for(const s of SKY){ ctx.fillStyle=`rgba(225,232,255,${s.a*.8})`; ctx.beginPath(); ctx.arc(s.x,s.y*1.5,s.r,0,7); ctx.fill(); }
+    ctx.font='500 20px "IBM Plex Sans",sans-serif'; ctx.textAlign='center'; ctx.fillStyle='#f0a64a'; ctx.fillText('Vælg en galaksehob til højre',SW/2,SH/2-120); }
+  // trådkors og sigtekreds
+  ctx.strokeStyle='rgba(124,200,255,.55)'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(SW/2,SH/2,60,0,7); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(SW/2-90,SH/2); ctx.lineTo(SW/2-70,SH/2); ctx.moveTo(SW/2+70,SH/2); ctx.lineTo(SW/2+90,SH/2); ctx.moveTo(SW/2,SH/2-90); ctx.lineTo(SW/2,SH/2-70); ctx.moveTo(SW/2,SH/2+70); ctx.lineTo(SW/2,SH/2+90); ctx.stroke();
+  if(v.hob>=0 && !(S.slew&&S.slew.streak&&S.slew.p<.9)){
+    for(const g of S.U.hobs[v.hob].gals){ const [x,y]=toPx(v,g.dx,g.dy), Rp=Math.max(10,g.theta/2/v.scale+6);
+      const sel=S.sel===g; ctx.strokeStyle=sel?'#f0a64a':'rgba(240,166,74,.35)'; ctx.lineWidth=sel?2:1; ctx.beginPath(); ctx.arc(x,y,Rp,0,7); ctx.stroke();
+      ctx.font='500 12px "IBM Plex Mono",monospace'; ctx.textAlign='left'; ctx.fillStyle=sel?'#f0a64a':'#c9d2e3'; ctx.fillText(g.name+(isDone(g.id)?' ✓':''),x+Rp+5,y-Rp*.4); }
+  }
+  hud(ctx,['SØGEKIKKERT · synsfelt 2,0°', v.hob>=0?S.U.hobs[v.hob].name+(S.sel&&S.sel.hob===v.hob?' · '+S.sel.name:''):'ingen hob valgt']);
+}
+function niceBar(scale){ for(const d of [0.002,0.005,0.01,0.02,0.05,0.1,0.2,0.5]){ const px=d/scale; if(px>=90&&px<=260) return [d,px]; } return [0.01,0.01/scale]; }
+function drawCamera(ctx,t,opt={}){
+  const v=S.view; drawSky(ctx,v,{noise:true});
+  const scale=v.scale, [bd,bpx]=niceBar(scale);
+  ctx.strokeStyle='#e5e9f0'; ctx.lineWidth=2; const by=SH-24, bx=SW-30-bpx; ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(bx+bpx,by); ctx.moveTo(bx,by-5); ctx.lineTo(bx,by+5); ctx.moveTo(bx+bpx,by-5); ctx.lineTo(bx+bpx,by+5); ctx.stroke();
+  ctx.font='500 13px "IBM Plex Mono",monospace'; ctx.textAlign='center'; ctx.fillStyle='#e5e9f0'; ctx.fillText(String(bd).replace('.',',')+'°',bx+bpx/2,by-9);
+  if(!opt.noHud) hud(ctx,['KAMERA · synsfelt '+fovTxt(S.fov), '1 pixel = '+sci(scale,2)+' grader', S.sel?S.sel.name+' · '+S.U.hobs[S.sel.hob].name:'']);
+  const m=S.meas; if(m){ const L=Math.hypot(m.x1-m.x0,m.y1-m.y0);
+    ctx.strokeStyle='#f0a64a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(m.x0,m.y0); ctx.lineTo(m.x1,m.y1); ctx.stroke();
+    const ang=Math.atan2(m.y1-m.y0,m.x1-m.x0), nx=-Math.sin(ang)*8, ny=Math.cos(ang)*8;
+    ctx.beginPath(); ctx.moveTo(m.x0-nx,m.y0-ny); ctx.lineTo(m.x0+nx,m.y0+ny); ctx.moveTo(m.x1-nx,m.y1-ny); ctx.lineTo(m.x1+nx,m.y1+ny); ctx.stroke();
+    const top=m.y0<m.y1?[m.x0,m.y0]:[m.x1,m.y1], tx=clamp(top[0],70,SW-70), ty=Math.max(24,top[1]-22), lab=Math.round(L)+' pixel'; ctx.font='600 15px "IBM Plex Mono",monospace'; const w=ctx.measureText(lab).width;
+    ctx.fillStyle='rgba(4,6,11,.75)'; ctx.fillRect(tx-w/2-6,ty-12,w+12,22); ctx.fillStyle='#f0a64a'; ctx.textAlign='center'; ctx.fillText(lab,tx,ty+4); }
+}
+function drawSpectro(ctx,t){
+  const v=S.view; drawSky(ctx,v,{noise:true});
+  const sl=Math.min(SLIT_L/v.scale,SH-40), sw=7;
+  ctx.fillStyle='rgba(0,0,0,.45)'; ctx.fillRect(0,0,SW/2-sw/2,SH); ctx.fillRect(SW/2+sw/2,0,SW/2,SH); ctx.fillRect(SW/2-sw/2,0,sw,SH/2-sl/2); ctx.fillRect(SW/2-sw/2,SH/2+sl/2,sw,SH);
+  ctx.strokeStyle='#7cc8ff'; ctx.lineWidth=1.2; ctx.strokeRect(SW/2-sw/2,SH/2-sl/2,sw,sl);
+  const now=performance.now(); S.flashes=S.flashes.filter(f=>now-f.t<350);
+  for(const f of S.flashes){ const a=1-(now-f.t)/350; ctx.fillStyle=`rgba(190,230,255,${a})`; ctx.beginPath(); ctx.arc(SW/2+f.dx,SH/2+f.dy,1.6,0,7); ctx.fill(); }
+  const s=specOf(S.sel);
+  hud(ctx,['SPEKTROGRAF · spalte '+fmt(SLIT_L,3)+'° lang', S.sel?S.sel.name+' · '+S.U.hobs[S.sel.hob].name:'', 'Eksponeringstid: '+fmtMin(s?s.sim:0), 'Fotoner: '+fint(s?s.N:0)+(S.exposing?'  ● måler':'')]);
+}
+function fmtMin(sim){ const m=Math.floor(sim/60), s=Math.floor(sim%60); return m+' min '+String(s).padStart(2,'0')+' s'; }
+const fovTxt=f=>f===0.5?'0,50°':f===0.125?'0,125°':f===0.05?'0,050°':fmt(f,1)+'°';
+
+/* ---------- figurkort: geometrien ---------- */
+function drawGeometry(c){
+  c.clearRect(0,0,PW,PH); c.fillStyle='#fff'; c.fillRect(0,0,PW,PH);
+  c.font='600 15px "IBM Plex Sans",sans-serif'; c.fillStyle='#1b1b1b'; c.textAlign='left';
+  c.fillText('Afstanden ud fra galaksens størrelse',30,26); c.fillText('Parallaksemetoden – samme trekant',540,26);
+  c.strokeStyle='#d5d9e0'; c.lineWidth=1; c.beginPath(); c.moveTo(510,14); c.lineTo(510,318); c.stroke();
+  const tri=(T,G,E,opp,angLab,col)=>{
+    c.setLineDash([5,5]); c.strokeStyle='#888'; c.lineWidth=1.2; c.beginPath(); c.moveTo(T[0],T[1]); c.lineTo(G[0],G[1]); c.stroke(); c.setLineDash([]);
+    c.strokeStyle='#1b1b1b'; c.lineWidth=1.8; c.beginPath(); c.moveTo(T[0],T[1]); c.lineTo(E[0],E[1]); c.stroke();
+    c.strokeStyle=col; c.lineWidth=3; c.beginPath(); c.moveTo(G[0],G[1]); c.lineTo(E[0],E[1]); c.stroke();
+    c.strokeStyle='#1b1b1b'; c.lineWidth=1; c.beginPath(); c.moveTo(G[0]-11,G[1]); c.lineTo(G[0]-11,G[1]-11); c.lineTo(G[0],G[1]-11); c.stroke();
+    const a=Math.atan2(E[1]-T[1],E[0]-T[0]); c.strokeStyle='#d0312b'; c.lineWidth=1.6; c.beginPath(); c.arc(T[0],T[1],78,a,0); c.stroke();
+    rich(c,T[0]+90,T[1]-8,angLab,'#d0312b','left',18);
+    const mx=(T[0]+E[0])/2, my=(T[1]+E[1])/2; rich(c,mx-6,my-10,[['r','i']],'#1b1b1b','center',20);
+    rich(c,G[0]+12,(G[1]+E[1])/2+6,opp,col,'left',18);
+  };
+  // galaksen
+  const T=[60,170], G=[420,170], E=[420,86], B=[420,254];
+  c.strokeStyle='#bbb'; c.lineWidth=1.2; c.beginPath(); c.moveTo(T[0],T[1]); c.lineTo(B[0],B[1]); c.stroke();
+  const gg=c.createRadialGradient(G[0],G[1],2,G[0],G[1],84); gg.addColorStop(0,'#f6e7c8'); gg.addColorStop(1,'#cfd6ea');
+  c.save(); c.translate(G[0],G[1]); c.scale(.17,1); c.fillStyle=gg; c.beginPath(); c.arc(0,0,84,0,7); c.fill(); c.restore();
+  c.strokeStyle='#8a93a8'; c.lineWidth=1; c.beginPath(); c.ellipse(G[0],G[1],14,84,0,0,7); c.stroke();
+  tri(T,G,E,[['D','i'],['/2','n']],[['θ','i'],['/2','n']],'#1f6fd1');
+  const a2=Math.atan2(B[1]-T[1],B[0]-T[0]); c.strokeStyle='#d0312b'; c.lineWidth=1; c.beginPath(); c.arc(T[0],T[1],44,-a2,a2); c.stroke(); rich(c,T[0]+50,T[1]+22,[['θ','i']],'#d0312b','left',17);
+  c.fillStyle='#333'; c.fillRect(T[0]-26,T[1]-6,24,12); c.fillRect(T[0]-30,T[1]-8,6,16);
+  c.font='13px "IBM Plex Sans",sans-serif'; c.fillStyle='#555'; c.textAlign='center'; c.fillText('teleskop',T[0]-8,T[1]+26); c.fillText('galakse',G[0]+36,B[1]+4);
+  rich(c,30,288,[['sin(','n'],['θ','i'],['/2) = (','n'],['D','i'],['/2) / ','n'],['r','i'],['   ⇔   ','n'],['r','i'],[' = (','n'],['D','i'],['/2) / sin(','n'],['θ','i'],['/2)','n']],'#1b1b1b','left',18);
+  rich(c,30,312,[['D','i'],[' ≈ 150 kly (antaget: samme størrelse som Mælkevejen)','n']],'#444','left',16);
+  // parallaksen
+  const S2=[560,170], O=[920,170], Ea=[920,86];
+  tri(S2,O,Ea,[['1 AE','n']],[['φ','i']],'#1f6fd1');
+  c.fillStyle='#f2b632'; c.beginPath(); c.arc(O[0],O[1],11,0,7); c.fill(); c.fillStyle='#2f6fb8'; c.beginPath(); c.arc(Ea[0],Ea[1],7,0,7); c.fill();
+  c.fillStyle='#d9a400'; c.beginPath(); for(let k=0;k<10;k++){ const r=k%2?3.5:9, a=k*Math.PI/5-Math.PI/2; c.lineTo(S2[0]+r*Math.cos(a),S2[1]+r*Math.sin(a)); } c.closePath(); c.fill();
+  c.font='13px "IBM Plex Sans",sans-serif'; c.fillStyle='#555'; c.textAlign='center'; c.fillText('stjerne',S2[0],S2[1]+28); c.textAlign='left'; c.fillText('Solen',O[0]+16,O[1]+5); c.fillText('Jorden',Ea[0]+13,Ea[1]+5);
+  rich(c,540,288,[['sin(','n'],['φ','i'],[') = 1 AE / ','n'],['r','i'],['   ⇔   ','n'],['r','i'],[' = 1 AE / sin(','n'],['φ','i'],[')','n']],'#1b1b1b','left',18);
+  c.font='italic 13px "IBM Plex Sans",sans-serif'; c.fillStyle='#777'; c.fillText('Vinklerne er stærkt overdrevet på tegningerne.',540,312);
+}
+
+/* ---------- figurkort: spektret ---------- */
+const SX0=72, SX1=972, SY1=70, SY0=236;
+const SX=l=>SX0+(l-L0)/(L1-L0)*(SX1-SX0), SL=x=>L0+(x-SX0)/(SX1-SX0)*(L1-L0);
+function specOf(g){ if(!g) return null; if(!S.spec[g.id]){ const p=new Float64Array(NB); let sum=0; for(let i=0;i<NB;i++){ const l=L0+(i+.5)*BW; p[i]=GI0(l/(1+g.z)); sum+=p[i]; } const bg=0.06*sum/NB; sum=0; for(let i=0;i<NB;i++){ p[i]+=bg; sum+=p[i]; } for(let i=0;i<NB;i++) p[i]/=sum;
+  S.spec[g.id]={p, counts:new Float64Array(NB), N:0, sim:0, mk:{K:null,H:null}}; } return S.spec[g.id]; }
+function snOf(s){ if(!s||!s.N) return 0; let sum=0,n=0; for(let i=0;i<NB;i++){ const l=L0+(i+.5)*BW; if(l>=440&&l<=470){ sum+=s.counts[i]; n++; } } return Math.sqrt(sum/n); }
+function niceStep(m){ const e=10**Math.floor(Math.log10(m)), f=m/e; return (f<1.5?1:f<3.5?2:f<7.5?5:10)*e; }
+function drawSpectrum(c,s,opt={}){
+  c.clearRect(0,0,PW,PH); c.fillStyle='#fff'; c.fillRect(0,0,PW,PH);
+  c.strokeStyle='#222'; c.lineWidth=1.2; c.beginPath(); c.moveTo(SX0,SY1-8); c.lineTo(SX0,SY0); c.lineTo(SX1,SY0); c.stroke();
+  c.font='14px "Times New Roman",Times,serif'; c.fillStyle='#222'; c.textAlign='center';
+  for(let l=L0;l<=L1;l+=10){ const x=SX(l); c.beginPath(); c.moveTo(x,SY0); c.lineTo(x,SY0+6); c.stroke(); c.fillText(l,x,SY0+21); }
+  for(let l=L0+5;l<L1;l+=10){ const x=SX(l); c.beginPath(); c.moveTo(x,SY0); c.lineTo(x,SY0+3); c.stroke(); }
+  rich(c,SX1,SY0-8,[['λ','i'],[' / nm','n']],'#d0312b','right',17);
+  let ymax=10; if(s&&s.N){ for(let i=0;i<NB;i++) ymax=Math.max(ymax,s.counts[i]); ymax*=1.12; }
+  const st=niceStep(ymax/4); c.font='13px "Times New Roman",Times,serif'; c.textAlign='right'; c.fillStyle='#222';
+  for(let y=0;y<=ymax;y+=st){ const py=SY0-y/ymax*(SY0-SY1); c.beginPath(); c.moveTo(SX0-5,py); c.lineTo(SX0,py); c.stroke(); c.fillText(fint(y),SX0-8,py+4); }
+  c.save(); c.translate(16,(SY0+SY1)/2); c.rotate(-Math.PI/2); c.textAlign='center'; c.font='14px "IBM Plex Sans",sans-serif'; c.fillStyle='#d0312b'; c.fillText('Antal fotoner',0,0); c.restore();
+  // laboratoriets linjer (grønne)
+  const lab=[[LK,'K'],[LH,'H']];
+  c.strokeStyle='#1f9d3a'; c.lineWidth=2.4; for(const [l] of lab){ c.beginPath(); c.moveTo(SX(l),SY1-6); c.lineTo(SX(l),SY0); c.stroke(); }
+  // sammenligning (stiplede)
+  if(!opt.export && S.fitS>0){ c.setLineDash([6,4]); c.strokeStyle='rgba(31,157,58,.85)'; c.lineWidth=1.6;
+    for(const [l] of lab){ const x=SX(l*(1+S.fitS)); c.beginPath(); c.moveTo(x,SY1); c.lineTo(x,SY0); c.stroke(); } c.setLineDash([]);
+    c.font='12px "IBM Plex Sans",sans-serif'; c.fillStyle='#1f9d3a'; c.textAlign='left'; c.fillText('laboratoriets linjer, strakt',SX(LH*(1+S.fitS))+5,SY0-8); }
+  // spektret
+  if(s&&s.N){ c.strokeStyle='#1b1b1b'; c.lineWidth=1.2; c.beginPath();
+    for(let i=0;i<NB;i++){ const x=SX(L0+(i+.5)*BW), y=SY0-s.counts[i]/ymax*(SY0-SY1); i?c.lineTo(x,y):c.moveTo(x,y); } c.stroke();
+  } else { c.font='15px "IBM Plex Sans",sans-serif'; c.fillStyle='#888'; c.textAlign='center'; c.fillText(S.sel?'Tryk ”Start måling” for at optage spektret':'Vælg først en galakse i søgekikkerten',(SX0+SX1)/2,(SY0+SY1)/2+20); }
+  // markører (røde)
+  if(!s){ rich(c,SX(LK)-4,22,[['λ','i'],['Ca-II,K,lab','s'],[' = '+fmt(LK)+' nm','n']],'#1f9d3a','right',16,'#fff'); rich(c,SX(LH)+4,42,[['λ','i'],['Ca-II,H,lab','s'],[' = '+fmt(LH)+' nm','n']],'#1f9d3a','left',16,'#fff'); }
+  if(s){ const mk=s.mk;
+    c.strokeStyle='#e0312b'; c.lineWidth=1.4;
+    if(mk.K!=null){ c.beginPath(); c.moveTo(SX(mk.K),24); c.lineTo(SX(mk.K),SY0); c.stroke(); }
+    if(mk.H!=null){ c.beginPath(); c.moveTo(SX(mk.H),46); c.lineTo(SX(mk.H),SY0); c.stroke(); }
+  rich(c,SX(LK)-4,22,[['λ','i'],['Ca-II,K,lab','s'],[' = '+fmt(LK)+' nm','n']],'#1f9d3a','right',16,'#fff');
+  rich(c,SX(LH)+4,42,[['λ','i'],['Ca-II,H,lab','s'],[' = '+fmt(LH)+' nm','n']],'#1f9d3a','left',16,'#fff');
+    if(mk.K!=null) rich(c,SX(mk.K)+4,22,[['λ','i'],['Ca-II,K,gal','s'],[' = '+fmt(mk.K)+' nm','n']],'#e0312b','left',16,'#fff');
+    if(mk.H!=null) rich(c,SX(mk.H)+4,62,[['λ','i'],['Ca-II,H,gal','s'],[' = '+fmt(mk.H)+' nm','n']],'#e0312b','left',16,'#fff');
+    if(!opt.export&&S.step===4&&(mk.K!=null||mk.H!=null)){ c.font='12px "IBM Plex Sans",sans-serif'; c.fillStyle='#e0312b'; c.textAlign='left'; c.textAlign='right'; c.fillText('Træk i en markør for at flytte den · pilene flytter markør '+S.mkA,SX1,SY1-2); }
+  }
+  // farvestrimmel
+  const sy=SY0+30, sh=13;
+  for(let px=SX0;px<=SX1;px++){ const l=SL(px), i=clamp(Math.floor((l-L0)/BW),0,NB-1), v=s&&s.N?clamp(s.counts[i]/ymax*1.12,0,1):0, col=wl2rgb(l);
+    c.fillStyle=col?`rgb(${Math.round(col[0]*v)},${Math.round(col[1]*v)},${Math.round(col[2]*v)})`:`rgb(${Math.round(40*v)},${Math.round(30*v)},${Math.round(70*v)})`; c.fillRect(px,sy,1.2,sh); }
+  c.fillStyle='#666'; c.font='12px "IBM Plex Sans",sans-serif'; c.textAlign='left'; c.fillText('Sådan ser spektret ud for øjet (lyset under ca. 380 nm er ultraviolet og vist mørkt)',SX0,sy+sh+16);
+}
+function wl2rgb(w){ if(w<380||w>780) return null; let r=0,g=0,b=0;
+  if(w<440){r=-(w-440)/60;b=1;} else if(w<490){g=(w-440)/50;b=1;} else if(w<510){g=1;b=-(w-510)/20;} else if(w<580){r=(w-510)/70;g=1;} else if(w<645){r=1;g=-(w-645)/65;} else r=1;
+  let f=1; if(w<420) f=.35+.65*(w-380)/40; const c=x=>Math.round(255*Math.pow(x*f,.8)); return [c(r),c(g),c(b)]; }
+
+/* ---------- tekst ---------- */
+const CAP=[
+  '<b>Log ind.</b> Skriv jeres navne. Hver gruppe får sin egen himmel med galakser, så jeres Hubble-graf bliver ikke magen til de andre gruppers.',
+  '<b>Kuplen.</b> Åbn kuplen og tænd for tracking. Jorden drejer, så teleskopet skal hele tiden følge med himlen for at galaksen bliver i synsfeltet.',
+  '<b>Søgekikkerten.</b> Vælg en galaksehob, og klik på en af galakserne i billedet for at centrere den. Følg tjeklisten øverst til højre.',
+  '<b>Kameraet.</b> Vælg den forstørrelse hvor galaksen fylder mest. Træk en linje hen over galaksens længste akse – målingen gemmes automatisk i logbogen.',
+  '<b>Spektrografen.</b> Start målingen, og vent til Ca-II K- og H-linjerne står tydeligt frem. Klik i bunden af den venstre linje (K) og derefter den højre (H) – det gemmes automatisk.',
+  '<b>Logbogen.</b> Hent logbogen som Excel-fil, og kopiér tallene ind i jeres grafprogram. Beregn <i>z</i>, <i>v</i><sub>0</sub> og <i>r</i>, og tegn (<i>r</i>, <i>v</i><sub>0</sub>)-grafen.'
+];
+const it=s=>`<i>${s}</i>`;
+const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+function facitHTML(U,obs){
+  let h=`<p>${it('H')}<sub>0</sub> = ${fmt(U.H0,2)} km/s pr. Mly · universets alder ≈ 1/${it('H')}<sub>0</sub> = ${fmt(9.4607e18/U.H0/3.156e7/1e9,1)} mia. år</p>
+    <table><tr><th>Galakse</th><th>Hob</th><th>${it('r')} / Mly</th><th>${it('D')} / kly</th><th>${it('θ')} / grader</th><th>${it('λ')}<sub>K</sub> / nm</th><th>${it('λ')}<sub>H</sub> / nm</th><th>${it('z')}</th><th>${it('v')}<sub>0</sub> / (km/s)</th></tr>`;
+  U.hobs.forEach(hb=>hb.gals.forEach(g=>{ h+=`<tr><td>${g.name}</td><td>${hb.name}</td><td>${fmt(g.r,0)}</td><td>${fmt(g.D,0)}</td><td>${fmt(g.theta,4)}</td><td>${fmt(LK*(1+g.z),2)}</td><td>${fmt(LH*(1+g.z),2)}</td><td>${fmt(g.z,4)}</td><td>${fint(g.z*CKMS)}</td></tr>`; }));
+  return h+`</table><p class="note">${it('v')}<sub>0</sub> indeholder galaksens egenhastighed, og galakserne er ikke præcis 150 kly, så punkterne ligger ikke præcist på linjen.</p>`;
+}
+function paperHTML(st){
+  if(st===0) return `<h3>Opgaven: Bestem Hubbleparameteren ${it('H')}<sub>0</sub></h3><ol>
+    <li>Åbn kuplen og tænd for teleskopets tracking.</li>
+    <li>Find en galakse i hver af de seks galaksehobe med søgekikkerten.</li>
+    <li>Mål galaksens vinkeludstrækning ${it('θ')} med kameraet. Vi antager at galakserne er lige så store som Mælkevejen, ${it('D')} ≈ 150 kly.</li>
+    <li>Optag galaksens spektrum, og aflæs bølgelængderne af Ca-II K- og H-linjerne.</li>
+    <li>Hent logbogen, og beregn ${it('z')}, ${it('v')}<sub>0</sub> og ${it('r')} for hver galakse. Tegn (${it('r')}, ${it('v')}<sub>0</sub>)-grafen, og bestem ${it('H')}<sub>0</sub>.</li></ol>
+    <p class="note">Alle målinger gemmes automatisk i logbogen. Logger I ind igen med samme gruppenavn på samme computer, fortsætter I med jeres egen himmel.</p>`;
+  if(st===1) return `<h3>Kuplen og tracking</h3><p>Teleskopet står inde i en kuppel der beskytter det mod vind og vejr. Når kuplen åbnes, drejer den først så spalten vender mod den del af himlen vi vil observere, og derefter glider lugen til side.</p>
+    <p>Jorden roterer om sin egen akse, og derfor ser stjernerne og galakserne ud til at bevæge sig hen over himlen (se Note_Verdensbilleder). Tracking betyder at teleskopet langsomt drejer med, så galaksen bliver i synsfeltet mens vi måler.</p>`;
+  if(st===2){ let rows=''; if(S.U) S.U.hobs.forEach(h=>{ rows+=`<tr><td>${h.name}</td><td>${h.gals.map(g=>g.name.split('-')[1]+(isDone(g.id)?'&nbsp;✓':'')).join(', ')}</td><td>${h.gals.some(g=>isDone(g.id))?'✓':''}</td></tr>`; });
+    return `<h3>Søgekikkerten</h3><p>Søgekikkerten har et stort synsfelt på 2,0°, så man kan finde rundt på himlen. Hver galaksehob indeholder fire spiralgalakser der ligger i næsten samme afstand fra os. Det er nok at måle én galakse i hver hob, men flere giver et bedre resultat.</p>
+    <table><tr><th>Hob</th><th>Galakser (✓ = færdigmålt)</th><th>Færdig</th></tr>${rows}</table>`; }
+  if(st===5){ let h=`<h3>Fra målinger til Hubbles lov</h3><p>Jeres observationsnummer er <b>${esc(S.obs)}</b>. Skriv det i rapporten, så læreren kan tjekke jeres tal.</p><p>Hent logbogen som Excel-fil (knapperne til højre). Vælg decimalkomma, hvis I tegner grafen i Excel, og decimalpunktum, hvis I kopierer tallene over i TI-Nspire eller GeoGebra. Et billede af hver vinkelmåling og hvert spektrum gemmes automatisk: klik på Vinkel eller Spektrum i logbogen, eller hent dem alle som én ZIP-fil til rapporten.</p><ol>
+    <li>Rødforskydningstallet for hver linje: ${it('z')} = ${it('λ')}<sub>gal</sub> / ${it('λ')}<sub>lab</sub> − 1 med ${it('λ')}<sub>Ca-II,K,lab</sub> = 393,37 nm og ${it('λ')}<sub>Ca-II,H,lab</sub> = 396,85 nm. Nanometer går ud med nanometer, så ${it('z')} har ingen enhed. Brug gennemsnittet af de to.</li>
+    <li>Galaksens hastighed: ${it('v')}<sub>0</sub> = ${it('z')} · ${it('c')} med ${it('c')} = 3,00·10<sup>5</sup> km/s (gælder for ${it('z')} &lt; 0,1).</li>
+    <li>${S.rmode?`Afstanden ${it('r')} står allerede i logbogen i Mly. Den er beregnet med ${it('r')} = (${it('D')}/2) / sin(${it('θ')}/2) og ${it('D')} = 150 kly = 0,150 Mly.`:`Afstanden: ${it('r')} = (${it('D')}/2) / sin(${it('θ')}/2) med ${it('D')} = 150 kly = 0,150 Mly. Når ${it('D')} sættes ind i Mly, får ${it('r')} også enheden Mly.`}</li>
+    <li>Tegn (${it('r')}, ${it('v')}<sub>0</sub>)-grafen, og lav lineær regression gennem (0,0). Stigningstallet er ${it('H')}<sub>0</sub> i km/s pr. Mly.</li>
+    <li>Universets alder er ca. 1/${it('H')}<sub>0</sub> (husk at omregne enhederne).</li></ol>`;
+    if(S.teacher){ const U=S.facitU||S.U, o=S.facitObs||S.obs;
+      h+=`<h3>Facit (kun lærer)</h3><p>Skriv en elevs observationsnummer: <input type="text" id="fObs" value="${esc(o)}" style="font:15px var(--mono);width:9em;padding:2px 6px;border:1px solid #9aa3b2;border-radius:4px"> <button id="fBtn" style="background:#f0a64a;color:#1a1206;border-color:#f0a64a;font-weight:600">Vis facit</button></p>
+        <p><b>Facit for observationsnummer ${esc(o)}</b></p>`+facitHTML(U,o); }
+    return h; }
+  return '';
+}
+
+/* ---------- tal i højre side ---------- */
+function ro(i,label,val,sub='',cls=''){ const el=$('ro'+i); el.className='ro '+cls; const sm=el.querySelector('small'), b=el.querySelector('b'), s=el.querySelector('.sub');
+  if(sm.innerHTML!==label) sm.innerHTML=label; if(b.textContent!==val) b.textContent=val; if(s.innerHTML!==sub) s.innerHTML=sub; }
+function clockTxt(){ const m=21*60+30+(performance.now()-S.t0)/1000*.25+Object.values(S.spec).reduce((a,s)=>a+s.sim/60,0); const h=Math.floor(m/60)%24, mm=Math.floor(m%60); return String(h).padStart(2,'0')+':'+String(mm).padStart(2,'0'); }
+function rFromTheta(th){ return (DMW*1e3/2)/Math.sin(th/2*Math.PI/180)/1e6; }
+function doneCount(){ const ids=Object.keys(S.log).filter(isDone); return {n:ids.length, hobs:new Set(ids.map(id=>id[0])).size}; }
+function updReadouts(){
+  const st=S.step, L=S.sel?S.log[S.sel.id]:null;
+  if(st===0){ for(let i=0;i<4;i++) ro(i,['Gruppe','Observationsnummer','Teleskop','Lokal tid'][i],i===2?'T1 · 2,4 m':i===3?clockTxt():'–'); return; }
+  if(st===1){ const D=S.dome; ro(0,'Kuppel',{closed:'Lukket',rotating:'Drejer …',opening:'Åbner …',open:'Åben'}[D.phase],'',D.phase==='open'?'okc':'');
+    ro(1,'Tracking',S.tracking?'Til':'Fra','',S.tracking?'okc':''); ro(2,'Lokal tid',clockTxt()); ro(3,'Udetemperatur',S.U.temp+' °C','klart vejr, let vind'); return; }
+  if(st===2){ ro(0,'Peger mod',S.view.hob>=0?S.U.hobs[S.view.hob].name:'–',S.slew?'teleskopet drejer …':''); ro(1,'Valgt galakse',S.sel?S.sel.name:'–',S.sel&&isDone(S.sel.id)?'færdigmålt ✓':'');
+    ro(2,'Synsfelt','2,0°','1000 pixel i bredden'); ro(3,'1 pixel svarer til',sci(FOV_FINDER/1000,1),'grader'); return; }
+  if(st===3){ const sc=S.fov/1000, px=parseFloat($('inPx').value), th=px>0?px*sc:null;
+    ro(0,'Synsfelt',fovTxt(S.fov),'1000 pixel i bredden'); ro(1,'1 pixel svarer til',sci(sc,2),'grader');
+    ro(2,'Udstrækning',px>0?Math.round(px)+' pixel':'–', L&&L.px?'gemt i logbogen ✓':'træk en linje over galaksen', L&&L.px?'okc':'');
+    ro(3,'Vinkeludstrækning <i>θ</i>',th?sci(th,3):'–', th? 'grader'+(S.rmode?' · <i>r</i> ≈ '+fint(rFromTheta(th))+' Mly':''):'', th?'gal':''); return; }
+  if(st===4){ const s=specOf(S.sel), sn=snOf(s);
+    ro(0,'Fotoner',s?fint(s.N):'–',s?fmtMin(s.sim):''); ro(1,'Signal/støj',s&&s.N?fmt(sn,1):'–',sn>=10?'linjerne står tydeligt frem':sn>0?'mål videre (ca. 10 er godt)':'', sn>=10?'okc':'');
+    ro(2,'<i>λ</i><sub>Ca-II,K,gal</sub>',s&&s.mk.K!=null?fmt(s.mk.K)+' nm':'–','lab: 393,37 nm','gal'); ro(3,'<i>λ</i><sub>Ca-II,H,gal</sub>',s&&s.mk.H!=null?fmt(s.mk.H)+' nm':'–','lab: 396,85 nm','gal'); return; }
+  if(st===5){ const d=doneCount();
+    ro(0,'Galakser i logbogen',String(Object.keys(S.log).length),'heraf færdigmålt: '+d.n); ro(1,'Færdige hobe',d.hobs+' af 6','',d.hobs>=6?'okc':''); ro(2,'Gruppe',S.group); ro(3,'Observationsnummer',S.obs,'skriv det i rapporten'); }
+}
+
+/* ---------- tjekliste: næste skridt ---------- */
+let pulsed=null;
+function guide(){
+  const st=S.step, e=S.sel?S.log[S.sel.id]:null, s=S.sel?S.spec[S.sel.id]:null; let items=[], tip='';
+  if(st===1) items=[['Åbn kuplen',S.dome.phase==='open','bDome'],['Tænd for tracking',S.tracking,'bTrack'],['Gå til søgekikkerten',false,'go2']];
+  else if(st===2) items=[['Vælg en galaksehob',S.view.hob>=0,'hobBtns'],['Klik på en galakse i billedet',!!S.sel&&S.sel.hob===S.view.hob&&!S.slew,null],['Gå til kameraet',false,'go3']];
+  else if(st===3){ const size=S.sel?S.sel.theta/(S.fov/1000):0, big=size>950, small=size<150&&S.fov>0.05;
+    if(big) tip='Galaksen er større end billedet – vælg et større synsfelt.'; else if(small) tip='Galaksen er lille – vælg et mindre synsfelt, så den bliver større.';
+    items=[['Vælg forstørrelsen hvor galaksen fylder mest',!big&&!small,'zoomBtns'],['Træk en linje hen over galaksens længste akse',!!(e&&e.px),null],['Gå til spektrografen',false,'go4']]; }
+  else if(st===4){ const sn=snOf(s);
+    items=[['Start målingen',!!(s&&s.N),'bExpose'],['Mål til signal/støj er ca. 10',sn>=10,S.exposing?null:'bExpose'],['Klik i bunden af den venstre linje (K)',!!(s&&s.mk.K!=null),null],['Klik i bunden af den højre linje (H)',!!(s&&s.mk.H!=null),null],['Vælg næste galakse',false,'bNextGal']];
+    if(sn>0&&sn<10&&!S.exposing) tip='Spektret er stadig meget støjfyldt. Tryk "Fortsæt måling".'; }
+  else if(st===5){ const d=doneCount(); items=[['Færdigmål en galakse i hver af de seks hobe',d.hobs>=6,d.hobs>=6?null:'bNextGal5'],['Hent logbogen som Excel-fil',!!S.csvDone,'bXlsx']]; }
+  let now=items.findIndex(x=>!x[1]); if(now<0) now=items.length-1;
+  const html=items.length?`<div class="gt">Næste skridt</div><ol>${items.map((x,i)=>`<li class="${x[1]?'done':i===now?'now':''}">${x[0]}</li>`).join('')}</ol>${tip?`<div class="tip">${tip}</div>`:''}${st>=2&&st<=4?`<div class="prog">Færdigmålte galakser: ${doneCount().n} · hobe: ${doneCount().hobs} af 6</div>`:''}`:'';
+  const g=$('guide'); g.hidden=!items.length; if(g.dataset.h!==html){ g.innerHTML=html; g.dataset.h=html; }
+  const id=items.length?items[now][2]:null;
+  if(pulsed!==id){ if(pulsed&&$(pulsed)) $(pulsed).classList.remove('pulse'); if(id&&$(id)) $(id).classList.add('pulse'); pulsed=id; }
+}
+
+/* ---------- logbog ---------- */
+const LKEY=()=>'obs_log_'+S.U.key;
+function saveLog(){ try{ localStorage.setItem(LKEY(),JSON.stringify(S.log)); }catch(e){} }
+function loadLog(){ try{ const t=localStorage.getItem(LKEY()); S.log=t?JSON.parse(t):{}; }catch(e){ S.log={}; } }
+function entry(g){ if(!S.log[g.id]) S.log[g.id]={hob:S.U.hobs[g.hob].name, name:g.name}; return S.log[g.id]; }
+let CSVDEC=',';
+const csvNum=(x,p=4)=>x==null||x===''?'':(typeof x==='number'?(Number.isInteger(x)?String(x):String(+x.toPrecision(p))).replace('.',CSVDEC):String(x));
+function saveTheta(px){ if(!S.sel) return; const e=entry(S.sel); if(px>0){ e.fov=S.fov; e.px=Math.round(px); e.theta=e.px*S.fov/1000; e.tCam=dateTxt(); if(S.meas) e.meas={x0:+S.meas.x0.toFixed(1),y0:+S.meas.y0.toFixed(1),x1:+S.meas.x1.toFixed(1),y1:+S.meas.y1.toFixed(1)}; else delete e.meas; } else { delete e.fov; delete e.px; delete e.theta; delete e.meas; } saveLog(); }
+function saveSpec(){ if(!S.sel) return; const s=specOf(S.sel), e=entry(S.sel);
+  if(s&&s.N){ if(e.photons!==Math.round(s.N)||e.lamK!==s.mk.K||e.lamH!==s.mk.H) e.tSpec=dateTxt(); e.counts=Array.from(s.counts,Math.round); e.expSim=Math.round(s.sim); e.photons=Math.round(s.N); } else { delete e.counts; delete e.expSim; delete e.photons; }
+  if(s&&s.mk.K!=null&&s.mk.H!=null){ e.lamK=s.mk.K; e.lamH=s.mk.H; } else { delete e.lamK; delete e.lamH; }
+  saveLog(); }
+function statusOf(e){ if(e.theta&&e.lamK&&e.lamH) return '<span class="st ok">Færdig ✓</span>'; const m=[]; if(!e.theta) m.push('vinkel'); if(!(e.lamK&&e.lamH)) m.push('spektrum'); return '<span class="st miss">mangler '+m.join(' og ')+'</span>'; }
+function renderLog(){
+  const rows=[]; S.U.hobs.forEach(h=>h.gals.forEach(g=>{ const e=S.log[g.id]; if(e) rows.push([g,e]); }));
+  const head=`<div class="loghead">Observationsnummer <b>${esc(S.obs)}</b> · Gruppe ${esc(S.group)}${S.code?' · Klassekode '+esc(S.code):''}</div>`;
+  if(!rows.length){ $('logwrap').innerHTML=head+'<div class="empty">Logbogen er tom. Vælg en galakse med søgekikkerten – så kommer den med her.</div>'; return; }
+  let h=head+'<table><tr><th>Galakse</th><th>Hob</th><th>Synsfelt</th><th>Udstrækning / pixel</th><th><i>θ</i> / grader</th>'+(S.rmode?'<th><i>r</i> / Mly</th>':'')+'<th><i>λ</i><sub>K,gal</sub> / nm</th><th><i>λ</i><sub>H,gal</sub> / nm</th><th>Eksponering</th><th>Billeder</th><th>Status</th></tr>';
+  for(const [g,e] of rows) h+=`<tr data-g="${g.id}" title="Klik for at måle videre på ${g.name}"><td>${g.name}</td><td>${e.hob}</td><td>${e.fov?fovTxt(e.fov):''}</td><td>${e.px??''}</td><td>${e.theta?fmt(e.theta,5):''}</td>${S.rmode?`<td>${e.theta?fint(rFromTheta(e.theta)):''}</td>`:''}<td>${e.lamK?fmt(e.lamK):''}</td><td>${e.lamH?fmt(e.lamH):''}</td><td>${e.expSim?fmtMin(e.expSim):''}</td><td class="imgs">${e.px?`<button class="mini" data-img="cam">Vinkel</button>`:''}${e.counts?`<button class="mini" data-img="spec">Spektrum</button>`:''}</td><td>${statusOf(e)}</td></tr>`;
+  $('logwrap').innerHTML=h+'</table><div class="loghint">Klik på Vinkel eller Spektrum for at se billedet af målingen. Klik et andet sted på rækken for at måle videre på galaksen.</div>';
+}
+function download(name,blob){ const u=URL.createObjectURL(blob), a=document.createElement('a'); a.href=u; a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(u); a.remove(); },3000); }
+const safe=s=>String(s).replace(/[^\wæøåÆØÅ-]+/g,'_');
+function dateTxt(){ const d=new Date(); return d.toLocaleDateString('da-DK')+' kl. '+d.toLocaleTimeString('da-DK',{hour:'2-digit',minute:'2-digit'}); }
+/* logbogens data som rækker: første række er overskrifter, resten er rå tal */
+function logRows(){
+  const head=['Hob','Galakse','Synsfelt (grader)','1 pixel (grader)','Udstrækning (pixel)','Vinkel θ (grader)',...(S.rmode?['Afstand r (Mly)']:[]),'λ K gal (nm)','λ H gal (nm)','Eksponeringstid (min)','Fotoner'];
+  const rows=[];
+  S.U.hobs.forEach(h=>h.gals.forEach(g=>{ const e=S.log[g.id]; if(!e||!(e.theta||e.lamK)) return;
+    rows.push([e.hob,g.name,e.fov??null,e.fov?e.fov/1000:null,e.px??null,e.theta??null,...(S.rmode?[e.theta?Math.round(rFromTheta(e.theta)):null]:[]),e.lamK??null,e.lamH??null,e.expSim?+(e.expSim/60).toFixed(1):null,e.photons??null]); }));
+  return [head,...rows];
+}
+/* rigtig Excel-fil (.xlsx): tallene gemmes som tal, så komma/punktum og kolonnedeling ikke kan gå galt */
+const xesc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+const colL=n=>{ let s=''; n++; while(n){ const m=(n-1)%26; s=String.fromCharCode(65+m)+s; n=Math.floor((n-1)/26); } return s; };
+function makeXlsx(rows,sheetName){
+  const enc=new TextEncoder(), X='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+  const NS='http://schemas.openxmlformats.org', ncol=Math.max(...rows.map(r=>r.length));
+  const cell=(v,r,c,head)=>{ const ref=colL(c)+(r+1); if(v==null||v==='') return '';
+    if(typeof v==='number'&&isFinite(v)) return `<c r="${ref}"${head?' s="1"':''}><v>${v}</v></c>`;
+    return `<c r="${ref}" t="inlineStr"${head?' s="1"':''}><is><t>${xesc(v)}</t></is></c>`; };
+  const sheet=X+`<worksheet xmlns="${NS}/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols><col min="1" max="${ncol}" width="17" customWidth="1"/></cols><sheetData>`+
+    rows.map((r,ri)=>`<row r="${ri+1}">`+r.map((v,ci)=>cell(v,ri,ci,ri===0)).join('')+'</row>').join('')+'</sheetData></worksheet>';
+  const files=[
+    ['[Content_Types].xml',X+`<Types xmlns="${NS}/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`],
+    ['_rels/.rels',X+`<Relationships xmlns="${NS}/package/2006/relationships"><Relationship Id="rId1" Type="${NS}/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`],
+    ['xl/workbook.xml',X+`<workbook xmlns="${NS}/spreadsheetml/2006/main" xmlns:r="${NS}/officeDocument/2006/relationships"><sheets><sheet name="${xesc(sheetName)}" sheetId="1" r:id="rId1"/></sheets></workbook>`],
+    ['xl/_rels/workbook.xml.rels',X+`<Relationships xmlns="${NS}/package/2006/relationships"><Relationship Id="rId1" Type="${NS}/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="${NS}/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`],
+    ['xl/styles.xml',X+`<styleSheet xmlns="${NS}/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`],
+    ['xl/worksheets/sheet1.xml',sheet]];
+  const z=makeZip(files.map(([name,txt])=>({name,data:enc.encode(txt)})));
+  return new Blob([z],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+/* decimalkomma: tallene gemmes som tal (dansk Excel viser komma og kan regne med dem).
+   decimalpunktum: decimaltal gemmes som tekst med punktum, så de kan kopieres direkte over i TI-Nspire og GeoGebra uanset Excels sprog. */
+function xlsxLog(dec){ let rows=logRows();
+  if(dec==='.') rows=rows.map((r,i)=>i?r.map(v=>typeof v==='number'&&!Number.isInteger(v)?String(+v.toPrecision(6)):v):r);
+  download('Logbog_'+safe(S.group)+'_'+safe(S.obs)+(dec==='.'?'_decimalpunktum':'_decimalkomma')+'.xlsx',makeXlsx(rows,'Logbog')); S.csvDone=true; }
+function xlsxFacit(){ const U=S.facitU||S.U, o=S.facitObs||S.obs;
+  const rows=[['Hob','Galakse','r (Mly)','D (kly)','θ (grader)','λ K (nm)','λ H (nm)','z','v0 (km/s)']];
+  U.hobs.forEach(h=>h.gals.forEach(g=>rows.push([h.name,g.name,Math.round(g.r),Math.round(g.D),+g.theta.toPrecision(6),+(LK*(1+g.z)).toFixed(3),+(LH*(1+g.z)).toFixed(3),+g.z.toPrecision(5),Math.round(g.z*CKMS)])));
+  rows.push([]); rows.push(['H0 (km/s pr. Mly)',+U.H0.toFixed(3)]);
+  download('Facit_'+safe(o)+'.xlsx',makeXlsx(rows,'Facit'));
+}
+
+/* ---------- PNG ---------- */
+function pngHeader(x,W,title,lines){ x.fillStyle='#fff'; x.fillRect(0,0,W,9999); x.fillStyle='#1b1b1b'; x.textAlign='left'; x.font='600 36px "IBM Plex Sans",sans-serif'; x.fillText(title,56,64);
+  x.font='25px "IBM Plex Sans",sans-serif'; x.fillStyle='#444'; lines.forEach((t,i)=>x.fillText(t,56,108+i*36)); }
+const who=t=>'Gruppe: '+S.group+' · Observationsnummer: '+S.obs+' · målt '+(t||dateTxt());
+/* billederne tegnes ud fra det der er gemt i logbogen, så de altid kan vises og hentes igen */
+function specCanvas(g,e){
+  const s={counts:Float64Array.from(e.counts), N:e.photons, sim:e.expSim, mk:{K:e.lamK??null,H:e.lamH??null}};
+  const c=document.createElement('canvas'); c.width=2000; c.height=880; const x=c.getContext('2d');
+  const lam=(s.mk.K!=null&&s.mk.H!=null)?' · aflæst: λK,gal = '+fmt(s.mk.K)+' nm, λH,gal = '+fmt(s.mk.H)+' nm':'';
+  pngHeader(x,2000,'Spektrum af galaksen '+g.name+' ('+S.U.hobs[g.hob].name+') · '+OBS,[who(e.tSpec),'Eksponeringstid: '+fmtMin(s.sim)+' · '+fint(s.N)+' fotoner · Signal/støj ≈ '+fmt(snOf(s),1)+lam]);
+  x.save(); x.translate(0,200); x.scale(2,2); drawSpectrum(x,s,{export:true}); x.restore(); return c;
+}
+function camCanvas(g,e){
+  const keep={view:S.view,fov:S.fov,meas:S.meas,sel:S.sel};
+  S.view={hob:g.hob,cx:g.dx,cy:g.dy,scale:e.fov/1000}; S.fov=e.fov; S.meas=e.meas||null; S.sel=g;
+  const c=document.createElement('canvas'); c.width=2000; c.height=1240; const x=c.getContext('2d'), sc=e.fov/1000;
+  try{
+    pngHeader(x,2000,'Vinkelmåling af galaksen '+g.name+' ('+S.U.hobs[g.hob].name+') · '+OBS,[who(e.tCam),'Synsfelt '+fovTxt(e.fov)+' · 1 pixel = '+sci(sc,2)+' grader · udstrækning '+e.px+' pixel · θ = '+sci(e.theta,3)+' grader'+(S.rmode?' · r ≈ '+fint(rFromTheta(e.theta))+' Mly':'')]);
+    x.save(); x.translate(0,200); x.scale(2,2); drawCamera(x,0); x.restore();
+  } finally { Object.assign(S,keep); }
+  return c;
+}
+const fileName=(kind,g)=>kind+'_'+g.name.replace(/\s+/g,'')+'_'+safe(S.obs)+'.png';
+function exportSpectrum(){ const g=S.sel; if(!g) return; saveSpec(); const e=S.log[g.id]; if(!e||!e.counts) return; specCanvas(g,e).toBlob(b=>b&&download(fileName('Spektrum',g),b),'image/png'); shutter(); }
+function exportImage(){ const g=S.sel; if(!g) return; const e=S.log[g.id]; if(!e||!e.px) return; camCanvas(g,e).toBlob(b=>b&&download(fileName('Vinkel',g),b),'image/png'); shutter(); }
+
+/* forhåndsvisning af et billede fra logbogen */
+function preview(kind,g){
+  const e=S.log[g.id]; if(!e) return; const c=kind==='cam'?camCanvas(g,e):specCanvas(g,e);
+  let ov=$('pv'); if(!ov){ ov=document.createElement('div'); ov.id='pv'; ov.className='pv'; ov.innerHTML='<div class="pvbox"><img alt=""><div class="pvbar"><button class="go" id="pvDl">Hent PNG</button><button id="pvClose">Luk</button></div></div>'; document.body.appendChild(ov);
+    ov.addEventListener('click',ev=>{ if(ev.target===ov||ev.target.id==='pvClose') ov.hidden=true; }); }
+  ov.querySelector('img').src=c.toDataURL('image/png'); ov.hidden=false;
+  $('pvDl').onclick=()=>c.toBlob(b=>b&&download(fileName(kind==='cam'?'Vinkel':'Spektrum',g),b),'image/png');
+}
+
+/* alle billeder i én ZIP-fil (ukomprimeret, så der ikke skal hentes noget bibliotek) */
+const CRCT=(()=>{ const t=new Uint32Array(256); for(let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c=c&1?0xEDB88320^(c>>>1):c>>>1; t[n]=c>>>0; } return t; })();
+function crc32(u){ let c=0xFFFFFFFF; for(let i=0;i<u.length;i++) c=CRCT[(c^u[i])&255]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+function makeZip(files){
+  const enc=new TextEncoder(), parts=[], central=[]; let off=0; const d=new Date();
+  const dt=((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate(), tm=(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1);
+  for(const f of files){ const name=enc.encode(f.name), crc=crc32(f.data), n=f.data.length;
+    const h=new DataView(new ArrayBuffer(30)); h.setUint32(0,0x04034b50,true); h.setUint16(4,20,true); h.setUint16(6,0x0800,true); h.setUint16(8,0,true); h.setUint16(10,tm,true); h.setUint16(12,dt,true); h.setUint32(14,crc,true); h.setUint32(18,n,true); h.setUint32(22,n,true); h.setUint16(26,name.length,true); h.setUint16(28,0,true);
+    parts.push(new Uint8Array(h.buffer),name,f.data);
+    const cd=new DataView(new ArrayBuffer(46)); cd.setUint32(0,0x02014b50,true); cd.setUint16(4,20,true); cd.setUint16(6,20,true); cd.setUint16(8,0x0800,true); cd.setUint16(10,0,true); cd.setUint16(12,tm,true); cd.setUint16(14,dt,true); cd.setUint32(16,crc,true); cd.setUint32(20,n,true); cd.setUint32(24,n,true); cd.setUint16(28,name.length,true); cd.setUint32(42,off,true);
+    central.push(new Uint8Array(cd.buffer),name); off+=30+name.length+n; }
+  const csz=central.reduce((a,u)=>a+u.length,0), end=new DataView(new ArrayBuffer(22)); end.setUint32(0,0x06054b50,true); end.setUint16(8,files.length,true); end.setUint16(10,files.length,true); end.setUint32(12,csz,true); end.setUint32(16,off,true);
+  return new Blob([...parts,...central,new Uint8Array(end.buffer)],{type:'application/zip'});
+}
+const toBytes=c=>new Promise(res=>c.toBlob(b=>b.arrayBuffer().then(a=>res(new Uint8Array(a))),'image/png'));
+async function zipAll(){
+  const btn=$('bZip'), old=btn.textContent; btn.disabled=true; btn.textContent='Laver billederne …';
+  try{ const files=[];
+    for(const h of S.U.hobs) for(const g of h.gals){ const e=S.log[g.id]; if(!e) continue;
+      if(e.px) files.push({name:fileName('Vinkel',g),data:await toBytes(camCanvas(g,e))});
+      if(e.counts) files.push({name:fileName('Spektrum',g),data:await toBytes(specCanvas(g,e))}); }
+    if(files.length) download('Billeder_'+safe(S.group)+'_'+safe(S.obs)+'.zip',makeZip(files)); else flash('Der er ingen målinger i logbogen endnu.');
+  } finally { btn.disabled=false; btn.textContent=old; }
+}
+function flash(t){ let el=$('toast'); if(!el){ el=document.createElement('div'); el.id='toast'; el.className='toast'; document.body.appendChild(el); } el.textContent=t; el.hidden=false; clearTimeout(flash.t); flash.t=setTimeout(()=>{ el.hidden=true; },2600); }
+
+/* ---------- trin ---------- */
+function allowed(i){ if(!S.logged) return i===0; if(i===0) return false; if(i===1||i===5) return true;
+  const ready=S.teacher||(S.dome.phase==='open'&&S.tracking); if(i===2) return ready; return ready&&!!S.sel; }
+function setStep(i){
+  if(!allowed(i)) return;
+  if(S.step===4&&i!==4){ S.exposing=false; saveSpec(); }
+  S.step=i;
+  if(i===2){ S.view.scale=FOV_FINDER/1000; if(S.sel){ S.view.hob=S.sel.hob; S.view.cx=S.sel.dx; S.view.cy=S.sel.dy; } }
+  if(i===3||i===4){ S.view.hob=S.sel.hob; S.view.cx=S.sel.dx; S.view.cy=S.sel.dy; S.view.scale=S.fov/1000; }
+  if(i===3){ const e=S.log[S.sel.id]; S.meas=e&&e.meas?{...e.meas}:null; if(e&&e.fov){ S.fov=e.fov; S.view.scale=S.fov/1000; } $('inPx').value=e&&e.px?e.px:''; }
+  document.querySelectorAll('#bar .grp').forEach(g=>g.hidden=!(g.dataset.s==='all'?S.logged:+g.dataset.s===i));
+  $('caption').innerHTML=CAP[i];
+  const canvasPaper=(i===3||i===4); $('ptext').hidden=canvasPaper; if(!canvasPaper){ $('ptext').innerHTML=paperHTML(i); $('ptext').dataset.h=''; }
+  $('logwrap').hidden=i!==5; if(i===5) renderLog();
+  updSteps(); updButtons(); guide();
+}
+function updSteps(){ document.querySelectorAll('#steps button').forEach(b=>{ const k=+b.dataset.i; b.disabled=!allowed(k)&&k!==S.step; b.classList.toggle('on',k===S.step); }); }
+function updButtons(){
+  const D=S.dome; $('bDome').disabled=D.phase!=='closed'; $('bDome').textContent=D.phase==='closed'?'Åbn kuplen':D.phase==='open'?'Kuplen er åben ✓':'Kuplen åbner …';
+  $('bTrack').setAttribute('aria-pressed',S.tracking); $('bTrack').textContent='Tracking: '+(S.tracking?'til':'fra'); $('bTrack').disabled=D.phase!=='open'&&!S.tracking;
+  $('go2').disabled=!allowed(2); $('go3').disabled=!allowed(3)||!!S.slew;
+  if(S.U) document.querySelectorAll('#hobBtns button').forEach(b=>{ const h=+b.dataset.h; b.setAttribute('aria-pressed',h===S.view.hob); const t=S.U.hobs[h].name+(S.U.hobs[h].gals.some(g=>isDone(g.id))?' ✓':''); if(b.textContent!==t) b.textContent=t; });
+  document.querySelectorAll('#zoomBtns button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.f===S.fov));
+  const s=specOf(S.sel), a=S.mkA; $('bExpose').textContent=S.exposing?'Stop måling':(s&&s.N?'Fortsæt måling':'Start måling');
+  $('bMinus').textContent='◀ '+a+' −0,05 nm'; $('bPlus').textContent=a+' +0,05 nm ▶';
+  const hasMk=!!(s&&(s.mk.K!=null||s.mk.H!=null)); $('bMinus').disabled=$('bPlus').disabled=!(s&&s.mk[a]!=null); $('bClearMk').disabled=!hasMk; $('bPngSpec').disabled=!(s&&s.N); $('bReset').disabled=!(s&&s.N);
+  $('bFacit').hidden=!S.teacher; $('bSound').textContent='Lyd: '+(S.sound?'til':'fra'); $('bSound').setAttribute('aria-pressed',S.sound);
+}
+
+/* ---------- log ind ---------- */
+const term=$('term');
+const OBSCH='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+function newObs(){ const r=new Uint32Array(7); (window.crypto||{getRandomValues:a=>{ for(let i=0;i<a.length;i++) a[i]=Math.random()*4294967296; return a; }}).getRandomValues(r); let s=''; for(const v of r) s+=OBSCH[v%OBSCH.length]; return s.slice(0,3)+'-'+s.slice(3); }
+const sessKey=g=>'obs_sess_'+g.trim().toLowerCase();
+function resetSky(obs){
+  S.obs=obs; S.U=makeUniverse(obs); S.spec={}; S.sel=null; S.meas=null; S.exposing=false; S.view={hob:-1,cx:0,cy:0,scale:FOV_FINDER/1000}; S.facitU=null; S.facitObs=null; S.csvDone=false;
+  loadLog(); try{ localStorage.setItem(sessKey(S.group),obs); }catch(e){}
+  S.U.hobs.forEach(h=>h.gals.forEach(g=>{ const e=S.log[g.id]; if(e&&e.counts&&e.counts.length===NB){ const sp_=specOf(g); sp_.counts.set(e.counts); sp_.N=e.photons||0; sp_.sim=e.expSim||0; sp_.mk={K:e.lamK??null,H:e.lamH??null}; } }));
+  const hb=$('hobBtns'); hb.innerHTML=''; S.U.hobs.forEach((h,i)=>{ const b=document.createElement('button'); b.textContent=h.name; b.dataset.h=i; hb.appendChild(b); });
+}
+function loginNow(group,code,obs){
+  try{ const a=ac(); a&&a.resume&&a.resume(); }catch(e){}
+  S.group=group; S.code=code||''; S.teacher=/^l(æ|ae)rer$/i.test(group.trim()); S.rmode=/r$/i.test(S.code.trim());
+  if(!obs){ try{ obs=localStorage.getItem(sessKey(group)); }catch(e){} }
+  const resumed=!!obs; resetSky(obs||newObs()); S.logged=true; $('loginOv').hidden=true;
+  const L=['> Forbinder til '+OBS+' …', resumed?'> Fortsætter observationsnat '+S.obs+' … OK':'> Ny observationsnat: '+S.obs, '> Teleskop T1 (spejl 2,4 m) … klar','> Kamera og spektrograf køles ned … OK','> Vejr: klart, '+S.U.temp+' °C, let vind','> Velkommen, '+group+'.'+(S.teacher?' (lærer)':'')];
+  term.hidden=false; term.textContent=''; let i=0;
+  (function next(){ if(i<L.length){ term.textContent+=(i?'\n':'')+L[i]; beep(i===L.length-1?1320:880+i*60,.06,.06); i++; setTimeout(next,i===1?650:520); } else setTimeout(()=>{ term.hidden=true; setStep(1); },900); })();
+  updSteps();
+}
+function doLogin(e){ e&&e.preventDefault(); const g=$('inGroup').value.trim(), c=$('inCode').value.trim();
+  if(!g){ const m=$('startMsg'); m.hidden=false; m.textContent='Skriv jeres navne.'; return; }
+  if($('startFs').checked&&window.__startFs){ let o=null; try{ o=localStorage.getItem(sessKey(g)); }catch(_){} if(!o){ o=newObs(); try{ localStorage.setItem(sessKey(g),o); }catch(_){} }
+    const r=window.__startFs({group:g,code:c,obs:o}); if(r==='tab'){ const m=$('startMsg'); m.hidden=false; m.textContent='Observatoriet kører nu i en ny fane.'; return; } }
+  loginNow(g,c); }
+$('loginForm').addEventListener('submit',doLogin);
+window.__sim={autoLogin:(g,c,o)=>loginNow(g,c,o), actx:()=>ac(), pause:()=>{ S.exposing=false; }};
+
+/* ---------- knapper ---------- */
+$('steps').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setStep(+b.dataset.i); });
+$('bDome').addEventListener('click',()=>{ if(S.dome.phase!=='closed') return; S.dome.phase='rotating'; S.dome.t=0; motor(2.4); updButtons(); });
+$('bTrack').addEventListener('click',()=>{ S.tracking=!S.tracking; if(canPlay()){ relay(AC.currentTime); if(S.tracking) hum(AC.currentTime,.7,60,.05); } updButtons(); updSteps(); });
+$('go2').addEventListener('click',()=>setStep(2)); $('go3').addEventListener('click',()=>setStep(3)); $('go4').addEventListener('click',()=>setStep(4));
+$('bNextGal').addEventListener('click',()=>setStep(2)); $('bNextGal5').addEventListener('click',()=>setStep(2));
+$('hobBtns').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b||S.slew) return; const h=+b.dataset.h; if(h===S.view.hob) return;
+  S.slew={streak:true,t:0,dur:2.2,p:0,to:{hob:h,cx:0,cy:0}}; S.view.hob=h; S.view.cx=0; S.view.cy=0; if(S.sel&&S.sel.hob!==h) S.sel=null; servo(2.2); updButtons(); updSteps(); });
+document.querySelectorAll('#zoomBtns button').forEach(b=>b.addEventListener('click',()=>{ if(S.fov===+b.dataset.f) return; S.fov=+b.dataset.f; S.view.scale=S.fov/1000; S.meas=null; $('inPx').value=''; saveTheta(0); shutter(); updButtons(); }));
+$('inPx').addEventListener('input',()=>{ S.meas=null; saveTheta(parseFloat($('inPx').value)); });
+$('bPngImg').addEventListener('click',exportImage);
+$('bExpose').addEventListener('click',()=>{ if(!S.sel) return; S.exposing=!S.exposing; if(!S.exposing) saveSpec(); shutter(); updButtons(); });
+$('bReset').addEventListener('click',()=>{ if(!S.sel) return; delete S.spec[S.sel.id]; S.exposing=false; saveSpec(); updButtons(); });
+$('bClearMk').addEventListener('click',()=>{ const s=specOf(S.sel); if(s){ s.mk.K=s.mk.H=null; S.mkA='K'; saveSpec(); updButtons(); } });
+const nudge=d=>{ const s=specOf(S.sel); if(!s||s.mk[S.mkA]==null) return; s.mk[S.mkA]=Math.round(clamp(s.mk[S.mkA]+d,L0,L1)*100)/100; saveSpec(); updButtons(); };
+$('bMinus').addEventListener('click',()=>nudge(-.05)); $('bPlus').addEventListener('click',()=>nudge(.05));
+$('fitS').addEventListener('input',e=>{ S.fitS=+e.target.value; });
+$('bPngSpec').addEventListener('click',exportSpectrum); $('bZip').addEventListener('click',zipAll);
+$('bXlsx').addEventListener('click',()=>xlsxLog(',')); $('bXlsxDot').addEventListener('click',()=>xlsxLog('.')); $('bFacit').addEventListener('click',xlsxFacit);
+let armT=0; function armed(id,label,again){ const b=$(id); if(Date.now()-armT<4000&&b.dataset.armed){ b.textContent=label; delete b.dataset.armed; armT=0; return true; } armT=Date.now(); b.dataset.armed=1; b.textContent=again; setTimeout(()=>{ if(b.dataset.armed&&Date.now()-armT>=3900){ b.textContent=label; delete b.dataset.armed; } },4000); return false; }
+$('bNewSky').addEventListener('click',()=>{ if(!armed('bNewSky','Ny himmel (ny observationsnat)','Tryk igen – logbogen slettes')) return; try{ localStorage.removeItem('obs_log_'+S.U.key); }catch(e){} resetSky(newObs()); renderLog(); setStep(5); });
+$('bSound').addEventListener('click',()=>{ S.sound=!S.sound; try{ if(S.sound&&AC) AC.resume(); }catch(e){} updButtons(); });
+$('logwrap').addEventListener('click',e=>{ const tr=e.target.closest('tr[data-g]'); if(!tr) return; const g=S.U.hobs.flatMap(h=>h.gals).find(x=>x.id===tr.dataset.g); if(!g) return; const ib=e.target.closest('button[data-img]'); if(ib){ preview(ib.dataset.img,g); return; } const en=S.log[g.id]; S.sel=g; setStep(en&&en.theta?4:3); });
+$('ptext').addEventListener('click',e=>{ if(e.target.id!=='fBtn') return; const v=$('fObs').value.trim().toUpperCase(); if(!v) return; S.facitObs=v; S.facitU=makeUniverse(v); $('ptext').innerHTML=paperHTML(5); });
+document.addEventListener('pointerdown',()=>{ try{ if(AC&&AC.state==='suspended') AC.resume(); }catch(e){} },true);
+addEventListener('keydown',e=>{ if(S.step!==4||e.target.tagName==='INPUT') return; if(e.key==='ArrowLeft'){ nudge(-.05); e.preventDefault(); } if(e.key==='ArrowRight'){ nudge(.05); e.preventDefault(); } });
+
+/* ---------- mus på scenen og spektret ---------- */
+function logical(c,e,W,H){ const r=c.getBoundingClientRect(); return {x:(e.clientX-r.left)/r.width*W, y:(e.clientY-r.top)/r.height*H}; }
+sc.addEventListener('pointerdown',e=>{ if(!S.logged) return; const p=logical(sc,e,SW,SH);
+  if(S.step===2&&S.view.hob>=0&&!S.slew){ let best=null,bd=1e9; for(const g of S.U.hobs[S.view.hob].gals){ const [x,y]=toPx(S.view,g.dx,g.dy), d=Math.hypot(p.x-x,p.y-y), R=Math.max(16,g.theta/2/S.view.scale+8); if(d<R&&d<bd){ bd=d; best=g; } }
+    if(best&&best!==S.sel){ S.sel=best; S.meas=null; entry(best); saveLog(); S.slew={streak:false,t:0,dur:.9,p:0,from:{cx:S.view.cx,cy:S.view.cy},to:{cx:best.dx,cy:best.dy}}; servo(.9); updButtons(); updSteps(); } }
+  if(S.step===3){ S.drag=true; S.meas={x0:p.x,y0:p.y,x1:p.x,y1:p.y}; sc.setPointerCapture(e.pointerId); } });
+sc.addEventListener('pointermove',e=>{ if(S.step===3&&S.drag){ const p=logical(sc,e,SW,SH); S.meas.x1=clamp(p.x,0,SW); S.meas.y1=clamp(p.y,0,SH); $('inPx').value=Math.round(Math.hypot(S.meas.x1-S.meas.x0,S.meas.y1-S.meas.y0)); } });
+sc.addEventListener('pointerup',()=>{ if(!S.drag) return; S.drag=false; const L=S.meas?Math.hypot(S.meas.x1-S.meas.x0,S.meas.y1-S.meas.y0):0;
+  if(L<3){ S.meas=null; const e=S.log[S.sel.id]; $('inPx').value=e&&e.px?e.px:''; return; } $('inPx').value=Math.round(L); saveTheta(L); beep(1180,.05,.05,'sine'); flash('Vinkelmålingen og billedet er gemt i logbogen ✓'); });
+let spDrag=false;
+function clickMk(lam){ const s=specOf(S.sel), mk=s.mk;
+  if(mk.K==null){ mk.K=lam; S.mkA='K'; }
+  else if(mk.H==null){ if(lam>mk.K){ mk.H=lam; S.mkA='H'; } else { mk.H=mk.K; mk.K=lam; S.mkA='K'; } }
+  else { S.mkA=Math.abs(lam-mk.K)<=Math.abs(lam-mk.H)?'K':'H'; mk[S.mkA]=lam; } }
+function lamAt(e){ const p=logical(sp,e,PW,PH); return p.x<SX0||p.x>SX1?null:Math.round(SL(p.x)*20)/20; }
+sp.addEventListener('pointerdown',e=>{ if(S.step!==4) return; const s=specOf(S.sel); if(!s||!s.N) return; const l=lamAt(e); if(l==null) return; spDrag=true; sp.setPointerCapture(e.pointerId); clickMk(l); updButtons(); });
+sp.addEventListener('pointermove',e=>{ if(!spDrag) return; const l=lamAt(e); if(l!=null) specOf(S.sel).mk[S.mkA]=l; });
+sp.addEventListener('pointerup',()=>{ if(spDrag){ spDrag=false; const s=specOf(S.sel); if(s.mk.K!=null&&s.mk.H!=null&&s.mk.K>s.mk.H){ [s.mk.K,s.mk.H]=[s.mk.H,s.mk.K]; S.mkA=S.mkA==='K'?'H':'K'; } saveSpec(); if(s.mk.K!=null&&s.mk.H!=null){ beep(1180,.05,.05,'sine'); flash('Linjerne og spektret er gemt i logbogen ✓'); } updButtons(); } });
+
+/* ---------- løkke ---------- */
+let last=performance.now(), tAll=0, btnTick=0;
+function frame(now){
+  const dt=Math.min(.05,(now-last)/1000); last=now; tAll+=dt;
+  const D=S.dome;
+  if(D.phase==='rotating'){ D.t+=dt; D.rot=clamp(D.t/2.4,0,1); D.rot=D.rot<.5?2*D.rot*D.rot:1-2*(1-D.rot)**2; if(D.t>=2.4){ D.phase='opening'; D.t=0; grind(3.2); } }
+  else if(D.phase==='opening'){ D.t+=dt; D.open=clamp(D.t/3.2,0,1); if(D.t>=3.2){ D.phase='open'; D.open=1; clank(); updButtons(); updSteps(); } }
+  if(S.slew){ const s=S.slew; s.t+=dt; s.p=clamp(s.t/s.dur,0,1); if(!s.streak){ const e=s.p<.5?2*s.p*s.p:1-2*(1-s.p)**2; S.view.cx=s.from.cx+(s.to.cx-s.from.cx)*e; S.view.cy=s.from.cy+(s.to.cy-s.from.cy)*e; } if(s.p>=1){ S.slew=null; updButtons(); } }
+  if(S.exposing&&S.step===4&&S.sel){
+    const g=S.sel, s=specOf(g), rate=RMAX*Math.min(g.theta,SLIT_L)/SLIT_L, N=rate*dt;
+    for(let i=0;i<NB;i++) s.counts[i]+=poisson(N*s.p[i]);
+    s.N+=N; s.sim+=dt*SIMX;
+    const k=poisson(rate/CLICKDIV*dt); for(let j=0;j<k;j++){ if(AC) photonClick(AC.currentTime+Math.random()*dt); const sl=SLIT_L/S.view.scale; S.flashes.push({t:now-Math.random()*dt*1000,dx:(Math.random()-.5)*6,dy:(Math.random()-.5)*sl}); }
+  }
+  const c=cs; c.clearRect(0,0,SW,SH);
+  if(S.step<=1) drawDome(c,tAll); else if(S.step===2) drawFinder(c,tAll); else if(S.step===3) drawCamera(c,tAll); else if(S.step===4) drawSpectro(c,tAll); else drawDome(c,tAll);
+  if(S.step===3) drawGeometry(cp); else if(S.step===4) drawSpectrum(cp,specOf(S.sel));
+  updReadouts();
+  if((btnTick+=dt)>.25){ btnTick=0; if(S.step===2&&!$('ptext').hidden) { const h=paperHTML(2); if($('ptext').dataset.h!==h){ $('ptext').innerHTML=h; $('ptext').dataset.h=h; } } updButtons(); updSteps(); guide(); }
+  requestAnimationFrame(frame);
+}
+document.querySelectorAll('#bar .grp').forEach(g=>g.hidden=true);
+$('caption').innerHTML=CAP[0]; $('ptext').innerHTML=paperHTML(0); updSteps();
+requestAnimationFrame(frame);
+})();
+
+/* fuld skærm – i Google Sites er fuld skærm blokeret, så åbnes observatoriet i en ny fane i stedet (som ver18) */
+(()=>{
+  const b=document.getElementById('fs'), d=document, el=d.documentElement;
+  if(!b) return;
+  b.hidden=false;
+  const inFrame=(()=>{ try{ return window.self!==window.top; }catch(e){ return true; } })();
+  const can=!!(d.fullscreenEnabled||d.webkitFullscreenEnabled);
+  const isFs=()=>d.fullscreenElement||d.webkitFullscreenElement;
+  const msg=t=>{ b.textContent=t; setTimeout(upd,4000); };
+  function openTab(auto){
+    const js=JSON.stringify(auto||null).replace(/</g,'\\u003c');
+    const html=window.__SRC.replace('<head>','<head><script>window.__AUTO='+js+';<\/script>');
+    try{ const w=window.open('','_blank'); if(w){ try{ w.document.open(); w.document.write(html); w.document.close(); return true; }catch(e){ try{ w.close(); }catch(_){} } } }catch(e){}
+    try{ const u=URL.createObjectURL(new Blob([html],{type:'text/html'})); if(window.open(u,'_blank')) return true; }catch(e){}
+    return false;
+  }
+  b.addEventListener('click',()=>{
+    if(isFs()){ (d.exitFullscreen||d.webkitExitFullscreen).call(d); return; }
+    const fallback=()=>{ if(inFrame&&openTab(null)){ window.__sim&&window.__sim.pause(); } else msg('Ikke tilladt her – tryk F11'); };
+    if(!can){ fallback(); return; }
+    try{ const p=(el.requestFullscreen||el.webkitRequestFullscreen).call(el); if(p&&p.catch) p.catch(fallback); }catch(e){ fallback(); }
+  });
+  window.__startFs=(auto)=>{
+    if(isFs()) return 'none';
+    if(can){ try{ const p=(el.requestFullscreen||el.webkitRequestFullscreen).call(el); if(p&&p.catch) p.catch(()=>{}); return 'fs'; }catch(e){ return 'none'; } }
+    if(inFrame && openTab(auto)) return 'tab';
+    return 'none';
+  };
+  const cb=d.getElementById('startFs'), cbt=d.getElementById('startFsTxt');
+  try{ if(localStorage.getItem('obs_startFs')==='0') cb.checked=false; }catch(e){}
+  cb.addEventListener('change',()=>{ try{ localStorage.setItem('obs_startFs',cb.checked?'1':'0'); }catch(e){} });
+  if(!can && inFrame) cbt.textContent='Vis i hele vinduet (ny fane)';
+  if(!can && !inFrame) cb.closest('label').hidden=true;
+  function upd(){ b.textContent=isFs()?'Afslut fuld skærm':(can||!inFrame?'Fuld skærm':'Åbn i ny fane ↗'); }
+  d.addEventListener('fullscreenchange',upd); d.addEventListener('webkitfullscreenchange',upd);
+  upd();
+})();
+
+/* tilpas til boksen: vælg layout efter boksens form, og skaler hele siden så den fylder boksen uden rullepaneler (som ver18) */
+(()=>{
+  const root=document.documentElement, w=document.querySelector('.wrap');
+  let busy=false;
+  function fitStage(){
+    if(busy) return; busy=true;
+    if(innerWidth<700){ root.classList.remove('fitmode','wide'); w.style.transform=''; window.__fitScale=1; window.__fitCanvas&&window.__fitCanvas(); busy=false; return; }
+    root.classList.add('fitmode');
+    root.classList.toggle('wide', innerWidth/innerHeight>=1.15);
+    w.style.transform='none';
+    const W=w.offsetWidth, H=w.scrollHeight;
+    const s=Math.min(innerWidth/W, innerHeight/H, 3);
+    const dx=Math.max(0,(innerWidth-W*s)/2), dy=Math.max(0,(innerHeight-H*s)/2);
+    w.style.transform='translate('+dx+'px,'+dy+'px) scale('+s+')';
+    window.__fitScale=s; window.__fitCanvas&&window.__fitCanvas();
+    busy=false;
+  }
+  addEventListener('resize',fitStage);
+  document.querySelectorAll('details').forEach(d=>d.addEventListener('toggle',()=>{ if(!root.classList.contains('wide')) fitStage(); }));
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fitStage);
+  fitStage(); setTimeout(fitStage,300);
+})();
+
+/* ny fane åbnet fra Google Sites: log ind med det samme; første klik et vilkårligt sted giver fuld skærm og lyd */
+(()=>{
+  const A=window.__AUTO, sim=window.__sim; if(!A||!sim) return;
+  const d=document, el=d.documentElement;
+  const ban=d.createElement('button'); ban.id='autoBan'; ban.textContent='⛶ Klik for fuld skærm og lyd'; d.body.appendChild(ban);
+  function first(e){
+    d.removeEventListener('click',first,true); ban.hidden=true;
+    try{ const rq=el.requestFullscreen||el.webkitRequestFullscreen; if(!(d.fullscreenElement||d.webkitFullscreenElement)&&rq){ const p=rq.call(el); if(p&&p.catch) p.catch(()=>{}); } }catch(_){}
+    try{ const a=sim.actx(); a&&a.resume(); }catch(_){}
+    if(e.target===ban) e.stopPropagation();
+  }
+  d.addEventListener('click',first,true);
+  sim.autoLogin(A.group,A.code,A.obs);
+})();
+</script>
