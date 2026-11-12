@@ -1,2 +1,0 @@
-# Applets
-Fysik applets
