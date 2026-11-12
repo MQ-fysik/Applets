@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Månens faser – den avancerede model</title>
+<style>
+:root{--bg:#ffffff;--fg:#1d2430;--muted:#5b6575;--line:#d4d9e1;--card:#f3f5f8;--hl:#fdf1dc;--hlline:#e0952a;--red:#c0392b;--btn:#1d2430;--onbtn:#ffffff;--ok:#1f9d55;--okbg:#e6f6ec;--adv:#5b4b8a;--advbg:#f3f0fa;--advline:#cfc6e6;}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%}
+.wrap{max-width:860px;margin:0 auto;padding:14px 16px 18px;position:relative;display:flex;flex-direction:column;gap:10px}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:15px;font-weight:600;margin:0}
+.vtag{font-size:12px;font-weight:500;color:var(--adv);border:1px solid var(--advline);border-radius:999px;padding:2px 9px;margin-left:10px;vertical-align:middle;white-space:nowrap}
+button{font:inherit;font-size:14px;padding:6px 14px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);cursor:pointer;-webkit-appearance:none;appearance:none}
+button:hover:not(:disabled){background:var(--card)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,canvas:focus-visible{outline:2px solid var(--hlline);outline-offset:2px}
+button.primary{background:var(--btn);color:var(--onbtn);border-color:var(--btn);font-weight:600}
+button.primary:hover:not(:disabled){background:#38414f}
+button.on{background:var(--hl);border-color:var(--hlline);font-weight:600}
+.hd{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.steps{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;list-style:none;margin:0;padding:0}
+.steps button{width:100%;text-align:left;padding:6px 10px;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.steps button .k{font-weight:700;color:var(--adv);margin-right:6px}
+.steps button.cur{color:var(--fg);border-color:var(--adv);background:var(--advbg);font-weight:600}
+.steps button.done::after{content:' ✓';color:var(--ok);font-weight:700}
+.caption{margin:0;font-size:15.5px;line-height:1.45;min-height:2.9em}
+.caption b{color:var(--adv)}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.tb{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 8px}
+.tb h2{margin-right:auto}
+.tb button{font-size:12.5px;padding:3px 10px;border-radius:999px}
+canvas{width:100%;display:block;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.note{font-size:12px;color:var(--muted);margin:6px 0 0}
+.view{display:flex;flex-direction:column;gap:10px}
+.colL,.colR{display:contents}
+/* tjekliste */
+.guide{background:var(--advbg);border:1px solid var(--advline);border-radius:12px;padding:9px 12px}
+.guide .gt{font-size:11.5px;color:var(--adv);text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:5px}
+.guide ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:3px 12px}
+.guide li{position:relative;padding-left:23px;font-size:13.5px;color:var(--muted);line-height:1.3}
+.guide li.wide{grid-column:1/-1}
+.guide li::before{content:'';position:absolute;left:0;top:1px;width:15px;height:15px;border:1.5px solid #9aa3b2;border-radius:4px;box-sizing:border-box;font-size:11px;line-height:12px;text-align:center;background:#fff}
+.guide li.done{color:var(--ok)}
+.guide li.done::before{content:'✓';background:var(--ok);border-color:var(--ok);color:#fff;font-weight:700}
+.guide li.now{color:var(--fg);font-weight:600}
+.guide li.now::before{border-color:var(--hlline);box-shadow:0 0 0 3px var(--hl)}
+.guide .tip{margin-top:6px;font-size:13px;color:#9a5a00;font-weight:600}
+.pulse{border-color:var(--hlline)!important;animation:pulse 1.5s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(224,149,42,.75)}70%{box-shadow:0 0 0 9px rgba(224,149,42,0)}100%{box-shadow:0 0 0 0 rgba(224,149,42,0)}}
+input[type=range].pulse{border-radius:999px}
+/* kamera */
+.cam{display:flex;gap:12px;align-items:flex-start}
+#cvP{width:200px;flex:none;border-radius:8px}
+.cinfo{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
+.lit{font-size:17px;font-weight:700;margin:0}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.mc{background:var(--card);border-radius:8px;padding:4px 9px}
+.mc div:first-child{font-size:11.5px;color:var(--muted)}
+.mc div:last-child{font-size:14.5px;font-weight:600;font-variant-numeric:tabular-nums}
+#bShot{font-size:16px;padding:9px 16px}
+.small{font-size:12.5px;color:var(--muted);margin:0}
+/* styring */
+.row{display:flex;align-items:center;gap:10px;margin:6px 0 3px;flex-wrap:wrap}
+.row label{font-size:14px;color:var(--muted);min-width:96px}
+.row input[type=range]{flex:1;min-width:140px;accent-color:var(--hlline);margin:0}
+.val{font-size:14px;font-weight:600;min-width:84px;text-align:right;font-variant-numeric:tabular-nums}
+.chips{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.chips button{font-size:12.5px;padding:3px 10px;border-radius:999px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{border:0;border-radius:0;font-size:13px;padding:4px 12px}
+.seg button.on{background:var(--adv);color:#fff}
+.tgl{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer;-webkit-user-select:none;user-select:none;margin-right:10px}
+.tgl input{width:16px;height:16px;margin:0;accent-color:var(--hlline);cursor:pointer}
+.lbl{font-size:13px;color:var(--muted)}
+.red{color:var(--red);font-weight:600;font-family:"Times New Roman",Times,serif}
+.sep{border-top:1px solid var(--line);margin:8px 0 0;padding-top:6px}
+/* fasebånd */
+.posterwrap{max-height:720px;overflow:auto;border-radius:8px;border:1px solid var(--line);background:#f7f8fa}
+.posterwrap img{width:100%;display:block}
+.qs{margin:0;padding-left:20px;font-size:14px}
+.qs li{margin:0 0 7px}
+.btncol{display:flex;flex-direction:column;gap:8px}
+.foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding-top:8px;border-top:1px solid var(--line)}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){.pulse{animation:none}}
+/* stablet rækkefølge */
+#guide{order:1}#secCam{order:2}#sec3{order:3}#secK{order:4}#secFilm{order:5}#secC{order:6}
+/* log ind */
+.startov{position:absolute;top:0;left:0;right:0;bottom:0;z-index:10;display:grid;place-items:start center;padding-top:90px;background:rgba(255,255,255,.85);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.login{display:grid;gap:12px;width:min(440px,92%);padding:24px 26px;background:var(--bg);border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 40px rgba(29,36,48,.18)}
+.st-t{margin:0;font-size:26px;font-weight:700;text-align:center}
+.st-l{margin:-6px 0 4px;color:var(--muted);font-size:15px;text-align:center}
+.login label.f{display:grid;gap:4px;font-size:14px;color:var(--muted)}
+.login input[type=text]{font:inherit;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:8px}
+.st-fs{display:inline-flex;align-items:center;gap:8px;font-size:15px;cursor:pointer;justify-self:center;-webkit-user-select:none;user-select:none}
+.st-fs input{width:18px;height:18px;margin:0;accent-color:var(--hlline);cursor:pointer}
+button.big{font-size:18px;font-weight:600;padding:12px 22px;background:var(--adv);border-color:var(--adv);color:#fff}
+button.big:hover{background:#4a3c75!important}
+.st-msg{margin:0;font-size:14px;font-weight:600;color:#9a5a00;text-align:center}
+#autoBan{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:50;font-size:19px;font-weight:600;padding:12px 22px;border-radius:999px;background:var(--btn);border:0;color:#fff;box-shadow:0 6px 30px rgba(0,0,0,.35);cursor:pointer}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:70;background:var(--okbg);color:#14532d;border:1px solid #86d0a3;border-radius:999px;padding:9px 18px;font-size:15px;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.18);max-width:92vw;text-align:center}
+.toast.bad{background:#fdf1dc;color:#7a4500;border-color:#e0b46a}
+.pv{position:fixed;top:0;left:0;right:0;bottom:0;z-index:60;background:rgba(10,14,22,.78);display:grid;place-items:center;padding:20px}
+.pvbox{max-width:min(1100px,96vw);max-height:94vh;display:grid;gap:10px;justify-items:center}
+.pvbox img{max-width:100%;max-height:calc(94vh - 60px);border-radius:8px;background:#fff;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.pvbar{display:flex;gap:10px}
+.flash{position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;z-index:65;pointer-events:none;opacity:0;transition:opacity .35s}
+/* tilpas til boksen */
+html.fitmode,html.fitmode body{height:100%;overflow:hidden}
+html.fitmode .wrap{position:absolute;top:0;left:0;width:860px;max-width:none;margin:0;transform-origin:0 0}
+html.wide .wrap{width:1280px;padding:12px 18px 10px;gap:9px}
+html.wide h1{font-size:24px}
+html.wide .view{display:grid;grid-template-columns:610px minmax(0,1fr);column-gap:16px;align-items:start}
+html.wide .colL,html.wide .colR{display:flex;flex-direction:column;gap:9px;min-width:0}
+html.wide .caption{height:2.9em;overflow:hidden}
+html.wide .guide{height:182px;overflow:hidden}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="hd">
+  <h1>Månens faser – den avancerede model<span class="vtag" id="ver"></span></h1>
+  <div style="display:flex;gap:8px;align-items:center"><span class="small" id="who"></span><button id="fs" type="button" hidden>Fuld skærm</button></div>
+</div>
+<ol class="steps" id="steps">
+  <li><button type="button" data-i="0"><span class="k">1</span>Log ind</button></li>
+  <li><button type="button" data-i="1"><span class="k">2</span>Danmark</button></li>
+  <li><button type="button" data-i="2"><span class="k">3</span>Australien</button></li>
+  <li><button type="button" data-i="3"><span class="k">4</span>Ækvator</button></li>
+  <li><button type="button" data-i="4"><span class="k">5</span>Nordpolen</button></li>
+  <li><button type="button" data-i="5"><span class="k">6</span>Fasebånd</button></li>
+  <li><button type="button" data-i="6"><span class="k">7</span>Frit</button></li>
+</ol>
+<p class="caption" id="cap" aria-live="polite"></p>
+
+<div class="startov" id="loginOv">
+  <form class="login" id="loginForm" autocomplete="off">
+    <p class="st-t">Månens faser</p>
+    <p class="st-l">Den avancerede model – Månen set fra hele Jorden</p>
+    <label class="f">Jeres navne (gruppe)<input type="text" id="inGroup" maxlength="40" required></label>
+    <label class="st-fs"><input type="checkbox" id="startFs" checked> <span id="startFsTxt">Start i fuld skærm</span></label>
+    <button class="big" type="submit">Start opgaverne</button>
+    <p class="st-msg" id="startMsg" hidden></p>
+    <p class="small" style="text-align:center">Navnene kommer på jeres billeder. Billederne gemmes på denne computer, så I kan fortsætte senere med samme navne.</p>
+  </form>
+</div>
+
+<!-- ============ OPGAVER ============ -->
+<div class="view" id="vm">
+  <div class="colL">
+    <section class="card" id="sec3" aria-labelledby="h3d">
+      <div class="tb"><h2 id="h3d">Modellen</h2>
+        <button type="button" data-cam="top">Fra oven</button><button type="button" data-cam="skraat">Skråt</button><button type="button" data-cam="obs">Bag figuren</button><button type="button" data-cam="syd">Fra neden</button>
+      </div>
+      <canvas id="cv3" data-ar="0.62" aria-label="Model af Solen, Jorden og Månen med en figur på Jorden. Træk for at dreje."></canvas>
+      <p class="note">Træk i modellen for at dreje den. Tallene rundt om Jorden viser klokken. Figuren er tegnet meget stor. Vælg »Bag figuren« for at se, hvordan figuren står.</p>
+    </section>
+    <section class="card" id="secK" aria-labelledby="hK">
+      <div class="tb"><h2 id="hK">Himlen set af figuren</h2><span id="lookDir" class="note" style="margin:0"></span><button type="button" id="lookMoon" hidden>Kig mod Månen</button></div>
+      <canvas id="cvK" data-ar="0.46" aria-label="Himlen set fra figurens sted. Træk til siden for at kigge rundt."></canvas>
+    </section>
+  </div>
+  <div class="colR">
+    <div class="guide" id="guide"></div>
+    <section class="card" id="secCam" aria-labelledby="hCam">
+      <div class="cam">
+        <canvas id="cvP" data-ar="1" aria-label="Kameraets billede af Månen"></canvas>
+        <div class="cinfo">
+          <h2 id="hCam" style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Kameraet</h2>
+          <p class="lit" id="litTxt"></p>
+          <div class="cards">
+            <div class="mc"><div>Fase</div><div id="rPh"></div></div>
+            <div class="mc"><div>Månen på himlen</div><div id="rPos"></div></div>
+            <div class="mc"><div>Månen står op / går ned</div><div id="rRise"></div></div>
+            <div class="mc"><div>Solen</div><div id="rSun"></div></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button type="button" id="bShot" class="primary">📷 Tag billede</button><span class="small" id="shotHint"></span></div>
+        </div>
+      </div>
+    </section>
+    <section class="card" id="secFilm" aria-labelledby="hFilm">
+      <div class="tb"><h2 id="hFilm">Billeder i denne opgave</h2><span class="small">Klik på et billede for at se det og gemme det som PNG.</span></div>
+      <canvas id="cvF" data-ar="0.2" aria-label="Billeder taget i opgaven"></canvas>
+    </section>
+    <section class="card" id="secC" aria-labelledby="hC">
+      <div class="row"><label for="sLat">Figuren står</label><input type="range" id="sLat" min="-90" max="90" step="1"><span class="val" id="vLat"></span></div>
+      <div class="chips" id="latChips"><button type="button" id="lat_90" data-lat="90">Nordpolen</button><button type="button" id="lat_56" data-lat="56">Danmark</button><button type="button" id="lat_0" data-lat="0">Ækvator</button><button type="button" id="lat_-34" data-lat="-34">Australien</button><button type="button" id="lat_-90" data-lat="-90">Sydpolen</button></div>
+      <div class="row sep"><label for="sAge">Månens fase</label><input type="range" id="sAge" min="0" max="29.5" step="0.05"><span class="val" id="vAge"></span></div>
+      <div class="chips" id="phChips"></div>
+      <div class="row sep"><label for="sT">Klokken</label><input type="range" id="sT" min="0" max="24" step="0.05"><span class="val" id="vT"></span></div>
+      <div class="chips"><button type="button" data-t="0">kl. 24</button><button type="button" data-t="6">kl. 6</button><button type="button" data-t="12">kl. 12</button><button type="button" data-t="18">kl. 18</button><button type="button" id="pDay">▶ Lad et døgn gå</button>
+        <label class="tgl"><input type="checkbox" id="cFollow"> Klokken følger Månen</label></div>
+      <div class="row sep" id="tiltRow"><span class="lbl" style="min-width:96px">Jordens akse</span>
+        <span class="seg"><button type="button" id="tiltOff">lodret (grundmodel)</button><button type="button" id="tiltOn">hælder 23,4°</button></span>
+        <span class="chips" id="seChips"><button type="button" id="se_mar" data-se="mar">21. marts</button><button type="button" id="se_jun" data-se="jun">21. juni</button><button type="button" id="se_sep" data-se="sep">23. sep.</button><button type="button" id="se_dec" data-se="dec">21. dec.</button></span>
+        <span class="small" id="tiltLock"></span></div>
+      <div class="sep"><label class="tgl"><input type="checkbox" id="cHand" checked> Vis figurens venstre hånd</label><label class="tgl"><input type="checkbox" id="cArc" checked> Vis retningen mod Solen på himlen</label></div>
+    </section>
+  </div>
+</div>
+
+<!-- ============ FASEBÅND ============ -->
+<div class="view" id="vp" hidden>
+  <div class="colL"><section class="card"><div class="tb"><h2>Jeres fasebånd</h2></div><div class="posterwrap"><img id="posterImg" alt="Fasebånd med alle jeres billeder"></div></section></div>
+  <div class="colR">
+    <section class="card"><h2 style="margin:0 0 8px">Gem til rapporten</h2>
+      <div class="btncol"><button type="button" id="bPoster" class="primary">Gem fasebåndet (PNG)</button><button type="button" id="bZip">Hent alle billeder hver for sig (ZIP)</button><button type="button" id="bReset">Slet alle billeder og start forfra</button></div></section>
+    <section class="card"><h2 style="margin:0 0 8px">Spørgsmål til rapporten</h2>
+      <ol class="qs">
+        <li><b>Danmark:</b> Hvilken side af Månen er belyst ved B og ved D? Forklar det med modellen.</li>
+        <li><b>Australien:</b> Sammenlign med Danmark. Hvorfor står Månen »på hovedet« i Australien? Hint: Vælg »Bag figuren«. Hvilken vej peger figurens hoved, og hvilken vej kigger figuren?</li>
+        <li><b>Ækvator:</b> Hvorfor »ligger« Månen ned ved ækvator? Hvordan kan man se forskel på tiltagende og aftagende halvmåne, når man kigger mod øst? Sammenlign også halvmånen B, da den stod op i øst, med B, da den gik ned i vest. Hvor står Solen hver gang?</li>
+        <li><b>En regel:</b> Formulér en regel, der gælder alle steder på Jorden, for hvilken side af Månen der er belyst.</li>
+        <li><b>Nordpolen:</b> Hvorfor kan man se fuldmånen hele døgnet ved Nordpolen i december, men slet ikke i juni?</li>
+        <li><b>Tidspunkter:</b> Hvornår på døgnet kunne I tage billedet af fuldmånen fra Danmark? Og af den tiltagende segl?</li>
+      </ol></section>
+  </div>
+</div>
+
+<div class="foot"><span id="footTxt">Modellen: Månen går i en cirkel i samme plan som Jordens bane om Solen, og Solens stråler er parallelle. I opgave 4 kan Jordens akse hælde 23,4°.</span><span>Månens faser – den avancerede model · MQfysik</span></div>
+</div>
+
+<script>
+window.__SRC='<!doctype html>\n'+document.documentElement.outerHTML;
+const VERSION='3.0',VDATE='08.11.2026';
+const $=id=>document.getElementById(id);
+$('ver').textContent='Version '+VERSION+' · '+VDATE;
+const PI=Math.PI,D2R=PI/180,R2D=180/PI,PER=29.53;
+const reduce=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]];
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
+const mul=(a,k)=>[a[0]*k,a[1]*k,a[2]*k];
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const len=a=>Math.sqrt(dot(a,a));
+const nrm=a=>{const l=len(a)||1;return[a[0]/l,a[1]/l,a[2]/l];};
+const perp=(v,m)=>sub(v,mul(m,dot(v,m)));
+const lerp=(a,b,f)=>a+(b-a)*f;
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const wrap180=a=>(a+540)%360-180;
+const modP=a=>((a%PER)+PER)%PER;
+function rotv(v,ax,an){const c=Math.cos(an),s=Math.sin(an);return add(add(mul(v,c),mul(cross(ax,v),s)),mul(ax,dot(ax,v)*(1-c)));}
+const SUN=[1,0,0],ZA=[0,0,1];
+const fmt=(v,d)=>v.toFixed(d).replace('.',',');
+const FONT='system-ui,-apple-system,"Segoe UI",Roboto,sans-serif';
+const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+
+/* ---------- tilstand ---------- */
+const S={age:7.38,t:18,lat:56,follow:true,hand:true,arc:true,tilt:false,season:'dec'};
+let step=0,play=null,group='',D={photos:{},free:[],seen:{}};
+
+/* ---------- geometri ----------
+   x mod Solen, y mod B (figur 22), z vinkelret på Jordens bane (ekliptika).
+   Uden hældning er Jordens akse = z. Med hældning 23,4°: i juni hælder Nordpolen mod Solen, i december væk fra Solen.
+   Kl. 12 vender mod Solen. */
+const EPS=23.44*D2R,PSI={mar:90,jun:0,sep:-90,dec:180};
+const SEASON={mar:'21. marts',jun:'21. juni',sep:'23. september',dec:'21. december'};
+function axisOf(tilt,se){if(!tilt)return[0,0,1];const p=PSI[se]*D2R;return[Math.sin(EPS)*Math.cos(p),Math.sin(EPS)*Math.sin(p),Math.cos(EPS)];}
+function basis(ax){const e1=nrm(perp(SUN,ax));return{n:ax,e1,e2:cross(ax,e1)};}
+function frameOf(lat,t,ax){const B=basis(ax),th=(t-12)/24*2*PI,la=lat*D2R,cl=Math.cos(la),sl=Math.sin(la),c=Math.cos(th),s=Math.sin(th);
+  const r=add(mul(B.e1,c),mul(B.e2,s));return{U:add(mul(r,cl),mul(B.n,sl)),E:add(mul(B.e1,-s),mul(B.e2,c)),N:sub(mul(B.n,cl),mul(r,sl))};}
+const AX=()=>axisOf(S.tilt,S.season);
+const frame=(lat,t)=>frameOf(lat,t,AX());
+function altaz(v,F){const alt=Math.asin(clamp(dot(v,F.U),-1,1))*R2D;let az=Math.atan2(dot(v,F.E),dot(v,F.N))*R2D;if(az<0)az+=360;return{alt,az};}
+function photo(m,F){let up=perp(F.U,m);if(len(up)<1e-3)up=perp(F.N,m);up=nrm(up);const rt=cross(m,up);
+  const ts=perp(SUN,m),tn=perp(ZA,m);const sx=dot(ts,rt),sy=dot(ts,up),nx=dot(tn,rt),ny=dot(tn,up);
+  return{sunAng:Math.atan2(-sy,sx),northRot:Math.atan2(-ny,nx)+PI/2,ct:dot(SUN,m),k:(1-dot(SUN,m))/2,sx,sy};}
+const mOf=age=>{const p=age/PER*2*PI;return[Math.cos(p),Math.sin(p),0];};
+function culmT(m,ax){const B=basis(ax),th=Math.atan2(dot(m,B.e2),dot(m,B.e1));return(((12+th*12/PI)%24)+24)%24;}
+const RO=4.6,RM=0.42,FIG=1.45,SUNP=[7.6,0,0],SUNR=1.0;
+function scene(){const m=mOf(S.age);const F=frame(S.lat,S.t);let fh=perp(m,F.U);fh=len(fh)<1e-3?F.N:nrm(fh);return{m,M:mul(m,RO),F,fh,rt:cross(fh,F.U),P:F.U};}
+function riseSet(age,lat,ax){const m=mOf(age),N=288,al=[];for(let i=0;i<=N;i++)al.push(altaz(m,frameOf(lat,i/N*24,ax)).alt);
+  let up=null,dn=null;for(let i=0;i<N;i++){if(al[i]<0&&al[i+1]>=0)up=(i+(-al[i])/(al[i+1]-al[i]))/N*24;if(al[i]>=0&&al[i+1]<0)dn=(i+al[i]/(al[i]-al[i+1]))/N*24;}
+  return{up,dn,mx:Math.max.apply(null,al),mn:Math.min.apply(null,al)};}
+
+/* ---------- tekster ---------- */
+const PH5=[{k:'s1',n:'Tiltagende månesegl',a:3.7},{k:'B',n:'Tiltagende halvmåne',a:7.38,l:'B'},{k:'C',n:'Fuldmåne',a:14.77,l:'C'},{k:'D',n:'Aftagende halvmåne',a:22.15,l:'D'},{k:'s2',n:'Aftagende månesegl',a:25.83}];
+const phaseKey=a=>{const p=PH5.find(p=>Math.abs(modP(a)-p.a)<0.25);return p?p.k:null;};
+function phaseName(a){const f=modP(a)/PER;
+  if(f<0.03||f>0.97)return['Nymåne','A'];if(Math.abs(f-.25)<.035)return['Tiltagende halvmåne','B'];
+  if(Math.abs(f-.5)<.035)return['Fuldmåne','C'];if(Math.abs(f-.75)<.035)return['Aftagende halvmåne','D'];
+  if(f<.25)return['Tiltagende månesegl',''];if(f<.5)return['Tiltagende, over halv',''];
+  if(f<.75)return['Aftagende, over halv',''];return['Aftagende månesegl',''];}
+const phHTML=a=>{const p=phaseName(a);return p[0]+(p[1]?' <span class="red">'+p[1]+'</span>':'');};
+const DIRS=['N','NØ','Ø','SØ','S','SV','V','NV'];
+const DIRL={N:'nord',NØ:'nordøst',Ø:'øst',SØ:'sydøst',S:'syd',SV:'sydvest',V:'vest',NV:'nordvest'};
+const compass=az=>DIRS[Math.round(az/45)%8];
+const latTxt=l=>l===0?'0° (ækvator)':Math.abs(l)+'° '+(l>0?'N':'S');
+function place(l){if(l>=90)return'Nordpolen';if(l<=-90)return'Sydpolen';if(l===56)return'Danmark (56° N)';if(l===-34)return'Australien (34° S)';if(l===0)return'ækvator';return latTxt(l);}
+function hhmm(t){t=((t%24)+24)%24;let h=Math.floor(t),m=Math.round((t-h)*60);if(m===60){m=0;h++;}if(h===0)h=24;return(h<10?'0':'')+h+':'+(m<10?'0':'')+m;}
+function litWords(ph){if(ph.k<0.02)return'Nymåne – kan ikke ses';if(ph.k>0.985)return'Fuldmåne – hele siden er belyst';
+  const a=Math.atan2(ph.sy,ph.sx)*R2D;const W=['højre side','øverst til højre','oversiden','øverst til venstre','venstre side','nederst til venstre','undersiden','nederst til højre'];
+  const w=W[((Math.round(a/45)%8)+8)%8];return(w.indexOf('til')>0?'Lys ':'Lys på ')+w;}
+function dateTxt(){const d=new Date();return d.toLocaleDateString('da-DK')+' kl. '+d.toLocaleTimeString('da-DK',{hour:'2-digit',minute:'2-digit'});}
+
+/* ---------- opgaver ---------- */
+const MIS=[null,
+ {id:'dk',lat:56,place:'Danmark (56° N)',look:{az:180,n:'syd'},slots:PH5.map(p=>({k:'dk_'+p.k,lbl:p.n,ph:p.k}))},
+ {id:'au',lat:-34,place:'Australien (34° S)',look:{az:0,n:'nord'},slots:PH5.map(p=>({k:'au_'+p.k,lbl:p.n,ph:p.k}))},
+ {id:'eq',lat:0,place:'ækvator',look:{az:90,n:'øst'},slots:PH5.map(p=>({k:'eq_'+p.k,lbl:p.n,ph:p.k})).concat([
+   {k:'eq_rotE',lbl:'B står op i øst',long:'Halvmånen B lige efter, den er stået op (lavt mod øst)',ph:'B',pos:'E'},
+   {k:'eq_rotW',lbl:'B går ned i vest',long:'Halvmånen B kort før, den går ned (lavt mod vest)',ph:'B',pos:'W'}])},
+ {id:'pol',lat:90,place:'Nordpolen',slots:[{k:'pol_decC',lbl:'December: fuldmåne',ph:'C',se:'dec'},{k:'pol_junS',lbl:'Juni: tiltagende segl',ph:'s1',se:'jun'}]}];
+const CAP=['<b>Log ind.</b> Skriv jeres navne. Navnene kommer på billederne, så I kan bruge dem i rapporten.',
+ '<b>Opgave 1 · Danmark.</b> Tag et billede af hver af de fem faser fra Danmark, mens Månen står mod syd – så kigger figuren samme vej hver gang, ligesom i figur 21. Tip: Sæt flueben i »Klokken følger Månen«.',
+ '<b>Opgave 2 · Australien.</b> Flyt figuren til Australien (34° S), og tag de samme fem billeder, mens Månen står mod nord. Hvad er anderledes end i Danmark – og hvorfor? Vælg »Bag figuren« i modellen, og se, hvordan figuren står.',
+ '<b>Opgave 3 · Ækvator.</b> Flyt figuren til ækvator, og tag de fem billeder, mens Månen står mod øst (ikke lige over hovedet). Tag til sidst to billeder af halvmånen B: lige efter den er stået op i øst, og kort før den går ned i vest.',
+ '<b>Opgave 4 · Nordpolen.</b> I grundmodellen står Månen altid i horisonten ved polerne. Men Jordens akse hælder 23,4°. Slå hældningen til, og find ud af, hvornår man kan se fuldmånen fra Nordpolen.',
+ '<b>Fasebåndet.</b> Her er alle jeres billeder samlet. Gem fasebåndet som PNG, og brug det til at besvare spørgsmålene i rapporten.',
+ '<b>Frit eksperiment.</b> Prøv selv alle steder og årstider. Billeder, I tager her, kommer med i fasebåndet under »Frie billeder«.'];
+function posOK(sl,am){if(sl.pos==='E')return Math.abs(wrap180(am.az-90))<=45&&am.alt<=30;if(sl.pos==='W')return Math.abs(wrap180(am.az-270))<=45&&am.alt<=30;return true;}
+/* lige over hovedet er der ingen »op« i billedet, så der kan ikke tages billeder dér */
+const ZEN=80;
+function atPlace(mi,lat){return mi.lat===90?lat>=89:Math.abs(lat-mi.lat)<=1;}
+/* fasebåndet: alle billeder tages, mens Månen står i samme retning, så figuren kigger samme vej hver gang (som i figur 21) */
+const lookOK=(mi,am)=>!mi.look||Math.abs(wrap180(am.az-mi.look.az))<=45;
+function fits(mi,sl,rec,pk,am){if(!atPlace(mi,rec.lat)||sl.ph!==pk)return false;if(mi.id==='pol')return rec.tilt&&rec.season===sl.se;if(rec.tilt)return false;return sl.pos?posOK(sl,am):lookOK(mi,am);}
+const misDone=i=>!!MIS[i]&&MIS[i].slots.every(sl=>D.photos[sl.k]);
+
+/* ---------- lærreder ---------- */
+const CV={};
+['cv3','cvK','cvP','cvF'].forEach(id=>{const el=$(id);CV[id]={el,ar:+el.dataset.ar,g:el.getContext('2d'),w:300,h:200};});
+function size(){const dpr=(window.devicePixelRatio||1)*Math.max(1,window.__fitScale||1);
+  for(const id in CV){const o=CV[id];const w=o.el.clientWidth;if(!w)continue;const h=Math.round(w*o.ar);o.el.style.height=h+'px';
+    let k=Math.min(dpr,4096/w,4096/h);if(w*h*k*k>8e6)k=Math.sqrt(8e6/(w*h));
+    o.el.width=Math.round(w*k);o.el.height=Math.round(h*k);o.w=w;o.h=h;o.g.setTransform(k,0,0,k,0,0);}}
+
+/* ---------- Månens overflade ---------- */
+const TEX=document.createElement('canvas');TEX.width=TEX.height=512;
+(()=>{const g=TEX.getContext('2d'),r=256;let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+  g.translate(r,r);const gr=g.createRadialGradient(-50,-60,20,0,0,r);gr.addColorStop(0,'#f3f1ec');gr.addColorStop(.75,'#dcd9d2');gr.addColorStop(1,'#a8a59f');
+  g.beginPath();g.arc(0,0,r,0,2*PI);g.fillStyle=gr;g.fill();g.save();g.clip();
+  [[-.56,.10,.30,.46,-.25],[-.30,.45,.27,.22,.2],[.20,.42,.17,.15,0],[.34,.12,.21,.17,.3],[.69,.27,.11,.09,0],[.55,-.15,.13,.17,.2],[.31,-.30,.09,.09,0],[-.20,-.36,.17,.12,0],[-.50,-.37,.09,.09,0],[.0,.71,.45,.07,0],[-.05,.18,.10,.08,0]]
+  .forEach(([x,y,rx,ry,rot])=>{g.save();g.translate(x*r,-y*r);g.rotate(rot);g.scale(1,ry/rx);const R=rx*r;const q=g.createRadialGradient(0,0,R*.2,0,0,R);
+    q.addColorStop(0,'rgba(108,110,116,.62)');q.addColorStop(.75,'rgba(118,120,126,.5)');q.addColorStop(1,'rgba(130,132,138,0)');g.fillStyle=q;g.beginPath();g.arc(0,0,R,0,2*PI);g.fill();g.restore();});
+  for(let i=0;i<260;i++){const a=rnd()*2*PI,d=Math.sqrt(rnd())*r*.97,x=Math.cos(a)*d,y=Math.sin(a)*d,cr=1+rnd()*rnd()*9;
+    g.beginPath();g.arc(x,y,cr,0,2*PI);g.fillStyle='rgba(90,90,95,'+(.10+rnd()*.12)+')';g.fill();
+    g.beginPath();g.arc(x-cr*.3,y-cr*.3,cr*.6,0,2*PI);g.fillStyle='rgba(255,255,255,'+(.08+rnd()*.1)+')';g.fill();}
+  const tx=-.12*r,ty=.68*r;g.strokeStyle='rgba(255,255,255,.10)';g.lineWidth=2;
+  for(let i=0;i<14;i++){const a=rnd()*2*PI,L=r*(.3+rnd()*.5);g.beginPath();g.moveTo(tx,ty);g.lineTo(tx+Math.cos(a)*L,ty+Math.sin(a)*L);g.stroke();}
+  g.beginPath();g.arc(tx,ty,6,0,2*PI);g.fillStyle='rgba(255,255,255,.7)';g.fill();
+  g.restore();const lg=g.createRadialGradient(0,0,r*.7,0,0,r);lg.addColorStop(0,'rgba(0,0,0,0)');lg.addColorStop(1,'rgba(40,40,45,.35)');g.fillStyle=lg;g.beginPath();g.arc(0,0,r,0,2*PI);g.fill();})();
+function litPath(g,R,c){g.beginPath();g.moveTo(0,-R);g.arc(0,0,R,-PI/2,PI/2,false);g.ellipse(0,0,Math.max(Math.abs(c)*R,0.01),R,0,PI/2,-PI/2,c>0);g.closePath();}
+function drawSphere(g,x,y,R,ang,c,lit,dark,stroke){g.save();g.translate(x,y);g.beginPath();g.arc(0,0,R,0,2*PI);g.fillStyle=dark;g.fill();
+  if(c<0.999){g.rotate(ang);litPath(g,R,c);g.fillStyle=lit;g.fill();g.rotate(-ang);}
+  if(stroke){g.beginPath();g.arc(0,0,R,0,2*PI);g.strokeStyle=stroke;g.lineWidth=1;g.stroke();}g.restore();}
+function drawMoonReal(g,x,y,R,ph,darkFill){g.save();g.translate(x,y);g.beginPath();g.arc(0,0,R,0,2*PI);g.fillStyle=darkFill||'rgba(150,160,180,.10)';g.fill();
+  if(ph.ct<0.996){g.save();g.rotate(ph.sunAng);litPath(g,R,ph.ct);g.clip();g.rotate(-ph.sunAng+ph.northRot);g.drawImage(TEX,-R,-R,2*R,2*R);g.restore();}
+  g.restore();}
+function arrow(g,x0,y0,x1,y1,col,w,hs){g.strokeStyle=col;g.fillStyle=col;g.lineWidth=w||1.5;g.beginPath();g.moveTo(x0,y0);g.lineTo(x1,y1);g.stroke();
+  const a=Math.atan2(y1-y0,x1-x0),h=hs||7;g.beginPath();g.moveTo(x1,y1);g.lineTo(x1-h*Math.cos(a-.42),y1-h*Math.sin(a-.42));g.lineTo(x1-h*Math.cos(a+.42),y1-h*Math.sin(a+.42));g.closePath();g.fill();}
+function label(g,s,x,y,col,font,align,base){g.font=font||'600 13px '+FONT;g.textAlign=align||'center';g.textBaseline=base||'middle';
+  g.lineWidth=4;g.strokeStyle='rgba(255,255,255,.92)';g.lineJoin='round';g.strokeText(s,x,y);g.fillStyle=col||'#1d2430';g.fillText(s,x,y);}
+
+/* ---------- himmelfarver ---------- */
+const SKY=[[-14,'#060b1c','#141d38'],[-6,'#1f2f57','#6b5a7a'],[0,'#3b5f95','#f0b07a'],[10,'#3f7fc4','#a9cfee']];
+const hex=h=>[parseInt(h.substr(1,2),16),parseInt(h.substr(3,2),16),parseInt(h.substr(5,2),16)];
+const mixRGB=(a,b,f)=>a.map((v,i)=>Math.round(lerp(v,b[i],f)));
+const rgb=a=>'rgb('+a.join(',')+')';
+function skyArr(sa){const K=SKY.map(r=>[r[0],hex(r[1]),hex(r[2])]);if(sa<=K[0][0])return[K[0][1],K[0][2]];if(sa>=K[3][0])return[K[3][1],K[3][2]];
+  for(let i=0;i<3;i++){const a=K[i],b=K[i+1];if(sa<=b[0]){const f=(sa-a[0])/(b[0]-a[0]);return[mixRGB(a[1],b[1],f),mixRGB(a[2],b[2],f)];}}}
+const STARS=[];(()=>{let seed=11;const rnd=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+  for(let i=0;i<220;i++){const z=rnd()*2-1,a=rnd()*2*PI,r=Math.sqrt(1-z*z);STARS.push([[r*Math.cos(a),r*Math.sin(a),z],.4+rnd()*1.2]);}})();
+
+/* ---------- et foto af Månen ud fra en optagelse {age,t,lat,tilt,season} ---------- */
+function renderPhoto(g,x,y,Z,rec,mini){const ax=axisOf(rec.tilt,rec.season),F=frameOf(rec.lat,rec.t,ax),m=mOf(rec.age),ph=photo(m,F),am=altaz(m,F),as=altaz(SUN,F),below=am.alt<0;
+  g.save();g.translate(x,y);g.beginPath();g.rect(0,0,Z,Z);g.clip();
+  const gr=g.createLinearGradient(0,0,0,Z);
+  if(below){gr.addColorStop(0,'#141821');gr.addColorStop(1,'#0c0f15');}
+  else{const A=skyArr(as.alt),f=clamp(am.alt/70,0,1);gr.addColorStop(0,rgb(mixRGB(A[1],A[0],f)));gr.addColorStop(1,rgb(mixRGB(A[1],A[0],Math.max(0,f-.15))));}
+  g.fillStyle=gr;g.fillRect(0,0,Z,Z);
+  g.globalAlpha=below?.4:1;drawMoonReal(g,Z/2,Z/2,Z*.36,ph,'rgba(160,170,190,'+(as.alt<-6?.10:.05)+')');g.globalAlpha=1;
+  if(ph.k<0.02){g.setLineDash([3,4]);g.strokeStyle='rgba(255,255,255,.35)';g.beginPath();g.arc(Z/2,Z/2,Z*.36,0,2*PI);g.stroke();g.setLineDash([]);}
+  if(!mini){const fs=Math.max(10,Math.round(Z*.052));g.font='600 '+fs+'px '+FONT;g.fillStyle='rgba(255,255,255,.8)';g.textAlign='center';g.textBaseline='top';g.fillText('↑ op (mod zenit)',Z/2,fs*.4);
+    g.textBaseline='bottom';g.textAlign='left';g.fillText('kl. '+hhmm(rec.t),fs*.5,Z-fs*.4);g.textAlign='right';
+    g.fillText(below?'under horisonten':DIRL[compass(am.az)]+', '+Math.round(am.alt)+'°',Z-fs*.5,Z-fs*.4);}
+  g.restore();return{ph,am,as};}
+
+/* ---------- 3D-model ---------- */
+const cam={R:[1,0,0],U:[0,1,0],C:[0,0,1],ctr:[1.4,0,0],sc:40};let camMode='skraat',camSnap=true;
+function preset(name){const o=CV.cv3,W=o.w,H=o.h,scTop=Math.min(W/14.8,H/12.4);
+  if(name==='skraat'){const e=34*D2R,C=[0,-Math.cos(e),Math.sin(e)];return{C,U:nrm(perp(ZA,C)),ctr:[1.4,0,0.25],sc:Math.min(W/14.8,H/8.8)};}
+  if(name==='syd')return{C:[0,0,-1],U:[0,-1,0],ctr:[1.4,0,0],sc:scTop};
+  if(name==='obs'){const X=scene();const C=nrm(add(mul(X.fh,-Math.cos(28*D2R)),mul(X.F.U,Math.sin(28*D2R))));const U=nrm(perp(X.F.U,C)),R=cross(U,C);
+    const P=[[[0,0,0],1.15],[add(X.P,mul(X.F.U,.6*FIG)),.5],[X.M,RM+.9]];let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+    P.forEach(([p,r])=>{const x=dot(p,R),y=dot(p,U);x0=Math.min(x0,x-r);x1=Math.max(x1,x+r);y0=Math.min(y0,y-r);y1=Math.max(y1,y+r);});
+    const cx=(x0+x1)/2,cy=(y0+y1)/2,z=dot(X.P,C);return{C,U,ctr:add(add(mul(R,cx),mul(U,cy)),mul(C,z)),sc:Math.min(W/(x1-x0+.8),H/(y1-y0+.6))};}
+  return{C:[0,0,1],U:[0,1,0],ctr:[1.4,0,0],sc:scTop};}
+function updCam(dt){if(camMode==='free')return false;const T=preset(camMode);
+  const f=(camSnap||reduce)?1:1-Math.exp(-dt*5);camSnap=false;
+  let C=add(mul(cam.C,1-f),mul(T.C,f));if(len(C)<0.25)C=add(C,mul(cam.U,0.6));C=nrm(C);
+  const U=nrm(perp(add(mul(cam.U,1-f),mul(T.U,f)),C));cam.C=C;cam.U=U;cam.R=cross(U,C);
+  cam.ctr=add(mul(cam.ctr,1-f),mul(T.ctr,f));cam.sc=lerp(cam.sc,T.sc,f);
+  return dot(C,T.C)<0.99995||dot(U,T.U)<0.99995||Math.abs(cam.sc-T.sc)>0.05||len(sub(cam.ctr,T.ctr))>0.005;}
+function setCam(n){camMode=n;document.querySelectorAll('[data-cam]').forEach(b=>b.classList.toggle('on',b.dataset.cam===n));kick();}
+function draw3D(){const o=CV.cv3,g=o.g,W=o.w,H=o.h;g.fillStyle='#fff';g.fillRect(0,0,W,H);
+  const X=scene(),sc=cam.sc,B=basis(AX());
+  const pr=p=>{const q=sub(p,cam.ctr);return[W/2+sc*dot(q,cam.R),H/2-sc*dot(q,cam.U),dot(p,cam.C)];};
+  const sAng=Math.atan2(-dot(SUN,cam.U),dot(SUN,cam.R)),sC=-dot(SUN,cam.C);
+  const items=[],it=(d,f)=>items.push({d,f});
+  const seg=(a,b,col,w)=>{const p=pr(a),q=pr(b);it((p[2]+q[2])/2,()=>{g.strokeStyle=col;g.lineWidth=w;g.beginPath();g.moveTo(p[0],p[1]);g.lineTo(q[0],q[1]);g.stroke();});};
+  const txt=(p3,s,col,font)=>{const p=pr(p3);it(p[2],()=>{g.font=font||'600 13px '+FONT;g.fillStyle=col;g.textAlign='center';g.textBaseline='middle';g.fillText(s,p[0],p[1]);});};
+  const eq=(a,r)=>add(mul(B.e1,r*Math.cos(a)),mul(B.e2,r*Math.sin(a)));
+  const NO=120;for(let i=0;i<NO;i++){const a0=i/NO*2*PI,a1=(i+1)/NO*2*PI;seg([RO*Math.cos(a0),RO*Math.sin(a0),0],[RO*Math.cos(a1),RO*Math.sin(a1),0],'#8a93a3',1.2);}
+  [50,230].forEach(dg=>{const a=dg*D2R,p=[RO*Math.cos(a),RO*Math.sin(a),0],tg=mul([-Math.sin(a),Math.cos(a),0],0.35);const P0=pr(sub(p,tg)),P1=pr(add(p,tg));it(P1[2],()=>arrow(g,P0[0],P0[1],P1[0],P1[1],'#5b6575',1.6,9));});
+  const sp=pr(SUNP);it(sp[2],()=>{const R=SUNR*sc;const q=g.createRadialGradient(sp[0],sp[1],R*.5,sp[0],sp[1],R*1.8);q.addColorStop(0,'rgba(246,201,69,.45)');q.addColorStop(1,'rgba(246,201,69,0)');
+    g.fillStyle=q;g.beginPath();g.arc(sp[0],sp[1],R*1.8,0,2*PI);g.fill();g.fillStyle='#f6c945';g.beginPath();g.arc(sp[0],sp[1],R,0,2*PI);g.fill();
+    g.font='700 14px '+FONT;g.fillStyle='#8a5a00';g.textAlign='center';g.textBaseline='middle';g.fillText('SOL',sp[0],sp[1]);});
+  for(let y=-4;y<=4;y++){const a=pr([6.25,y,0]),b=pr([5.15,y,0]);it((a[2]+b[2])/2,()=>arrow(g,a[0],a[1],b[0],b[1],'#e0a30b',1.3,6));}
+  for(let i=0;i<4;i++){const a=i*PI/2,p3=[RO*Math.cos(a),RO*Math.sin(a),0],p=pr(p3);
+    it(p[2]-0.01,()=>{g.globalAlpha=.3;drawSphere(g,p[0],p[1],RM*sc,sAng,sC,'#fff','#9aa0aa','#5b6575');g.globalAlpha=1;});
+    txt(mul(p3,(RO+0.95)/RO),'ABCD'[i],'#c0392b','17px "Times New Roman",Times,serif');}
+  const ep=pr([0,0,0]);
+  it(0,()=>{drawSphere(g,ep[0],ep[1],sc,sAng,sC,'#3d9be0','#7c818b','#4b5563');
+    const circ=(fn,col,w,dash)=>{g.strokeStyle=col;g.lineWidth=w;g.setLineDash(dash||[]);g.beginPath();let on=false;
+      for(let i=0;i<=96;i++){const p=pr(fn(i/96*2*PI));if(p[2]>0.02){if(on)g.lineTo(p[0],p[1]);else g.moveTo(p[0],p[1]);on=true;}else on=false;}g.stroke();g.setLineDash([]);};
+    circ(a=>eq(a,1),'rgba(255,255,255,.6)',1.2);
+    if(Math.abs(S.lat)<89.5){const la=S.lat*D2R;circ(a=>add(eq(a,Math.cos(la)),mul(B.n,Math.sin(la))),'#e0952a',1.8,[4,3]);}});
+  seg(B.n,mul(B.n,1.45),'#1d2430',2);seg(mul(B.n,-1),mul(B.n,-1.45),'#1d2430',2);
+  txt(mul(B.n,1.62),'N','#1d2430','700 14px '+FONT);txt(mul(B.n,-1.62),'S','#1d2430','700 14px '+FONT);
+  [[12,0],[18,90],[24,180],[6,270]].forEach(([h,dg])=>txt(eq(dg*D2R,1.5),''+h,'#1d2430','600 12px '+FONT));
+  for(let i=0;i<10;i++){const p0=eq((-78+i*5.5)*D2R,1.27),p1=eq((-78+(i+1)*5.5)*D2R,1.27);
+    if(i<9)seg(p0,p1,'#1d2430',1.3);else{const P0=pr(p0),P1=pr(p1);it(P1[2],()=>arrow(g,P0[0],P0[1],P1[0],P1[1],'#1d2430',1.3,7));}}
+  const mp=pr(X.M);it(mp[2],()=>drawSphere(g,mp[0],mp[1],RM*sc,sAng,sC,'#fbfbf8','#8c919a','#4b5563'));
+  [-0.24,0.24].forEach(dy=>{const a=pr(add(X.M,[1.75,dy,0])),b=pr(add(X.M,[RM+0.12,dy,0]));it(Math.max(a[2],b[2])+0.01,()=>arrow(g,a[0],a[1],b[0],b[1],'rgba(224,163,11,.9)',1.4,6));});
+  const U=X.F.U,L=mul(X.rt,-1),f=FIG;
+  const pt=(a,b,c)=>pr(add(X.P,add(mul(U,a*f),add(mul(L,b*f),mul(X.fh,c*f)))));
+  const head3=add(X.P,mul(U,.56*f)),hp=pr(head3);
+  const dirM=nrm(sub(X.M,head3)),endM=sub(X.M,mul(dirM,RM*1.05));const below=altaz(X.m,X.F).alt<0;
+  for(let i=0;i<18;i++){const a=add(head3,mul(sub(endM,head3),i/18)),b=add(head3,mul(sub(endM,head3),(i+.6)/18));seg(a,b,below?'rgba(91,101,117,.5)':'#b9770e',1.6);}
+  it(dot(add(X.P,mul(U,.3*f)),cam.C),()=>{const P=k=>pt(k[0],k[1],k[2]);const ln=(a,b,col,w)=>{const p=P(a),q=P(b);g.strokeStyle=col;g.lineWidth=w;g.beginPath();g.moveTo(p[0],p[1]);g.lineTo(q[0],q[1]);g.stroke();};
+    g.lineCap='round';const ink='#1d2430';
+    ln([0,.08,0],[.22,0,0],ink,2.4);ln([0,-.08,0],[.22,0,0],ink,2.4);ln([.22,0,0],[.44,0,0],ink,2.6);ln([.43,0,0],[.33,-.16,.04],ink,2.2);
+    if(S.hand){const s0=P([.43,0,0]),s1=P([.43,.36,0]);arrow(g,s0[0],s0[1],s1[0],s1[1],'#e0952a',3,9);const lp=P([.43,.55,0]);label(g,'venstre',lp[0],lp[1],'#b8660e','700 13px '+FONT);}
+    else ln([.43,0,0],[.33,.16,.04],ink,2.2);
+    const hr=Math.max(3.5,.085*f*sc);g.beginPath();g.arc(hp[0],hp[1],hr,0,2*PI);g.fillStyle='#fff';g.fill();g.strokeStyle=ink;g.lineWidth=2;g.stroke();
+    const n0=P([.56,0,.06]),n1=P([.56,0,.15]);g.beginPath();g.moveTo(n0[0],n0[1]);g.lineTo(n1[0],n1[1]);g.lineWidth=2.4;g.stroke();g.lineCap='butt';});
+  items.sort((a,b)=>a.d-b.d);items.forEach(i=>i.f());
+  if(sp[0]<-SUNR*sc*.6||sp[0]>W+SUNR*sc*.6||sp[1]<-SUNR*sc*.6||sp[1]>H+SUNR*sc*.6){const cx=W/2,cy=H/2,dx=sp[0]-cx,dy=sp[1]-cy,s=Math.min((W/2-34)/Math.abs(dx||1e-6),(H/2-24)/Math.abs(dy||1e-6));
+    const x=cx+dx*s,y=cy+dy*s,a=Math.atan2(dy,dx);arrow(g,x-Math.cos(a)*30,y-Math.sin(a)*30,x+Math.cos(a)*6,y+Math.sin(a)*6,'#e0a30b',3,11);
+    label(g,'Solen',x-Math.cos(a)*48,y-Math.sin(a)*48,'#9a6c00','700 13px '+FONT);}
+  label(g,S.tilt?'Jordens akse hælder 23,4° · '+SEASON[S.season]:'Grundmodel: Jordens akse er lodret',10,14,S.tilt?'#5b4b8a':'#5b6575','600 12.5px '+FONT,'left');
+  label(g,place(S.lat)+' · kl. '+hhmm(S.t),10,32,'#1d2430','600 12.5px '+FONT,'left');}
+
+/* ---------- himlen ---------- */
+let skyAz=180,skyFollow=true,skySnap=true;
+function updSky(dt){if(!skyFollow)return false;const X=scene(),am=altaz(X.m,X.F);if(am.alt>80&&!skySnap)return false;
+  const d=wrap180(am.az-skyAz);const f=(skySnap||reduce)?1:1-Math.exp(-dt*4);skySnap=false;skyAz=(skyAz+d*f+360)%360;return Math.abs(d*(1-f))>0.05;}
+function drawSky(){const o=CV.cvK,g=o.g,W=o.w,H=o.h,k=W/200,hy=H-10*k;
+  const X=scene(),F=X.F,am=altaz(X.m,F),as=altaz(SUN,F),ph=photo(X.m,F);
+  const sx=az=>W/2+wrap180(az-skyAz)*k,sy=alt=>hy-alt*k,inV=az=>Math.abs(wrap180(az-skyAz))<=101;
+  const A=skyArr(as.alt);const gr=g.createLinearGradient(0,0,0,hy);gr.addColorStop(0,rgb(A[0]));gr.addColorStop(1,rgb(A[1]));g.fillStyle=gr;g.fillRect(0,0,W,hy);
+  const sa=clamp((-as.alt-3)/10,0,1);if(sa>0){g.fillStyle='#fff';STARS.forEach(([v,r])=>{const a=altaz(v,F);if(a.alt>0&&inV(a.az)){g.globalAlpha=sa*(.35+r*.4);g.beginPath();g.arc(sx(a.az),sy(a.alt),r*.8,0,2*PI);g.fill();}});g.globalAlpha=1;}
+  if(as.alt>-2&&inV(as.az)){const x=sx(as.az),y=sy(as.alt);const q=g.createRadialGradient(x,y,4,x,y,46);q.addColorStop(0,'rgba(255,240,180,.9)');q.addColorStop(1,'rgba(255,240,180,0)');g.fillStyle=q;g.beginPath();g.arc(x,y,46,0,2*PI);g.fill();
+    g.fillStyle='#fff6d0';g.beginPath();g.arc(x,y,12,0,2*PI);g.fill();}
+  const MR=Math.round(W*0.043);
+  if(am.alt>=0)drawMoonReal(g,sx(am.az),sy(am.alt),MR,ph,'rgba(160,170,190,'+(as.alt<-6?.10:.04)+')');
+  const night=clamp((-as.alt+2)/12,0,1);g.fillStyle=rgb(mixRGB([74,93,63],[16,22,17],night));g.fillRect(0,hy,W,H-hy);
+  g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=1;g.beginPath();g.moveTo(0,hy+.5);g.lineTo(W,hy+.5);g.stroke();
+  g.textAlign='center';g.textBaseline='top';
+  for(let i=0;i<8;i++){const az=i*45;if(!inV(az))continue;const x=sx(az);g.beginPath();g.moveTo(x,hy);g.lineTo(x,hy+5);g.stroke();
+    g.font=(i%2?'500 11px ':'700 13px ')+FONT;g.fillStyle='rgba(255,255,255,.9)';g.fillText(DIRS[i],x,hy+7);}
+  if(S.arc&&ph.k>0.015&&ph.k<0.985){const m=X.m,Om=Math.acos(clamp(dot(m,SUN),-1,1));g.setLineDash([2,5]);g.lineWidth=2;g.strokeStyle='rgba(255,226,140,.95)';g.beginPath();
+    let on=false,lx=0;const t0=(MR/k+2)/(Om*R2D);for(let i=0;i<=80;i++){const t=t0+(1-t0)*i/80;const v=nrm(add(mul(m,Math.sin((1-t)*Om)),mul(SUN,Math.sin(t*Om))));const a=altaz(v,F);
+      const ok=inV(a.az)&&a.alt>-10&&a.alt<88;const x=sx(a.az),y=sy(a.alt);if(ok&&on&&Math.abs(x-lx)<W/3)g.lineTo(x,y);else if(ok)g.moveTo(x,y);on=ok;lx=x;}
+    g.stroke();g.setLineDash([]);}
+  if(as.alt<=-2&&inV(as.az)){const x=sx(as.az);arrow(g,x,hy+8,x,H-3,'rgba(255,214,102,.95)',2,7);g.font='600 11px '+FONT;g.fillStyle='rgba(255,226,140,.95)';g.textAlign='left';g.textBaseline='bottom';g.fillText('Solen er under horisonten',x+6>W-140?x-150:x+6,H-3);}
+  if(am.alt<0){const x=sx(am.az),y=Math.min(sy(am.alt),H-MR-4);if(inV(am.az)){g.globalAlpha=.4;drawMoonReal(g,x,y,MR,ph);g.globalAlpha=1;g.setLineDash([3,3]);g.strokeStyle='rgba(255,255,255,.6)';g.beginPath();g.arc(x,y,MR,0,2*PI);g.stroke();g.setLineDash([]);}
+    g.font='600 13px '+FONT;g.fillStyle='#fff';g.textAlign='center';g.textBaseline='middle';g.fillText('Månen er under horisonten nu',W/2,hy*0.45);}
+  $('lookDir').textContent='Figuren kigger mod '+DIRL[compass(skyAz)];}
+
+/* ---------- kameraet og billedrullen ---------- */
+const curRec=()=>({age:S.age,t:S.t,lat:S.lat,tilt:S.tilt,season:S.season});
+function drawCam(){const o=CV.cvP,r=renderPhoto(o.g,0,0,o.w,curRec(),false);if(r.am.alt>ZEN){const g=o.g,W=o.w;g.fillStyle='rgba(20,24,33,.72)';g.fillRect(0,W*.36,W,W*.28);
+  g.font='700 14px '+FONT;g.fillStyle='#fff';g.textAlign='center';g.textBaseline='middle';g.fillText('Lige over hovedet:',W/2,W*.45);g.fillText('hvad er »op«?',W/2,W*.55);}}
+let filmCells=[];
+function filmSlots(){const mi=MIS[step];if(mi)return mi.slots.map(sl=>({lbl:sl.lbl,rec:D.photos[sl.k],key:sl.k}));
+  return D.free.slice(-6).map((r,i)=>({lbl:'Frit billede',rec:r,key:'free'+i}));}
+function drawFilm(){const o=CV.cvF,g=o.g,W=o.w,H=o.h;g.fillStyle='#fff';g.fillRect(0,0,W,H);
+  const sl=filmSlots(),n=Math.max(5,sl.length),gap=8,Z=Math.min((W-gap*(n-1))/n,H-30);filmCells=[];
+  if(!sl.length){g.font='500 13px '+FONT;g.fillStyle='#5b6575';g.textAlign='center';g.textBaseline='middle';g.fillText('Ingen billeder endnu',W/2,H/2);return;}
+  sl.forEach((s,i)=>{const x=i*(Z+gap),y=2;filmCells.push({x,y,Z,s});
+    if(s.rec)renderPhoto(g,x,y,Z,s.rec,true);else{g.fillStyle='#f3f5f8';g.fillRect(x,y,Z,Z);g.setLineDash([4,4]);g.strokeStyle='#b3bac6';g.strokeRect(x+.5,y+.5,Z-1,Z-1);g.setLineDash([]);
+      g.font='600 '+Math.round(Z*.3)+'px '+FONT;g.fillStyle='#c3c9d3';g.textAlign='center';g.textBaseline='middle';g.fillText('?',x+Z/2,y+Z/2);}
+    g.font='600 11px '+FONT;g.fillStyle=s.rec?'#1f9d55':'#5b6575';g.textAlign='center';g.textBaseline='top';
+    const words=(s.rec?'✓ ':'')+s.lbl;const parts=words.length>16?[words.slice(0,words.lastIndexOf(' ',16)),words.slice(words.lastIndexOf(' ',16)+1)]:[words];
+    parts.forEach((p,j)=>g.fillText(p,x+Z/2,y+Z+3+j*12));});}
+
+/* ---------- tjekliste ---------- */
+let pulsed=null;
+function guideItems(){const mi=MIS[step],items=[];let tip='',target=null;
+  const X=scene(),am=altaz(X.m,X.F),pk=phaseKey(S.age);
+  if(step===6){return{items:[],tip:'',target:null};}
+  if(!mi)return{items:[],tip:'',target:null};
+  const here=atPlace(mi,S.lat);
+  items.push({t:'Flyt figuren til '+mi.place,ok:here,el:'lat_'+(mi.lat===90?90:mi.lat),wide:true});
+  if(mi.id==='pol'){items.push({t:'Slå Jordens hældning til',ok:S.tilt,el:'tiltOn',wide:true});
+    items.push({t:'Vælg december, og fotografér fuldmånen C',ok:!!D.photos.pol_decC,el:!S.tilt?'tiltOn':S.season!=='dec'?'se_dec':pk!=='C'?'ph_C':am.alt<3?'sT':'bShot',wide:true});
+    items.push({t:'Vælg juni, og prøv at finde fuldmånen',ok:!!D.seen.junC,el:S.season!=='jun'?'se_jun':'ph_C',wide:true});
+    items.push({t:'Fotografér i stedet en tiltagende månesegl i juni',ok:!!D.photos.pol_junS,el:S.season!=='jun'?'se_jun':pk!=='s1'?'ph_s1':am.alt<3?'sT':'bShot',wide:true});
+    if(here&&!S.tilt)tip='I grundmodellen står Månen i horisonten hele døgnet ved polerne. Slå hældningen til.';
+    else if(here&&S.tilt&&S.season==='jun'&&pk==='C')tip='Fuldmånen er under horisonten hele døgnet i juni. Hvorfor? Se på modellen »Skråt«.';}
+  else{mi.slots.forEach(sl=>{const ok=!!D.photos[sl.k];items.push({t:sl.long||sl.lbl+(sl.pos?'':' (mod '+mi.look.n+')'),ok,wide:!!sl.long,pos:!!sl.pos,el:pk!==sl.ph?'ph_'+sl.ph:(am.alt<3||am.alt>ZEN||(sl.pos?!posOK(sl,am):!lookOK(mi,am)))?'sT':'bShot'});});
+    if(here&&S.tilt)tip='Slå Jordens hældning fra (grundmodel) i denne opgave.';}
+  let now=items.findIndex(x=>!x.ok);if(now>=0){target=items[now].el;if(now>0&&!here)target=items[0].el;if(S.tilt&&mi.id!=='pol'&&here)target='tiltOff';}
+  if(!tip&&here&&now>0&&am.alt<3)tip='Månen er under horisonten nu. Træk i klokken, til Månen er oppe – eller sæt flueben i »Klokken følger Månen«.';
+  if(!tip&&here&&now>0&&am.alt>ZEN)tip='Månen står lige over hovedet. Så er der intet »op« i billedet. Træk i klokken, så Månen står lidt lavere mod øst eller vest.';
+  if(!tip&&here&&now>0&&mi.look&&items[now]&&!items[now].pos&&am.alt>=3&&am.alt<=ZEN&&!lookOK(mi,am))tip='Månen står mod '+DIRL[compass(am.az)]+'. Træk i klokken, til den står mod '+mi.look.n+(mi.id!=='eq'?' – eller sæt flueben i »Klokken følger Månen«':'')+'.';
+  if(!tip&&here&&now>=0&&items[now]&&/lavt mod/.test(items[now].t)&&phaseKey(S.age)==='B'&&am.alt>=3)tip='Træk i klokken, til Månen står lavt (under 30°) mod '+(/øst/.test(items[now].t)?'øst':'vest')+'.';
+  return{items,tip,target,now};}
+function guide(){const G=guideItems(),g=$('guide');
+  if(!G.items.length){g.innerHTML=step===6?'<div class="gt">Frit eksperiment</div><div class="small" style="color:var(--fg)">Alle knapper er låst op. Billeder herfra kommer med i fasebåndet under »Frie billeder«.</div>':'';g.hidden=step!==6;}
+  else{g.hidden=false;const h='<div class="gt">Næste skridt</div><ol>'+G.items.map((x,i)=>'<li class="'+(x.ok?'done':i===G.now?'now':'')+(x.wide?' wide':'')+'">'+x.t+'</li>').join('')+'</ol>'+(G.tip?'<div class="tip">'+G.tip+'</div>':'')+(G.now<0?'<div class="tip" style="color:var(--ok)">Opgaven er løst ✓ Gå videre til næste opgave.</div>':'');
+    if(g.dataset.h!==h){g.innerHTML=h;g.dataset.h=h;}}
+  const id=G.target||null;if(pulsed!==id){if(pulsed&&$(pulsed))$(pulsed).classList.remove('pulse');if(id&&$(id))$(id).classList.add('pulse');pulsed=id;}}
+
+/* ---------- tal og knapper ---------- */
+function syncUI(){const X=scene(),ph=photo(X.m,X.F),am=altaz(X.m,X.F),as=altaz(SUN,X.F),a=modP(S.age);
+  $('sAge').value=a;$('vAge').textContent=fmt(a,1)+' døgn';$('sT').value=S.t;$('vT').textContent='kl. '+hhmm(S.t);$('sLat').value=S.lat;$('vLat').textContent=latTxt(S.lat);
+  $('cFollow').checked=S.follow;$('cHand').checked=S.hand;$('cArc').checked=S.arc;
+  $('rPh').innerHTML=phHTML(S.age);$('rPos').textContent=am.alt<0?'under horisonten':DIRL[compass(am.az)]+', '+Math.round(am.alt)+'° oppe';
+  $('rSun').textContent=as.alt<-0.5?'under horisonten':(as.alt<6?'lavt i '+DIRL[compass(as.az)]:'oppe, '+Math.round(as.alt)+'°');
+  const rs=riseSet(S.age,S.lat,AX());$('rRise').textContent=rs.mn>=0?'oppe hele døgnet':rs.mx<0?'nede hele døgnet':'op '+hhmm(rs.up)+' · ned '+hhmm(rs.dn);
+  $('litTxt').textContent=litWords(ph);
+  const pk=phaseKey(S.age);document.querySelectorAll('#phChips button').forEach(b=>b.classList.toggle('on',b.dataset.ph===pk));
+  document.querySelectorAll('#latChips button').forEach(b=>b.classList.toggle('on',+b.dataset.lat===S.lat));
+  $('tiltOff').classList.toggle('on',!S.tilt);$('tiltOn').classList.toggle('on',S.tilt);
+  document.querySelectorAll('#seChips button').forEach(b=>b.classList.toggle('on',S.tilt&&b.dataset.se===S.season));
+  const lock=step>=1&&step<=3;$('tiltOn').disabled=lock;$('seChips').hidden=!S.tilt;$('tiltLock').textContent=lock?'(grundmodel i opgave 1–3)':'';
+  $('bShot').disabled=am.alt<3||am.alt>ZEN;$('shotHint').textContent=am.alt<3?'Månen er under horisonten':am.alt>ZEN?'Lige over hovedet – hvad er op?':(ph.k<0.02?'Nymånen kan ikke ses':'');
+  $('pDay').textContent=play==='day'?'■ Stop':'▶ Lad et døgn gå';$('lookMoon').hidden=skyFollow;
+  if(step===4&&S.lat>=89&&S.tilt&&S.season==='jun'&&phaseKey(S.age)==='C'&&!D.seen.junC){D.seen.junC=true;save();}
+  document.querySelectorAll('#steps button').forEach(b=>{const i=+b.dataset.i;b.classList.toggle('cur',i===step);b.classList.toggle('done',misDone(i));b.disabled=!group&&i!==0;});}
+
+/* ---------- animation ---------- */
+let tw=null,running=false,last=0;
+function tweenTo(to,dur){if(reduce){Object.assign(S,to);tw=null;return;}tw={fr:{age:S.age,t:S.t,lat:S.lat},to,t0:performance.now(),dur:dur||800};}
+function stepTween(now){if(!tw)return false;const f=clamp((now-tw.t0)/tw.dur,0,1),e=f<.5?2*f*f:1-Math.pow(-2*f+2,2)/2,T=tw.to,Fr=tw.fr;
+  if('age'in T)S.age=lerp(Fr.age,T.age,e);if('lat'in T)S.lat=Math.round(lerp(Fr.lat,T.lat,e));
+  if('t'in T&&!S.follow){const d=wrap180((T.t-Fr.t)*15)/15;S.t=(((Fr.t+d*e)%24)+24)%24;}
+  if(f>=1){if('lat'in T)S.lat=T.lat;if('age'in T)S.age=T.age;tw=null;return false;}return true;}
+function loop(ts){const dt=last?Math.min(0.1,(ts-last)/1000):0.016;last=ts;let act=false;
+  if(play==='day'){const h=dt*2.4;S.t=(S.t+h)%24;act=true;}
+  if(tw)act=stepTween(ts)||act;if(S.follow)S.t=culmT(mOf(S.age),AX());
+  act=updCam(dt)||act;act=updSky(dt)||act;
+  if(step!==5){draw3D();drawSky();drawCam();drawFilm();}
+  syncUI();guide();
+  if(act)requestAnimationFrame(loop);else{running=false;last=0;}}
+function kick(){if(!running){running=true;last=0;requestAnimationFrame(loop);}}
+const user=()=>{tw=null;};
+
+/* ---------- gem og hent ---------- */
+const KEY=()=>'mfa_'+group.trim().toLowerCase();
+function save(){try{localStorage.setItem(KEY(),JSON.stringify(D));}catch(e){}}
+function recAlt(r){return altaz(mOf(r.age),frameOf(r.lat,r.t,axisOf(r.tilt,r.season))).alt;}
+function load(){try{const t=localStorage.getItem(KEY());const d=t?JSON.parse(t):null;D={photos:(d&&d.photos)||{},free:(d&&d.free)||[],seen:(d&&d.seen)||{}};}catch(e){D={photos:{},free:[],seen:{}};}
+  /* version 1 tillod billeder lige over hovedet og et billede »B højt på himlen« – de fjernes */
+  delete D.photos.eq_rotT;MIS.forEach(mi=>{if(!mi||!mi.look)return;mi.slots.forEach(sl=>{const r=D.photos[sl.k];if(r&&!sl.pos){const am=altaz(mOf(r.age),frameOf(r.lat,r.t,axisOf(r.tilt,r.season)));if(!lookOK(mi,am))delete D.photos[sl.k];}});});
+  for(const k in D.photos){const r=D.photos[k];if(recAlt(r)>ZEN||(k==='eq_rotE'||k==='eq_rotW')&&recAlt(r)>30)delete D.photos[k];}D.free=D.free.filter(r=>recAlt(r)<=ZEN);}
+function toast(t,bad){let el=$('toast');if(!el){el=document.createElement('div');el.id='toast';document.body.appendChild(el);}el.className='toast'+(bad?' bad':'');el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>{el.hidden=true;},bad?4200:2800);}
+function flash(){let f=$('flashEl');if(!f){f=document.createElement('div');f.id='flashEl';f.className='flash';document.body.appendChild(f);}f.style.transition='none';f.style.opacity='.85';void f.offsetWidth;f.style.transition='opacity .4s';f.style.opacity='0';}
+function takePhoto(){const X=scene(),am=altaz(X.m,X.F),pk=phaseKey(S.age);
+  if(am.alt<3){toast('Månen er under horisonten. Træk i klokken, til Månen er oppe.',true);return;}
+  if(am.alt>ZEN){toast('Månen står lige over hovedet, så der er intet »op« i billedet. Tag billedet, når den står lidt lavere.',true);return;}
+  if(photo(X.m,X.F).k<0.02){toast('Nymånen vender den mørke side mod Jorden, så den kan ikke fotograferes.',true);return;}
+  const rec=Object.assign(curRec(),{ts:dateTxt()});flash();
+  const mi=step>=1&&step<=4?MIS[step]:null,hit=[];
+  if(mi){const m=mi.slots.filter(sl=>fits(mi,sl,rec,pk,am)),hasPos=m.some(sl=>sl.pos);
+    /* et billede til »Månen drejer« overskriver ikke et billede, der allerede er i fasebåndet */
+    m.forEach(sl=>{if(hasPos&&!sl.pos&&D.photos[sl.k])return;D.photos[sl.k]=rec;hit.push(sl.lbl);});}
+  if(hit.length){save();toast('Gemt i fasebåndet: '+hit.join(' + ')+' ✓');kick();return;}
+  D.free.push(rec);if(D.free.length>10)D.free.shift();save();
+  let why='';if(mi){if(!atPlace(mi,rec.lat))why='Opgaven skal løses fra '+mi.place+'.';else if(mi.id!=='pol'&&rec.tilt)why='Slå Jordens hældning fra i denne opgave.';
+    else if(!pk)why='Vælg en af faserne med knapperne.';else if(mi.look&&!lookOK(mi,am)&&!(pk==='B'&&mi.id==='eq'))why='Billedet skal tages, mens Månen står mod '+mi.look.n+'.';else if(mi.id==='pol'&&!rec.tilt)why='Slå Jordens hældning til.';
+    else if(mi.id==='pol')why='Den fase og årstid hører ikke til opgaven.';else why='Billedet passer ikke til opgaven.';}
+  toast('Billedet er gemt under Frie billeder.'+(why?' '+why:''),!!mi);kick();}
+
+/* ---------- PNG ---------- */
+function recTitle(rec){return phaseName(rec.age)[0]+' set fra '+place(rec.lat);}
+function recLine(rec){const ax=axisOf(rec.tilt,rec.season),F=frameOf(rec.lat,rec.t,ax),m=mOf(rec.age),am=altaz(m,F),ph=photo(m,F);
+  return'kl. '+hhmm(rec.t)+' · Månen står mod '+DIRL[compass(am.az)]+', '+Math.round(am.alt)+'° over horisonten · '+litWords(ph).toLowerCase()+(rec.tilt?' · Jordens akse hælder 23,4° ('+SEASON[rec.season]+')':'');}
+function photoPNG(rec){const c=document.createElement('canvas');c.width=1000;c.height=1200;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,1000,1200);
+  g.fillStyle='#1d2430';g.textAlign='left';g.textBaseline='alphabetic';g.font='700 38px '+FONT;g.fillText(recTitle(rec),50,74);
+  g.font='22px '+FONT;g.fillStyle='#444';wrapText(g,recLine(rec),50,116,900,30);g.fillText('Gruppe: '+group+' · taget '+(rec.ts||dateTxt()),50,212);
+  renderPhoto(g,50,250,900,rec,false);g.font='18px '+FONT;g.fillStyle='#888';g.fillText('Månens faser – den avancerede model · MQfysik',50,1185);return c;}
+function wrapText(g,s,x,y,maxW,lh){const w=s.split(' ');let line='',yy=y;for(const t of w){const test=line?line+' '+t:t;if(g.measureText(test).width>maxW&&line){g.fillText(line,x,yy);line=t;yy+=lh;}else line=test;}if(line)g.fillText(line,x,yy);}
+function posterCanvas(){const W=1800,cell=300,gap=36,ml=60;const sections=[];
+  [1,2,3].forEach(i=>{const mi=MIS[i];sections.push({title:'Fasebånd set fra '+mi.place+' – figuren kigger mod '+mi.look.n,cells:mi.slots.filter(s=>!s.pos).map(s=>({lbl:s.lbl,rec:D.photos[s.k]}))});});
+  sections.push({title:'Ækvator: halvmånen B, når den står op, og når den går ned',cells:MIS[3].slots.filter(s=>s.pos).map(s=>({lbl:s.lbl,rec:D.photos[s.k]}))});
+  sections.push({title:'Nordpolen, når Jordens akse hælder 23,4°',cells:MIS[4].slots.map(s=>({lbl:s.lbl,rec:D.photos[s.k]}))});
+  if(D.free.length)sections.push({title:'Frie billeder',cells:D.free.slice(-5).map(r=>({lbl:phaseName(r.age)[0]+', '+place(r.lat),rec:r}))});
+  const rowH=60+cell+70,H=170+sections.length*rowH+40;const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
+  g.fillStyle='#fff';g.fillRect(0,0,W,H);g.fillStyle='#1d2430';g.textAlign='left';g.textBaseline='alphabetic';g.font='700 46px '+FONT;g.fillText('Månens faser set fra forskellige steder på Jorden',ml,80);
+  g.font='24px '+FONT;g.fillStyle='#555';g.fillText('Gruppe: '+group+' · '+dateTxt()+' · Billederne er taget, mens kameraet holdes vandret: »op« i billedet er op mod zenit.',ml,124);
+  sections.forEach((s,si)=>{const y0=170+si*rowH;g.font='700 28px '+FONT;g.fillStyle='#5b4b8a';g.fillText(s.title,ml,y0+36);
+    s.cells.forEach((cl,ci)=>{const x=ml+ci*(cell+gap),y=y0+56;
+      if(cl.rec)renderPhoto(g,x,y,cell,cl.rec,false);else{g.fillStyle='#f3f5f8';g.fillRect(x,y,cell,cell);g.setLineDash([8,8]);g.strokeStyle='#b3bac6';g.lineWidth=2;g.strokeRect(x+1,y+1,cell-2,cell-2);g.setLineDash([]);
+        g.font='600 22px '+FONT;g.fillStyle='#9aa3b2';g.textAlign='center';g.fillText('mangler',x+cell/2,y+cell/2);g.textAlign='left';}
+      g.font='600 21px '+FONT;g.fillStyle='#1d2430';g.textAlign='center';g.fillText(cl.lbl,x+cell/2,y+cell+30);
+      if(cl.rec){g.font='18px '+FONT;g.fillStyle='#666';g.fillText(litWords(photo(mOf(cl.rec.age),frameOf(cl.rec.lat,cl.rec.t,axisOf(cl.rec.tilt,cl.rec.season)))),x+cell/2,y+cell+56);}
+      g.textAlign='left';});});
+  return c;}
+const safe=s=>String(s).replace(/[^\wæøåÆØÅ-]+/g,'_');
+function download(name,blob){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove();},3000);}
+function preview(c,name){let ov=$('pv');if(!ov){ov=document.createElement('div');ov.id='pv';ov.className='pv';ov.innerHTML='<div class="pvbox"><img alt=""><div class="pvbar"><button class="primary" id="pvDl" type="button">Gem som PNG</button><button id="pvClose" type="button">Luk</button></div></div>';document.body.appendChild(ov);
+    ov.addEventListener('click',e=>{if(e.target===ov||e.target.id==='pvClose')ov.hidden=true;});}
+  ov.querySelector('img').src=c.toDataURL('image/png');ov.hidden=false;$('pvDl').onclick=()=>c.toBlob(b=>b&&download(name,b),'image/png');}
+const recFile=(rec,k)=>'Maane_'+safe(phaseName(rec.age)[0])+'_'+safe(place(rec.lat))+(rec.tilt?'_'+rec.season:'')+'_kl'+hhmm(rec.t).replace(':','')+(k?'_'+k:'')+'.png';
+/* ZIP uden komprimering, så der ikke skal hentes et bibliotek */
+const CRCT=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
+function crc32(u){let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=CRCT[(c^u[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0;}
+function makeZip(files){const enc=new TextEncoder(),parts=[],central=[];let off=0;const d=new Date();
+  const dt=((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate(),tm=(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1);
+  for(const f of files){const name=enc.encode(f.name),crc=crc32(f.data),n=f.data.length;
+    const h=new DataView(new ArrayBuffer(30));h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,0,true);h.setUint16(10,tm,true);h.setUint16(12,dt,true);h.setUint32(14,crc,true);h.setUint32(18,n,true);h.setUint32(22,n,true);h.setUint16(26,name.length,true);h.setUint16(28,0,true);
+    parts.push(new Uint8Array(h.buffer),name,f.data);
+    const cd=new DataView(new ArrayBuffer(46));cd.setUint32(0,0x02014b50,true);cd.setUint16(4,20,true);cd.setUint16(6,20,true);cd.setUint16(8,0x0800,true);cd.setUint16(10,0,true);cd.setUint16(12,tm,true);cd.setUint16(14,dt,true);cd.setUint32(16,crc,true);cd.setUint32(20,n,true);cd.setUint32(24,n,true);cd.setUint16(28,name.length,true);cd.setUint32(42,off,true);
+    central.push(new Uint8Array(cd.buffer),name);off+=30+name.length+n;}
+  const csz=central.reduce((a,u)=>a+u.length,0),end=new DataView(new ArrayBuffer(22));end.setUint32(0,0x06054b50,true);end.setUint16(8,files.length,true);end.setUint16(10,files.length,true);end.setUint32(12,csz,true);end.setUint32(16,off,true);
+  return new Blob([...parts,...central,new Uint8Array(end.buffer)],{type:'application/zip'});}
+const toBytes=c=>new Promise(res=>c.toBlob(b=>b.arrayBuffer().then(a=>res(new Uint8Array(a))),'image/png'));
+async function zipAll(){const b=$('bZip'),old=b.textContent;b.disabled=true;b.textContent='Laver billederne …';
+  try{const files=[],used={};const addF=async(rec,k)=>{let n=recFile(rec,k);if(used[n])n=n.replace('.png','_'+(++used[n])+'.png');else used[n]=1;files.push({name:n,data:await toBytes(photoPNG(rec))});};
+    for(const k in D.photos)await addF(D.photos[k],k.split('_')[0]);for(const r of D.free)await addF(r,'frit');
+    if(files.length)download('Maanens_faser_'+safe(group)+'.zip',makeZip(files));else toast('Der er ingen billeder endnu.',true);}
+  finally{b.disabled=false;b.textContent=old;}}
+
+/* ---------- trin ---------- */
+function setStep(i){if(i!==0&&!group)return;step=i;play=null;tw=null;
+  $('cap').innerHTML=CAP[i];$('vm').hidden=i===5;$('vp').hidden=i!==5;
+  if(i===5){const c=posterCanvas();$('posterImg').src=c.toDataURL('image/png');}
+  if(i===4&&!S.tilt){/* eleven skal selv slå hældningen til */}
+  if(i>=1&&i<=3&&S.tilt){S.tilt=false;toast('I opgave 1–3 bruges grundmodellen: Jordens akse er lodret.');}
+  $('guide').dataset.h='';camSnap=true;skySnap=true;if(window.__fit){window.__fit();setTimeout(window.__fit,80);}kick();}
+document.querySelectorAll('#steps button').forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.i;if(i===0){if(!group)return;$('loginOv').hidden=false;$('inGroup').value=group;return;}setStep(i);}));
+
+/* ---------- styring ---------- */
+PH5.forEach(p=>{const b=document.createElement('button');b.type='button';b.id='ph_'+p.k;b.dataset.ph=p.k;b.innerHTML=(p.l?'<span class="red">'+p.l+'</span> ':'')+p.n;$('phChips').appendChild(b);
+  b.addEventListener('click',()=>{user();tweenTo({age:p.a},600);kick();});});
+$('sAge').addEventListener('input',e=>{user();S.age=+e.target.value;kick();});
+$('sT').addEventListener('input',e=>{user();S.follow=false;play=null;S.t=+e.target.value;kick();});
+$('sLat').addEventListener('input',e=>{user();S.lat=+e.target.value;kick();});
+document.querySelectorAll('[data-t]').forEach(b=>b.addEventListener('click',()=>{user();S.follow=false;play=null;tweenTo({t:+b.dataset.t},600);kick();}));
+document.querySelectorAll('[data-lat]').forEach(b=>b.addEventListener('click',()=>{user();tweenTo({lat:+b.dataset.lat},700);kick();}));
+document.querySelectorAll('[data-cam]').forEach(b=>b.addEventListener('click',()=>setCam(b.dataset.cam)));
+document.querySelectorAll('[data-se]').forEach(b=>b.addEventListener('click',()=>{S.season=b.dataset.se;kick();}));
+$('tiltOff').addEventListener('click',()=>{S.tilt=false;kick();});$('tiltOn').addEventListener('click',()=>{S.tilt=true;kick();});
+$('cFollow').addEventListener('change',e=>{S.follow=e.target.checked;if(S.follow)play=null;kick();});
+$('cHand').addEventListener('change',e=>{S.hand=e.target.checked;kick();});
+$('cArc').addEventListener('change',e=>{S.arc=e.target.checked;kick();});
+$('pDay').addEventListener('click',()=>{play=play==='day'?null:'day';if(play)S.follow=false;kick();});
+$('lookMoon').addEventListener('click',()=>{skyFollow=true;kick();});
+$('bShot').addEventListener('click',takePhoto);
+$('bPoster').addEventListener('click',()=>{posterCanvas().toBlob(b=>b&&download('Fasebaand_'+safe(group)+'.png',b),'image/png');});
+$('bZip').addEventListener('click',zipAll);
+let armT=0;$('bReset').addEventListener('click',()=>{const b=$('bReset');if(Date.now()-armT<4000){D={photos:{},free:[],seen:{}};save();armT=0;b.textContent='Slet alle billeder og start forfra';setStep(5);toast('Alle billeder er slettet.');return;}
+  armT=Date.now();b.textContent='Tryk igen for at slette alle billeder';setTimeout(()=>{if(Date.now()-armT>=3900)b.textContent='Slet alle billeder og start forfra';},4000);});
+function drag(el,onMove,onDown){let on=false,lx=0,ly=0;
+  el.addEventListener('pointerdown',e=>{on=true;lx=e.clientX;ly=e.clientY;try{el.setPointerCapture(e.pointerId);}catch(_){}if(onDown)onDown(e);e.preventDefault();});
+  el.addEventListener('pointermove',e=>{if(!on)return;const r=el.getBoundingClientRect(),s=el.clientWidth/r.width;onMove((e.clientX-lx)*s,(e.clientY-ly)*s,e);lx=e.clientX;ly=e.clientY;});
+  const up=()=>{on=false;};el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);}
+drag($('cv3'),(dx,dy)=>{camMode='free';document.querySelectorAll('[data-cam]').forEach(b=>b.classList.remove('on'));
+  const a=-dx*0.008,b=-dy*0.008;let C=rotv(cam.C,ZA,a),U=rotv(cam.U,ZA,a);const R=cross(U,C);C=rotv(C,R,b);U=rotv(U,R,b);cam.C=nrm(C);cam.U=nrm(perp(U,cam.C));cam.R=cross(cam.U,cam.C);kick();});
+drag($('cvK'),dx=>{skyFollow=false;skyAz=(skyAz-dx/(CV.cvK.w/200)+360)%360;kick();});
+$('cvF').addEventListener('click',e=>{const el=$('cvF'),r=el.getBoundingClientRect(),x=(e.clientX-r.left)*el.clientWidth/r.width,y=(e.clientY-r.top)*el.clientHeight/r.height;
+  const c=filmCells.find(c=>x>=c.x&&x<=c.x+c.Z&&y>=c.y&&y<=c.y+c.Z+28);if(!c)return;if(!c.s.rec){toast('Det billede mangler endnu: '+c.s.lbl,true);return;}
+  preview(photoPNG(c.s.rec),recFile(c.s.rec,''));});
+
+/* ---------- log ind ---------- */
+function loginNow(g){group=g.trim();load();$('loginOv').hidden=true;$('who').textContent='Gruppe: '+group;setStep(1);}
+$('loginForm').addEventListener('submit',e=>{e.preventDefault();const g=$('inGroup').value.trim();if(!g){const m=$('startMsg');m.hidden=false;m.textContent='Skriv jeres navne.';return;}
+  if($('startFs').checked&&window.__startFs){const r=window.__startFs({group:g});if(r==='tab'){const m=$('startMsg');m.hidden=false;m.textContent='Programmet kører nu i en ny fane.';return;}}
+  loginNow(g);});
+
+/* ---------- start ---------- */
+size();setCam('skraat');$('cap').innerHTML=CAP[0];kick();
+
+/* ---------- fuld skærm (Google Sites: ny fane) ---------- */
+(()=>{const b=$('fs'),d=document,el=d.documentElement;b.hidden=false;
+  const inFrame=(()=>{try{return window.self!==window.top;}catch(e){return true;}})();
+  const can=!!(d.fullscreenEnabled||d.webkitFullscreenEnabled);
+  const isFs=()=>d.fullscreenElement||d.webkitFullscreenElement;
+  const msg=t=>{b.textContent=t;setTimeout(upd,4000);};
+  function openTab(auto){const js=JSON.stringify(auto||null).replace(/</g,'\\u003c');const html=window.__SRC.replace('<head>','<head><script>window.__AUTO='+js+';<\/script>');
+    try{const w=window.open('','_blank');if(w){try{w.document.open();w.document.write(html);w.document.close();return true;}catch(e){try{w.close();}catch(_){}}}}catch(e){}
+    try{const url=URL.createObjectURL(new Blob([html],{type:'text/html'}));if(window.open(url,'_blank'))return true;}catch(e){}
+    return false;}
+  b.addEventListener('click',()=>{if(isFs()){(d.exitFullscreen||d.webkitExitFullscreen).call(d);return;}
+    const fallback=()=>{if(!(inFrame&&openTab(group?{group}:null)))msg('Ikke tilladt her – brug browserens fuld skærm');};
+    if(!can){fallback();return;}
+    try{const p=(el.requestFullscreen||el.webkitRequestFullscreen).call(el);if(p&&p.catch)p.catch(fallback);}catch(e){fallback();}});
+  window.__startFs=auto=>{if(isFs())return'none';
+    if(can){try{const p=(el.requestFullscreen||el.webkitRequestFullscreen).call(el);if(p&&p.catch)p.catch(()=>{});return'fs';}catch(e){return'none';}}
+    if(inFrame&&openTab(auto))return'tab';return'none';};
+  const cb=$('startFs'),cbt=$('startFsTxt');
+  try{if(localStorage.getItem('mfa_startFs')==='0')cb.checked=false;}catch(e){}
+  cb.addEventListener('change',()=>{try{localStorage.setItem('mfa_startFs',cb.checked?'1':'0');}catch(e){}});
+  if(!can&&inFrame)cbt.textContent='Vis i hele vinduet (ny fane)';
+  if(!can&&!inFrame)cb.closest('label').hidden=true;
+  function upd(){b.textContent=isFs()?'Afslut fuld skærm':(can||!inFrame?'Fuld skærm':'Åbn i ny fane ↗');}
+  d.addEventListener('fullscreenchange',upd);d.addEventListener('webkitfullscreenchange',upd);upd();})();
+
+/* ---------- tilpas til boksen ---------- */
+(()=>{const root=document.documentElement,w=document.querySelector('.wrap');
+  function fitStage(){
+    if(innerWidth<700){root.classList.remove('fitmode','wide');w.style.transform='';window.__fitScale=1;size();camSnap=true;kick();return;}
+    root.classList.add('fitmode');root.classList.toggle('wide',innerWidth/innerHeight>=1.15);
+    w.style.transform='none';window.__fitScale=1;size();
+    const W0=w.offsetWidth,H0=w.scrollHeight;const s=Math.min(innerWidth/W0,innerHeight/H0,3);
+    const dx=Math.max(0,(innerWidth-W0*s)/2),dy=Math.max(0,(innerHeight-H0*s)/2);
+    w.style.transform='translate('+dx+'px,'+dy+'px) scale('+s+')';window.__fitScale=s;size();
+    if(camMode!=='free')camSnap=true;kick();}
+  window.__fit=fitStage;addEventListener('resize',fitStage);
+  document.addEventListener('fullscreenchange',()=>setTimeout(fitStage,60));document.addEventListener('webkitfullscreenchange',()=>setTimeout(fitStage,60));
+  fitStage();setTimeout(fitStage,300);})();
+
+/* ---------- ny fane fra Google Sites: log ind med det samme ---------- */
+(()=>{const A=window.__AUTO;if(!A||!A.group)return;const d=document,el=d.documentElement;loginNow(A.group);
+  const ban=d.createElement('button');ban.id='autoBan';ban.type='button';ban.textContent='⛶ Klik for fuld skærm';d.body.appendChild(ban);
+  const hideT=setTimeout(()=>{ban.hidden=true;},12000);
+  function first(){d.removeEventListener('click',first,true);ban.hidden=true;clearTimeout(hideT);
+    try{const rq=el.requestFullscreen||el.webkitRequestFullscreen;if(!(d.fullscreenElement||d.webkitFullscreenElement)&&rq){const p=rq.call(el);if(p&&p.catch)p.catch(()=>{});}}catch(_){}}
+  d.addEventListener('click',first,true);})();
+</script>
+</body>
+</html>
