@@ -316,7 +316,7 @@ html.wide .narr .cap-t{flex:1;font-size:15.5px}
 
 <script>
 window.__SRC='<!doctype html>\n'+document.documentElement.outerHTML;
-const VERSION='3.5',VDATE='08.11.2026';
+const VERSION='3.6',VDATE='15.11.2026';
 const $=id=>document.getElementById(id);
 $('ver').textContent='Version '+VERSION+' · '+VDATE;
 const PI=Math.PI,D2R=PI/180,R2D=180/PI,PER=29.53;
@@ -698,8 +698,11 @@ function loadT(){let d=null;try{d=JSON.parse(localStorage.getItem(TKEY())||'null
   T=Object.assign({place:{},mark:{},tries:0,triesX:0,solved:false,solvedX:false,extra:false,order:[],ans:''},d||{});
   if(!T.order||T.order.length<4)T.order=shuffle(OBS.map(o=>o.k)).concat(shuffle(OBSX.map(o=>o.k)));$('ans').value=T.ans||'';}
 /* et foto taget fra Danmark, når Månen står højest (som figur 21) */
-function drawObs(g,x,y,Z,age){g.save();g.fillStyle='#05070c';g.fillRect(x,y,Z,Z);const phi=age/PER*2*PI,m=[Math.cos(phi),Math.sin(phi),0],ph=photo(m,frame(56,culmOf(phi)));
-  if(ph.k<0.02){g.strokeStyle='rgba(200,200,200,.35)';g.lineWidth=1;g.beginPath();g.arc(x+Z/2,y+Z/2,Z*.36,0,2*PI);g.stroke();}
+function drawObs(g,x,y,Z,age){g.save();const phi=age/PER*2*PI,m=[Math.cos(phi),Math.sin(phi),0],F=frame(56,culmOf(phi)),ph=photo(m,F);
+  /* himlens farve afhænger af, hvor Solen står, når fotoet tages: nymåne kl. 12 = blå dagshimmel, fuldmåne kl. 24 = nat */
+  const A=skyArr(altaz(SUN,F).alt),fa=clamp(altaz(m,F).alt/70,0,1),gr=g.createLinearGradient(0,y,0,y+Z);
+  gr.addColorStop(0,rgb(mixRGB(A[1],A[0],fa)));gr.addColorStop(1,rgb(mixRGB(A[1],A[0],Math.max(0,fa-.15))));g.fillStyle=gr;g.fillRect(x,y,Z,Z);
+  if(ph.k<0.02){g.strokeStyle='rgba(255,255,255,.45)';g.lineWidth=1;g.beginPath();g.arc(x+Z/2,y+Z/2,Z*.36,0,2*PI);g.stroke();}
   else drawMoonReal(g,x+Z/2,y+Z/2,Z*.36,ph,'rgba(0,0,0,0)');g.restore();}
 let topTask=null,hoverZ=null,selK=null;
 function drawTask(o,now,exp){const g=o.g,W=o.w,H=o.h;g.fillStyle='#fff';g.fillRect(0,0,W,H);
