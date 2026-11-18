@@ -158,10 +158,63 @@ html.wide .bar .inrow{grid-column:1/-1}
 .pvbar{display:flex;gap:10px}
 .pvbar button{font-size:15px;padding:8px 16px}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:70;background:#12351f;color:#bff5cf;border:1px solid #2c7a47;border-radius:999px;padding:9px 18px;font:500 15px "IBM Plex Sans",sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+
+/* ===== MQfysik · opgaver til portfolien (fælles modul) ===== */
+.mqo-btn{font-weight:600}
+.mqo-btn.on{background:#1d2430;color:#fff;border-color:#1d2430}
+.mqo{border-color:#1d2430!important;padding:8px 10px}
+.mqo[hidden]{display:none!important}
+.mqo-h{display:flex;align-items:center;gap:8px;font-size:14.5px;margin-bottom:6px}
+.mqo-h b{flex:1}
+.mqo-cnt{font-size:12.5px;color:#5b6575;font-variant-numeric:tabular-nums}
+.mqo-x{padding:3px 8px!important;font-size:12.5px!important}
+.mqo-nm{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.mqo-nm label{font-size:13px;font-weight:600;flex:none}
+.mqo-nm input{flex:1;min-width:0;font:inherit;font-size:14px;padding:4px 8px;border:1px solid #d4d9e1;border-radius:8px;-webkit-appearance:none}
+.mqo-note{margin:0 0 6px;font-size:13px;color:#1f6b41;background:#e3f3e8;border-radius:8px;padding:4px 8px}
+.mqo-tabs{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-bottom:6px}
+.mqo-g{font-size:11.5px;font-weight:700;padding:2px 7px;border-radius:999px;margin-left:4px}
+.mqo-g:first-child{margin-left:0}
+.mqo-tab{border-radius:999px!important;padding:3px 9px!important;font-size:12.5px!important}
+.mqo-tab.on{color:#fff!important}
+.mqo-tab.done{font-weight:700}
+.lv-b{background:#e3f3e8;color:#1f6b41;border-color:#b9dfc7!important}
+.lv-a{background:#f3f0fa;color:#5b4b8a;border-color:#cfc6e6!important}
+.lv-bb{background:#e2ecf8;color:#1f4e8c;border-color:#b7cbe6!important}
+.mqo-tab.lv-b.on{background:#2e7d4f}.mqo-tab.lv-a.on{background:#5b4b8a}.mqo-tab.lv-bb.on{background:#1f4e8c}
+.mqo-t{display:flex;align-items:center;gap:8px;font-size:14.5px;margin:2px 0 3px}
+.mqo-lv{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid transparent;flex:none}
+.mqo-i{margin:0 0 4px;font-size:14px;line-height:1.4}
+.mqo-chk{list-style:none;margin:0 0 6px;padding:0;font-size:13.5px}
+.mqo-chk li{display:flex;gap:7px;align-items:flex-start;margin:2px 0;color:#5b6575}
+.mqo-chk li .bx{flex:none;width:16px;height:16px;border:1.5px solid #9aa3b0;border-radius:4px;font-size:12px;line-height:13px;text-align:center;margin-top:2px}
+.mqo-chk li.ok{color:#1f6b41}.mqo-chk li.ok .bx{background:#2e7d4f;border-color:#2e7d4f;color:#fff}
+.mqo-chk li.now{color:#1d2430;font-weight:600}.mqo-chk li.now .bx{border-color:#e0952a}
+.mqo-q{font-size:14px;line-height:1.4;background:#f3f5f8;border-radius:8px;padding:5px 8px;margin-bottom:4px}
+.mqo-ql{display:block;font-size:11px;font-weight:700;color:#5b6575;letter-spacing:.03em;text-transform:uppercase}
+.mqo-a{width:100%;font:inherit;font-size:14px;line-height:1.35;border:1px solid #d4d9e1;border-radius:8px;padding:5px 8px;resize:vertical;-webkit-appearance:none;display:block}
+.mqo-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}
+.mqo-msg{font-size:12.5px;color:#5b6575;flex:1;min-width:160px}
+.mqo-msg.good{color:#1f6b41;font-weight:600}.mqo-msg.warn{color:#9a5a00;font-weight:600}
+.mqo-pulse{animation:mqoP 1.2s ease-in-out infinite;border-color:#e0952a!important}
+@keyframes mqoP{0%,100%{box-shadow:0 0 0 0 rgba(224,149,42,0)}50%{box-shadow:0 0 0 5px rgba(224,149,42,.55)}}
+.mqo-pv{position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483000;background:rgba(29,36,48,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.mqo-pv[hidden]{display:none!important}
+.mqo-pvb{background:#fff;border-radius:14px;max-width:min(1040px,100%);width:100%;padding:12px 14px;box-shadow:0 10px 40px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:8px}
+.mqo-pvh{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:15px}
+.mqo-pvw{overflow:auto;border:1px solid #d4d9e1;border-radius:8px;background:#f3f5f8}
+.mqo-pvw img{display:block;width:100%;height:auto}
+.mqo-pvf{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+/* niveaumærker i siden */
+.lvtag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;border:1px solid transparent;vertical-align:1px;margin-left:4px}
+@media (prefers-reduced-motion:reduce){.mqo-pulse{animation:none;box-shadow:0 0 0 3px rgba(224,149,42,.6)}}
+.mqo .pri,.mqo-pv .pri{background:#1d2430;color:#fff;border-color:#1d2430}
+
+.obs-lv .lvtag{margin-right:6px;vertical-align:1px}
 </style>
 
 <div class="wrap">
-  <h1>Observatoriet Fjeldlys · Hubbles lov<span class="ver">Version 5 · 03.11.2026</span></h1>
+  <h1>Observatoriet Fjeldlys · Hubbles lov<span class="ver">Version 6 · 18.11.2026</span></h1>
   <ol class="steps" id="steps">
     <li><button data-i="0"><span class="k">1</span>Log ind</button></li>
     <li><button data-i="1" disabled><span class="k">2</span>Kuplen</button></li>
@@ -252,6 +305,24 @@ html.wide .bar .inrow{grid-column:1/-1}
   <details class="about"><summary>Om simuleringen</summary><p>Observatoriet Fjeldlys er opdigtet, og galakserne er simulerede. Hver gruppe får sin egen tilfældige himmel med seks galaksehobe mellem ca. 60 og 1000 mio. lysår væk og et observationsnummer der hører til. Logger gruppen ind igen med samme navn på samme computer, fortsætter den med samme himmel og logbog. Galakserne er spiralgalakser hvis diameter varierer ca. ±15 % omkring 150 kly, og de har en egenhastighed på op til ca. 400 km/s, så punkterne på Hubble-grafen spreder sig som rigtige målinger. Rødforskydningen følger bogens model <i>v</i><sub>0</sub> = <i>z</i> · <i>c</i> og holdes under <i>z</i> = 0,1. Spektret opbygges af enkelte fotoner med tilfældig støj, og jo mindre galaksen ser ud på himlen, jo færre fotoner falder gennem spalten. Kameraet har 1000 pixel i bredden, så 1 pixel svarer til synsfeltet divideret med 1000.</p></details>
 </div>
 
+<script>
+/* ===== MQfysik · fælles modul: niveauer, opgaver til portfolien og fuld bredde (v1) ===== */
+/* Fuld bredde: gør siden bredere, så hovedfiguren vokser ind i den tomme plads,
+   uden at siden bliver højere. Kaldes i fitStage efter klassen "wide" er sat. */
+function MQFIT(w,sizeFn){
+  w.style.width='';sizeFn();
+  if(!document.documentElement.classList.contains('wide'))return;
+  var W0=w.offsetWidth,H0=w.scrollHeight,max=Math.min(innerWidth/innerHeight*H0,W0*2);
+  if(max<=W0+4)return;
+  w.style.width=max+'px';sizeFn();
+  if(w.scrollHeight<=H0+1)return;
+  var lo=W0,hi=max;
+  for(var i=0;i<9;i++){var m=(lo+hi)/2;w.style.width=m+'px';sizeFn();if(w.scrollHeight<=H0+1)lo=m;else hi=m;}
+  w.style.width=lo+'px';sizeFn();
+}
+
+
+</script>
 <script>
 window.__SRC='<!doctype html>\n'+document.documentElement.outerHTML;
 (()=>{
@@ -633,12 +704,12 @@ function paperHTML(st){
   if(st===2){ let rows=''; if(S.U) S.U.hobs.forEach(h=>{ rows+=`<tr><td>${h.name}</td><td>${h.gals.map(g=>g.name.split('-')[1]+(isDone(g.id)?'&nbsp;✓':'')).join(', ')}</td><td>${h.gals.some(g=>isDone(g.id))?'✓':''}</td></tr>`; });
     return `<h3>Søgekikkerten</h3><p>Søgekikkerten har et stort synsfelt på 2,0°, så man kan finde rundt på himlen. Hver galaksehob indeholder fire spiralgalakser der ligger i næsten samme afstand fra os. Det er nok at måle én galakse i hver hob, men flere giver et bedre resultat.</p>
     <table><tr><th>Hob</th><th>Galakser (✓ = færdigmålt)</th><th>Færdig</th></tr>${rows}</table>`; }
-  if(st===5){ let h=`<h3>Fra målinger til Hubbles lov</h3><p>Jeres observationsnummer er <b>${esc(S.obs)}</b>. Skriv det i rapporten, så læreren kan tjekke jeres tal.</p><p>Hent logbogen som Excel-fil (knapperne til højre). Vælg decimalkomma, hvis I tegner grafen i Excel, og decimalpunktum, hvis I kopierer tallene over i TI-Nspire eller GeoGebra. Et billede af hver vinkelmåling og hvert spektrum gemmes automatisk: klik på Vinkel eller Spektrum i logbogen, eller hent dem alle som én ZIP-fil til rapporten.</p><ol>
-    <li>Rødforskydningstallet for hver linje: ${it('z')} = ${it('λ')}<sub>gal</sub> / ${it('λ')}<sub>lab</sub> − 1 med ${it('λ')}<sub>Ca-II,K,lab</sub> = 393,37 nm og ${it('λ')}<sub>Ca-II,H,lab</sub> = 396,85 nm. Nanometer går ud med nanometer, så ${it('z')} har ingen enhed. Brug gennemsnittet af de to.</li>
-    <li>Galaksens hastighed: ${it('v')}<sub>0</sub> = ${it('z')} · ${it('c')} med ${it('c')} = 3,00·10<sup>5</sup> km/s (gælder for ${it('z')} &lt; 0,1).</li>
-    <li>${S.rmode?`Afstanden ${it('r')} står allerede i logbogen i Mly. Den er beregnet med ${it('r')} = (${it('D')}/2) / sin(${it('θ')}/2) og ${it('D')} = 150 kly = 0,150 Mly.`:`Afstanden: ${it('r')} = (${it('D')}/2) / sin(${it('θ')}/2) med ${it('D')} = 150 kly = 0,150 Mly. Når ${it('D')} sættes ind i Mly, får ${it('r')} også enheden Mly.`}</li>
-    <li>Tegn (${it('r')}, ${it('v')}<sub>0</sub>)-grafen, og lav lineær regression gennem (0,0). Stigningstallet er ${it('H')}<sub>0</sub> i km/s pr. Mly.</li>
-    <li>Universets alder er ca. 1/${it('H')}<sub>0</sub> (husk at omregne enhederne).</li></ol>`;
+  if(st===5){ let h=`<h3>Fra målinger til Hubbles lov</h3><p>Jeres observationsnummer er <b>${esc(S.obs)}</b>. Skriv det i rapporten, så læreren kan tjekke jeres tal.</p><p>Hent logbogen som Excel-fil (knapperne til højre). Vælg decimalkomma, hvis I tegner grafen i Excel, og decimalpunktum, hvis I kopierer tallene over i TI-Nspire eller GeoGebra. Et billede af hver vinkelmåling og hvert spektrum gemmes automatisk: klik på Vinkel eller Spektrum i logbogen, eller hent dem alle som én ZIP-fil til rapporten.</p><ol class="obs-lv">
+    <li><span class="lvtag lv-b">Basic</span>Rødforskydningstallet for hver linje: ${it('z')} = ${it('λ')}<sub>gal</sub> / ${it('λ')}<sub>lab</sub> − 1 med ${it('λ')}<sub>Ca-II,K,lab</sub> = 393,37 nm og ${it('λ')}<sub>Ca-II,H,lab</sub> = 396,85 nm. Nanometer går ud med nanometer, så ${it('z')} har ingen enhed. Brug gennemsnittet af de to.</li>
+    <li><span class="lvtag lv-b">Basic</span>Galaksens hastighed: ${it('v')}<sub>0</sub> = ${it('z')} · ${it('c')} med ${it('c')} = 3,00·10<sup>5</sup> km/s (gælder for ${it('z')} &lt; 0,1).</li>
+    <li><span class="lvtag lv-a">Avanceret ★</span>${S.rmode?`Afstanden ${it('r')} står allerede i logbogen i Mly. Den er beregnet med ${it('r')} = (${it('D')}/2) / sin(${it('θ')}/2) og ${it('D')} = 150 kly = 0,150 Mly.`:`Afstanden: ${it('r')} = (${it('D')}/2) / sin(${it('θ')}/2) med ${it('D')} = 150 kly = 0,150 Mly. Når ${it('D')} sættes ind i Mly, får ${it('r')} også enheden Mly.`}</li>
+    <li><span class="lvtag lv-a">Avanceret ★</span>Tegn (${it('r')}, ${it('v')}<sub>0</sub>)-grafen, og lav lineær regression gennem (0,0). Stigningstallet er ${it('H')}<sub>0</sub> i km/s pr. Mly.</li>
+    <li><span class="lvtag lv-bb">B-niveau ★★</span>Universets alder er ca. 1/${it('H')}<sub>0</sub> (husk at omregne enhederne).</li></ol>`;
     if(S.teacher){ const U=S.facitU||S.U, o=S.facitObs||S.obs;
       h+=`<h3>Facit (kun lærer)</h3><p>Skriv en elevs observationsnummer: <input type="text" id="fObs" value="${esc(o)}" style="font:15px var(--mono);width:9em;padding:2px 6px;border:1px solid #9aa3b2;border-radius:4px"> <button id="fBtn" style="background:#f0a64a;color:#1a1206;border-color:#f0a64a;font-weight:600">Vis facit</button></p>
         <p><b>Facit for observationsnummer ${esc(o)}</b></p>`+facitHTML(U,o); }
@@ -990,10 +1061,10 @@ requestAnimationFrame(frame);
   let busy=false;
   function fitStage(){
     if(busy) return; busy=true;
-    if(innerWidth<700){ root.classList.remove('fitmode','wide'); w.style.transform=''; window.__fitScale=1; window.__fitCanvas&&window.__fitCanvas(); busy=false; return; }
+    if(innerWidth<700){ root.classList.remove('fitmode','wide'); w.style.transform=''; w.style.width=''; window.__fitScale=1; window.__fitCanvas&&window.__fitCanvas(); busy=false; return; }
     root.classList.add('fitmode');
     root.classList.toggle('wide', innerWidth/innerHeight>=1.15);
-    w.style.transform='none';
+    w.style.transform='none';window.__fitScale=1;MQFIT(w,function(){window.__fitCanvas&&window.__fitCanvas();});
     const W=w.offsetWidth, H=w.scrollHeight;
     const s=Math.min(innerWidth/W, innerHeight/H, 3);
     const dx=Math.max(0,(innerWidth-W*s)/2), dy=Math.max(0,(innerHeight-H*s)/2);
