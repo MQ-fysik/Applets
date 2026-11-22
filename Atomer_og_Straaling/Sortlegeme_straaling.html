@@ -1,0 +1,937 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sortlegemestråling</title>
+<style>
+:root{--bg:#ffffff;--fg:#1d2430;--muted:#5b6575;--line:#d4d9e1;--card:#f3f5f8;--hl:#fdf1dc;--hlline:#e0952a;--red:#c0392b;--btn:#1d2430;--onbtn:#ffffff;--adv:#5b4b8a;--advbg:#f3f0fa;--advline:#cfc6e6;--ok:#1f7a43;--cA:#d35400;--cB:#1f6fb2}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%}
+.wrap{max-width:860px;margin:0 auto;padding:14px 16px 18px;position:relative;display:flex;flex-direction:column;gap:12px}
+h1{font-size:21px;font-weight:600;margin:0}
+h2{font-size:15px;font-weight:600;margin:0}
+.lead{color:var(--muted);font-size:14px;margin:2px 0 0}
+button{font:inherit;font-size:14px;padding:6px 14px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);cursor:pointer;-webkit-appearance:none;appearance:none}
+button:hover{background:var(--card)}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,canvas:focus-visible,textarea:focus-visible{outline:2px solid var(--hlline);outline-offset:2px}
+button.primary{background:var(--btn);color:var(--onbtn);border-color:var(--btn);font-weight:600}
+button.primary:hover{background:#38414f}
+button.on{background:var(--hl);border-color:var(--hlline);font-weight:600}
+.hd{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hdr{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tabs{display:flex;gap:6px}
+.tab{font-size:15px;padding:8px 16px;border-radius:10px}
+.tab.cur{background:var(--btn);color:var(--onbtn);border-color:var(--btn);font-weight:600}
+.tab.adv{border-color:var(--advline);color:var(--adv)}
+.tab.adv.cur{background:var(--adv);border-color:var(--adv);color:#fff}
+#bOpg.on{background:var(--hl);border-color:var(--hlline);font-weight:600}
+.card{border:1px solid var(--line);border-radius:12px;padding:10px 12px;transition:border-color .25s,box-shadow .25s;min-width:0}
+.focus{border-color:var(--hlline)!important;box-shadow:0 0 0 3px var(--hlline)}
+.hlel{border-color:var(--hlline)!important;box-shadow:0 0 0 3px var(--hlline);background:var(--hl)}
+.tb{display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap;margin:0 0 6px}
+.tb h2{margin-right:auto}
+canvas{width:100%;display:block;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.note{font-size:12px;color:var(--muted);margin:6px 0 0}
+.view{display:flex;flex-direction:column;gap:12px}
+.colL,.colR{display:contents}
+/* fortælleboks */
+.cap-h{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:0 0 4px}
+.cap-t{font-size:16px;line-height:1.5;margin:0}
+.cap-t span{transition:color .3s;cursor:default}
+.cap-t span.past{color:#7a8392}
+.cap-t span.cur{color:var(--fg);background:var(--hl);border-radius:4px;box-shadow:0 0 0 2px var(--hl)}
+.cap-t span.fut{display:none}
+.cap-t.clickable span{cursor:pointer}
+.nbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.prog{position:relative;flex:1;min-width:60px;height:10px;background:var(--card);border-radius:5px;cursor:pointer}
+.prog .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--hlline);border-radius:5px}
+.prog .tick{position:absolute;top:-3px;width:2px;height:16px;background:#9aa3b2}
+.vnote{font-size:12px;color:var(--muted);margin:6px 0 0}
+.dots{display:flex;gap:5px;margin-right:auto}
+.dots span{width:9px;height:9px;border-radius:50%;background:var(--line);cursor:pointer}
+.dots span.cur{background:var(--adv)}
+/* matematik */
+.m{font-family:"Times New Roman",Times,serif;font-size:1.1em;white-space:nowrap}
+.m i,.sym{font-family:"Times New Roman",Times,serif;font-style:italic}
+.m sub,.m sup{font-size:.72em;line-height:0}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.mc{background:var(--card);border-radius:8px;padding:6px 10px;border:1px solid transparent;transition:border-color .25s,box-shadow .25s}
+.mc .k{font-size:12px;color:var(--muted)}
+.mc .v{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.35}
+.mc .v .sw{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid #9aa3b2;vertical-align:-2px;margin-right:6px}
+.cA{color:var(--cA)}.cB{color:var(--cB)}
+.calc{display:flex;flex-direction:column;gap:3px;margin:4px 0 0}
+.crow{display:flex;align-items:baseline;gap:8px;padding:3px 8px;border-radius:8px;border:1px solid transparent;font-variant-numeric:tabular-nums;flex-wrap:wrap}
+.crow .k{font-size:13px;color:var(--muted);min-width:118px;flex:none}
+.crow .v{font-size:15px}
+.crow.form{background:var(--card)}
+.crow.warn{background:#fdf6ea;color:#7a4500;font-size:13.5px}
+/* styring */
+.row{display:flex;align-items:center;gap:8px 10px;margin:6px 0 2px;flex-wrap:wrap;padding:4px 6px;border-radius:10px;border:1px solid transparent;transition:border-color .25s,box-shadow .25s}
+.row > label.lb{font-size:14px;color:var(--muted);min-width:96px;display:flex;align-items:center;gap:6px}
+.row input[type=range]{flex:1;min-width:140px;accent-color:var(--hlline);margin:0}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%}
+.tin{font:inherit;font-size:15px;font-weight:600;width:74px;padding:3px 6px;border:1px solid var(--line);border-radius:6px;text-align:right;font-variant-numeric:tabular-nums}
+.tun{font-size:14px;font-weight:600;min-width:22px}
+.chips{display:flex;flex-wrap:wrap;gap:5px;align-items:center;padding:0 6px}
+.chips button{font-size:12.5px;padding:3px 9px;border-radius:999px}
+.chips button.on{background:var(--hl);border-color:var(--hlline);font-weight:600}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;transition:box-shadow .25s}
+.seg button{border:0;border-radius:0;font-size:13px;padding:4px 12px}
+.seg button.on{background:var(--btn);color:#fff;box-shadow:none}
+.tgl{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);cursor:pointer;-webkit-user-select:none;user-select:none;border-radius:8px;padding:1px 4px;border:1px solid transparent}
+.tgl input{width:16px;height:16px;margin:0;accent-color:var(--hlline);cursor:pointer}
+.playrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0 0}
+.small{font-size:12.5px;color:var(--muted);margin:0}
+.pulse{border-color:var(--hlline)!important;box-shadow:0 0 0 4px var(--hlline);animation:pulse 1.4s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 4px var(--hlline),0 0 0 4px rgba(224,149,42,.7)}70%{box-shadow:0 0 0 4px var(--hlline),0 0 0 16px rgba(224,149,42,0)}100%{box-shadow:0 0 0 4px var(--hlline),0 0 0 4px rgba(224,149,42,0)}}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:90;background:#fdf1dc;color:#7a4500;border:1px solid #e0b46a;border-radius:999px;padding:9px 18px;font-size:15px;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.18);max-width:92vw;text-align:center}
+/* del 2 */
+html.m2 .card{border-color:var(--advline)}
+html.m2 .card.focus{border-color:var(--hlline)}
+.advbar{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;background:var(--advbg);border:1px solid var(--advline);border-radius:12px;padding:8px 12px}
+.advbar p{margin:0 auto 0 0;color:var(--adv);font-size:14px}
+.advbar b{font-size:15px}
+.stab{font-size:14px;border-color:var(--advline);color:var(--adv);background:#fff}
+.stab.cur{background:var(--adv);border-color:var(--adv);color:#fff;font-weight:600}
+.fl{display:flex;flex-direction:column;gap:8px}
+details.fcard{background:var(--advbg);border-radius:10px;padding:6px 12px}
+details.fcard summary{font-size:14.5px;font-weight:600;color:var(--adv);cursor:pointer;padding:2px 0}
+details.fcard p{font-size:13.5px;margin:4px 0}
+details.fcard .tgl{color:var(--fg);font-weight:600;margin:2px 0 4px}
+.oneline{display:flex;flex-direction:column;gap:6px}
+.oneline .tgl{color:var(--fg);font-weight:600}
+/* opgaver */
+.ttabs{display:flex;gap:5px;flex-wrap:wrap;margin:6px 0 8px}
+.ttab{font-size:12.5px;padding:3px 10px;border-radius:999px;border-width:1px 1px 1px 5px}
+.ttab.l-basic{border-left-color:#2e7d4f}.ttab.l-adv{border-left-color:var(--adv)}.ttab.l-b{border-left-color:#1f4e8c}
+.ttab.cur{background:var(--btn);color:#fff;border-color:var(--btn);font-weight:600}
+.ttab.done::after{content:" ✓";color:#2fb36b;font-weight:700}
+.ttab.cur.done::after{color:#9be7bd}
+.lvl{display:inline-block;font-size:12px;font-weight:700;padding:1px 9px;border-radius:999px}
+.lv-basic{background:#e3f3e8;color:#2e7d4f}.lv-adv{background:var(--advbg);color:var(--adv)}.lv-b{background:#e2ecf8;color:#1f4e8c}
+.olv{margin:0 0 4px;font-size:15px}
+.tp{font-size:14px;margin:0 0 6px}
+.oname{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+.oname input{font:inherit;font-size:15px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;flex:1;min-width:120px;color:var(--fg)}
+ul.chk{list-style:none;margin:4px 0 8px;padding:0;display:flex;flex-direction:column;gap:3px}
+ul.chk li{font-size:13.5px;padding:3px 8px 3px 28px;border-radius:7px;background:var(--card);position:relative}
+ul.chk li::before{content:"☐";position:absolute;left:8px;top:2px;color:#9aa3b2}
+ul.chk li.ok{background:#e6f6ec;color:#14532d}
+ul.chk li.ok::before{content:"✓";color:#1f9a55;font-weight:700}
+.oq{font-weight:600}
+textarea#oAns{width:100%;min-height:64px;font:inherit;font-size:14px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;resize:vertical}
+.pv{position:fixed;top:0;left:0;right:0;bottom:0;z-index:95;background:rgba(20,24,32,.62);display:flex;align-items:center;justify-content:center;padding:12px}
+.pvbox{background:#fff;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;max-width:96vw;max-height:96vh}
+.pvbox img{max-width:92vw;max-height:78vh;object-fit:contain;border:1px solid var(--line);border-radius:6px}
+.foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding-top:8px;border-top:1px solid var(--line)}
+.foot a{color:var(--muted)}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){.card,.cap-t span,.row,.mc{transition:none}.pulse{animation:none}}
+/* visninger */
+html:not(.m2) .only2{display:none!important}
+html.m2 .only1{display:none!important}
+html.m2:not(.sa) .s2a{display:none!important}
+html.m2:not(.sb) .s2b{display:none!important}
+html.m2:not(.sc) .s2c{display:none!important}
+html.m2.sc .s2ab{display:none!important}
+html.m2.sb .no2b{display:none!important}
+html.opg .narr,html.opg #secReal{display:none!important}
+/* stablet rækkefølge */
+#advbar{order:-1}#opg{order:0}#narr1,#narr2,#secReal{order:1}#secG{order:2}#secAtm{order:3}#secCtl{order:4}#secCards{order:5}#secWien,#secSB{order:6}
+/* startskærm */
+.startov{position:absolute;top:0;left:0;right:0;bottom:0;z-index:10;display:grid;place-items:start center;padding-top:110px;background:rgba(255,255,255,.82);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.startbox{display:grid;gap:14px;justify-items:center;text-align:center;padding:26px 30px;background:var(--bg);border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 40px rgba(29,36,48,.18);max-width:620px}
+.st-t{margin:0;font-size:28px;font-weight:700}
+.st-l{margin:-6px 0 0;color:var(--muted);font-size:16px}
+.st-b{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+button.bigb{font-size:18px;font-weight:600;padding:13px 22px;background:var(--btn);border-color:var(--btn);color:var(--onbtn)}
+button.bigb:hover{background:#38414f}
+button.bigb.alt{background:var(--bg);color:var(--fg);border-color:var(--line)}
+button.bigb.alt:hover{background:var(--card)}
+.st-fs{display:inline-flex;align-items:center;gap:8px;font-size:15px;cursor:pointer;-webkit-user-select:none;user-select:none}
+.st-fs input{width:18px;height:18px;margin:0;accent-color:var(--hlline);cursor:pointer}
+.st-msg{margin:0;font-size:15px;font-weight:600;color:#9a6c00}
+.st-n{margin:0;font-size:13px;color:var(--muted)}
+#autoBan{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:50;font-size:19px;font-weight:600;padding:12px 22px;border-radius:999px;background:var(--btn);border:0;color:var(--onbtn);box-shadow:0 6px 30px rgba(0,0,0,.35);cursor:pointer;max-width:92vw}
+/* tilpas til boksen */
+html.fitmode,html.fitmode body{height:100%;overflow:hidden}
+html.fitmode .wrap{position:absolute;top:0;left:0;width:860px;max-width:none;margin:0;transform-origin:0 0}
+/* bredformat */
+html.wide .wrap{width:1280px;padding:12px 18px 10px;gap:10px}
+html.wide h1{font-size:25px}
+html.wide .view{display:grid;grid-template-columns:minmax(600px,1fr) 450px;column-gap:16px;row-gap:10px;align-items:start}
+html.wide .advbar{grid-column:1/-1}
+html.wide .colL,html.wide .colR{display:flex;flex-direction:column;gap:10px;min-width:0}
+html.wide .narr{height:332px;overflow:hidden;display:flex;flex-direction:column}
+html.wide .narr .cap-h,html.wide .narr .nbar,html.wide .narr .vnote{flex:none}
+html.wide .narr .cap-t{flex:1;font-size:15.5px;overflow:hidden}
+@media (max-width:520px){.cards{grid-template-columns:1fr 1fr}.row > label.lb{min-width:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="hd">
+  <div><h1>Sortlegemestråling</h1><p class="lead">Aflæs bølgelængden med maksimal udstråling – og sammenlign Solen, Jorden og Sirius</p></div>
+  <div class="hdr">
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab cur" id="tab1" data-mode="1" role="tab">Del 1 · Grundmodellen</button>
+      <button type="button" class="tab adv" id="tab2" data-mode="2" role="tab">Del 2 · Gå videre ★</button>
+    </div>
+    <button type="button" id="bOpg">📷 Opgaver</button>
+    <button id="fs" type="button" hidden>Fuld skærm</button>
+  </div>
+</div>
+
+<div class="startov" id="startOv">
+  <div class="startbox">
+    <p class="st-t">Sortlegemestråling</p>
+    <p class="st-l">Hvor ligger toppen i spektret – for Solen, for Jorden og for Sirius?</p>
+    <div class="st-b"><button id="startVoice" class="bigb" type="button">▶ Start gennemgangen med oplæsning</button><button id="startMute" class="bigb alt" type="button">Udforsk selv</button></div>
+    <label class="st-fs"><input type="checkbox" id="startFs" checked> <span id="startFsTxt">Start i fuld skærm</span></label>
+    <p class="st-msg" id="startMsg" hidden></p>
+    <p class="st-n">Oplæsningen kan også startes og stoppes med knappen Hør forklaringen. Tryk Esc for at forlade fuld skærm.</p>
+  </div>
+</div>
+
+<div class="view" id="view">
+  <div class="advbar only2" id="advbar">
+    <p><b>Del 2 · Gå videre</b> – for dig, der vil vide mere.</p>
+    <button type="button" class="stab cur" id="stabA" data-sub="a">Drivhuseffekten</button>
+    <button type="button" class="stab" id="stabB" data-sub="b">Stefan–Boltzmanns lov ★★</button>
+    <button type="button" class="stab" id="stabC" data-sub="c">Hvor rigtig er modellen?</button>
+  </div>
+  <div class="colL">
+    <section class="card" id="secG" aria-labelledby="hG">
+      <div class="tb"><h2 id="hG">Udstråling fra et sort legeme</h2>
+        <div class="seg" id="segAx" hidden><button type="button" id="axLin">Almindelig λ-akse</button><button type="button" id="axLog">Logaritmisk λ-akse</button></div>
+        <label class="tgl" id="tglPeak"><input type="checkbox" id="cPeak" checked> Vis <span class="m"><i>λ</i><sub>max</sub></span></label>
+        <label class="tgl" id="tglCur"><input type="checkbox" id="cCur"> Aflæsningslinje</label>
+        <label class="tgl" id="tglLock"><input type="checkbox" id="cLock"> Lås akserne</label>
+      </div>
+      <canvas id="cvG" data-ar="0.56" tabindex="0" aria-label="Graf over udstrålingen per bølgelængde som funktion af bølgelængden i vakuum. Klik eller træk for at flytte aflæsningslinjen."></canvas>
+      <p class="note" id="gNote"></p>
+    </section>
+    <section class="card no2b" id="secWien" aria-labelledby="hW">
+      <h2 id="hW">Wiens forskydningslov</h2>
+      <div class="calc" id="wienBody"></div>
+    </section>
+    <section class="card only2 s2b" id="secSB" aria-labelledby="hSB">
+      <div class="tb"><h2 id="hSB">Stefan–Boltzmanns lov <span class="lvl lv-b">B-niveau ★★</span></h2><label class="tgl" id="tglArea"><input type="checkbox" id="oArea" checked> Farv arealet under kurverne</label></div>
+      <div class="calc" id="sbBody"></div>
+    </section>
+  </div>
+  <div class="colR">
+    <section class="card" id="opg" hidden aria-labelledby="hOpg">
+      <div class="tb"><h2 id="hOpg">📷 Opgaver til din portfolio</h2><button type="button" id="oClose">✕ Luk</button></div>
+      <label class="oname">Dit navn <input id="oName" maxlength="40" autocomplete="off" placeholder="kommer på billedet"></label>
+      <div class="ttabs" id="oTabs"></div>
+      <p class="olv"><span class="lvl" id="oLvl"></span> <b id="oH"></b></p>
+      <p class="tp" id="oIntro"></p>
+      <ul class="chk" id="oChk"></ul>
+      <label class="tp oq" id="oQ" for="oAns"></label>
+      <textarea id="oAns" maxlength="1200" placeholder="Skriv dit svar her"></textarea>
+      <div class="playrow"><button type="button" class="primary" id="oShot">📷 Tag billede</button><button type="button" id="oShow">Vis billede</button><button type="button" id="oZip">⬇ Alle (ZIP)</button></div>
+      <p class="small" id="oMsg"></p>
+    </section>
+    <section class="card narr only1" id="narr1" aria-live="polite">
+      <div class="cap-h" id="caph1"></div>
+      <p class="cap-t" id="capt1"></p>
+      <div class="nbar">
+        <button type="button" id="nPlay" class="primary">▶ Hør forklaringen</button>
+        <div class="prog" id="prog1" role="slider" tabindex="0" aria-label="Spol i forklaringen" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="fill" id="fill1"></div></div>
+        <button type="button" id="nPrev1" aria-label="Forrige trin">◀</button>
+        <button type="button" id="nNext1">Næste ▶</button>
+      </div>
+      <p class="vnote" id="vnote"></p>
+    </section>
+    <section class="card narr only2 s2ab" id="narr2" aria-live="polite">
+      <div class="cap-h" id="caph2"></div>
+      <p class="cap-t" id="capt2"></p>
+      <div class="nbar"><div class="dots" id="dots2"></div><button type="button" id="nPrev2">◀ Forrige</button><button type="button" id="nNext2" class="primary">Næste ▶</button></div>
+    </section>
+    <section class="card only2 s2c" id="secReal" aria-labelledby="hReal">
+      <h2 id="hReal" style="margin:0 0 8px">Hvor rigtig er modellen?</h2>
+      <div class="fl" id="realList">
+        <details class="fcard" open><summary>1 · Solen er ikke et helt sort legeme</summary>
+          <p>Solens lys kommer fra gaslag med lidt forskellig temperatur, og atomerne i de yderste lag absorberer bestemte bølgelængder. Derfor har det målte spektrum mørke absorptionslinjer, og der er mindre ultraviolet stråling end i modellen.</p>
+          <label class="tgl"><input type="checkbox" id="oSun"> Vis Solens målte spektrum (skematisk)</label></details>
+        <details class="fcard"><summary>2 · Jorden set fra rummet</summary>
+          <p>Overfladen udstråler næsten som et sort legeme. Men ved de bølgelængder, hvor CO₂ og vanddamp absorberer, slipper strålingen først ud højt oppe i den kolde atmosfære. Derfor har Jordens spektrum set fra rummet »huller«.</p>
+          <label class="tgl"><input type="checkbox" id="oToa"> Vis Jordens udstråling set fra rummet (skematisk)</label></details>
+        <details class="fcard"><summary>3 · Intet er helt sort</summary>
+          <p>Et sort legeme absorberer al stråling, der rammer det, og udsender den størst mulige stråling ved sin temperatur. Virkelige overflader udsender lidt mindre. Vand, jord og sne er dog næsten sorte i det infrarøde, så modellen passer godt for Jordens overflade.</p></details>
+        <details class="fcard"><summary>4 · En stjerne har ikke én temperatur</summary>
+          <p>Stjernen er varmest indvendigt. Lyset, vi ser, kommer fra overfladelaget (fotosfæren). Den temperatur, vi finder ud fra <span class="m"><i>λ</i><sub>max</sub></span>, er derfor en slags gennemsnitstemperatur for det lag, som lyset slipper ud fra.</p></details>
+      </div>
+    </section>
+    <section class="card only2 s2a" id="secAtm" aria-label="Indstillinger til drivhuseffekten">
+      <div class="oneline">
+        <label class="tgl" id="tglAtm"><input type="checkbox" id="oAtm"> Vis hvor atmosfæren absorberer (skematisk)</label>
+        <label class="tgl" id="tglNoGH"><input type="checkbox" id="oNoGH"> Jorden uden drivhuseffekt (−18 °C)</label>
+      </div>
+    </section>
+    <section class="card" id="secCtl" aria-labelledby="hCtl">
+      <div class="tb"><h2 id="hCtl">Styr selv</h2>
+        <div class="seg" id="segUnit"><button type="button" id="uK">kelvin</button><button type="button" id="uC">celsius</button></div></div>
+      <div class="row" id="rowA"><label class="lb" for="sA"><span class="dot" style="background:var(--cA)"></span><span id="lbA">Temperatur</span></label>
+        <input type="range" id="sA" min="1.69897" max="4.47712" step="any" aria-label="Temperatur for spektrum A">
+        <input class="tin" id="iA" inputmode="decimal" aria-label="Temperatur for spektrum A"><span class="tun" id="uA">K</span></div>
+      <div class="chips" id="chA"></div>
+      <div class="row" style="margin-top:8px"><label class="tgl" id="tglCmp"><input type="checkbox" id="cCmp"> Sammenlign med spektrum B</label></div>
+      <div id="blkB" hidden>
+        <div class="row" id="rowB"><label class="lb" for="sB"><span class="dot" style="background:var(--cB)"></span>Spektrum B</label>
+          <input type="range" id="sB" min="1.69897" max="4.47712" step="any" aria-label="Temperatur for spektrum B">
+          <input class="tin" id="iB" inputmode="decimal" aria-label="Temperatur for spektrum B"><span class="tun" id="uB">K</span></div>
+        <div class="chips" id="chB"></div>
+      </div>
+    </section>
+    <section class="card" id="secCards" aria-label="Aflæsninger">
+      <div class="cards">
+        <div class="mc" id="cLam"><div class="k">Toppen <span class="m"><i>λ</i><sub>max</sub></span></div><div class="v" id="vLam"></div></div>
+        <div class="mc" id="cOmr"><div class="k">Toppen ligger i</div><div class="v" id="vOmr"></div></div>
+        <div class="mc" id="cFarve"><div class="k">Farve, øjet ser</div><div class="v" id="vFarve"></div></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="foot"><span>Model: Planck-kurven for et sort legeme, der kun udsender stråling, fordi det har en temperatur. Bølgelængden er bølgelængden i vakuum. Wiens konstant <i class="sym">b</i> = 2,898·10<sup>−3</sup> m·K. Temperaturer: Solen 5 772 K, Sirius A 9 940 K, Jordens overflade i middel 15 °C.<span id="spk"></span></span><span>Sortlegemestråling · MQfysik · <span id="ver"></span></span></div>
+</div>
+
+<audio id="tale" preload="auto"></audio>
+<script>const AUDIO_B64="";</script>
+
+<script>
+window.__SRC='<!doctype html>\n'+document.documentElement.outerHTML;
+const VERSION='1.0',VDATE='22.11.2026';
+const $=id=>document.getElementById(id);
+$('ver').textContent='Version '+VERSION+' · '+VDATE;
+const PI=Math.PI;
+const reduce=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+const lerp=(a,b,f)=>a+(b-a)*f;
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const FONT='system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
+const SERIF='"Times New Roman",Times,serif';
+const NB='\u202F';
+const lg=Math.log10||(x=>Math.log(x)/Math.LN10);
+const root=document.documentElement;
+
+/* ---------- tal ---------- */
+const fmt=(v,d)=>(Math.abs(v)<5e-13?0:v).toFixed(d).replace('.',',').replace('-','−');
+function grp(n){const s=String(Math.round(Math.abs(n)));return(n<0&&Math.round(n)!==0?'−':'')+s.replace(/\B(?=(\d{3})+(?!\d))/g,NB);}
+function sigF(v,n){if(!v)return'0';const e=Math.floor(lg(Math.abs(v)));const d=Math.max(0,n-1-e);const s=fmt(v,d);return d===0?grp(Number(v.toPrecision(n))):s;}
+function sciParts(v,n){let e=Math.floor(lg(Math.abs(v)));let m=v/Math.pow(10,e);let ms=fmt(m,n-1);if(Number(ms.replace(',','.'))>=10){e++;m=v/Math.pow(10,e);ms=fmt(m,n-1);}return{m:ms,e};}
+const SUP={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻','−':'⁻'};
+const supS=s=>String(s).split('').map(c=>SUP[c]||c).join('');
+function sciH(v,n){const p=sciParts(v,n||3);return p.m+'·10<sup>'+String(p.e).replace('-','−')+'</sup>';}
+function sciR(v,n){const p=sciParts(v,n||3);return p.m+'·10^{'+String(p.e).replace('-','−')+'}';}
+function sciT(v,n){const p=sciParts(v,n||3);return p.m+'·10'+supS(p.e);}
+
+/* ---------- fysik ---------- */
+const HP=6.62607015e-34,CL=2.99792458e8,KB=1.380649e-23,BW=2.897771955e-3,SIG=5.670374419e-8;
+function Mlam(l,T){const x=HP*CL/(l*KB*T);if(x>700)return 0;return 2*PI*HP*CL*CL/Math.pow(l,5)/Math.expm1(x);}  /* W·m⁻³ */
+const lamMax=T=>BW/T,Mpk=T=>Mlam(BW/T,T);
+const TMIN=50,TMAX=30000;
+const PRE=[{k:'earth',n:'Jorden',T:288.15},{k:'human',n:'Menneske',T:310.15},{k:'bulb',n:'Glødetråd',T:2800},{k:'sun',n:'Solen',T:5772},{k:'sirius',n:'Sirius A',T:9940}];
+const PRE_HID=[{n:'Jorden uden drivhuseffekt',T:255.15},{n:'Betelgeuse',T:3600}];
+function preName(T){const p=PRE.concat(PRE_HID).find(p=>Math.abs(p.T-T)<0.3);return p?p.n:null;}
+function fLam(l){return l<1e-6?sigF(l*1e9,3)+NB+'nm':l<1e-3?sigF(l*1e6,3)+NB+'µm':sigF(l*1e3,3)+NB+'mm';}
+function fLamR(l){return fLam(l).replace(/\u202F/g,' ');}
+function fTK(T){return Math.abs(T-Math.round(T))<0.005?grp(T):fmt(T,2);}
+function fT(T,u){u=u||S.unit;if(u==='C'){return grp(Math.round(T-273.15))+NB+'°C';}return grp(Math.round(T))+NB+'K';}
+function fT2(T){return fT(T,'K')+' = '+fT(T,'C');}
+function region(l){if(l<380e-9)return{t:'ultraviolet',s:'UV'};if(l<=750e-9)return{t:'synligt lys',s:'synligt'};return{t:'infrarødt',s:'IR'};}
+function lamName(nm){return nm<450?'violet':nm<485?'blå':nm<510?'blågrøn':nm<565?'grøn':nm<590?'gul':nm<625?'orange':'rød';}
+function wlRGB(nm){let r=0,g=0,b=0;
+  if(nm<440){r=-(nm-440)/60;b=1;}else if(nm<490){g=(nm-440)/50;b=1;}else if(nm<510){g=1;b=-(nm-510)/20;}else if(nm<580){r=(nm-510)/70;g=1;}else if(nm<645){r=1;g=-(nm-645)/65;}else{r=1;}
+  let f=1;if(nm<420)f=0.3+0.7*(nm-380)/40;else if(nm>700)f=0.3+0.7*(750-nm)/50;
+  return[r,g,b].map(c=>Math.round(255*Math.pow(clamp(c*f,0,1),0.8)));}
+function bbRGB(T){const t=T/100;let r,g,b;
+  if(t<=66){r=255;g=99.4708025861*Math.log(t)-161.1195681661;b=t<=19?0:138.5177312231*Math.log(t-10)-305.0447927307;}
+  else{r=329.698727446*Math.pow(t-60,-0.1332047592);g=288.1221695283*Math.pow(t-60,-0.0755148492);b=255;}
+  const f=clamp((T-650)/1300,0,1);return[r,g,b].map(c=>Math.round(clamp(c,0,255)*f));}
+function bbName(T){return T<750?'ingen synlig glød':T<1300?'mørkerød glød':T<2200?'rød-orange':T<4000?'orange':T<4800?'gul-orange':T<5300?'gullig hvid':T<7000?'hvid':T<10500?'blålig hvid':'blå-hvid';}
+/* skematiske spektre (Del 2c) */
+const sgm=x=>1/(1+Math.exp(-x));
+const band=(u,a,b,w)=>sgm((u-a)/w)*sgm((b-u)/w);
+function Teff(l,Ts){const u=l*1e6;return Ts-Math.max(68*band(u,13.6,16.8,0.35),30*band(u,4.15,4.45,0.06),40*band(u,5.4,7.4,0.3),24*band(u,9.4,10.1,0.12),33*band(u,18.5,300,1.5));}
+const FRAUN=[[393.4,.75,1.6],[396.8,.7,1.6],[410.2,.35,1.2],[434.0,.4,1.2],[486.1,.5,1.4],[517.3,.35,1.2],[527.0,.25,1],[589.3,.45,1.2],[656.3,.5,1.4]];
+function fSun(l){const nm=l*1e9;let f=nm<400?0.55+0.45*sgm((nm-360)/18):1;if(nm<300)f*=0.6+0.4*sgm((nm-260)/12);
+  FRAUN.forEach(q=>{f*=1-q[1]*Math.exp(-Math.pow((nm-q[0])/(q[2]*2.2),2));});return f;}
+const ATM=[{a:0.1,b:0.3,n:'O₃'},{a:2.55,b:2.9,n:'H₂O'},{a:4.15,b:4.45,n:'CO₂'},{a:5.4,b:7.4,n:'H₂O'},{a:9.4,b:10.1,n:'O₃'},{a:13.6,b:16.8,n:'CO₂'},{a:18.5,b:1e4,n:'H₂O'}];
+
+/* ---------- tilstand ---------- */
+const S={TA:5772,TB:288.15,cmp:false,ax:'auto',unit:'K',peak:true,curOn:false,cur:null,lock:false,mode:1,sub:'a',atm:false,noGH:false,area:true,sunLines:false,toa:false};
+let HL=[];
+const TW={};
+
+/* ---------- canvas ---------- */
+const CV={};
+['cvG'].forEach(id=>{const el=$(id);CV[id]={el,ar:+el.dataset.ar,g:el.getContext('2d'),w:300,h:200};});
+function size(){const dpr=(window.devicePixelRatio||1)*Math.max(1,window.__fitScale||1);
+  for(const id in CV){const o=CV[id];const w=o.el.clientWidth;if(!w)continue;const h=Math.round(w*o.ar);o.el.style.height=h+'px';
+    let k=Math.min(dpr,4096/w,4096/h);if(w*h*k*k>8e6)k=Math.sqrt(8e6/(w*h));
+    o.el.width=Math.round(w*k);o.el.height=Math.round(h*k);o.w=w;o.h=h;o.g.setTransform(k,0,0,k,0,0);}}
+
+/* blandet tekst: *x* kursiv, _x / _{..} indeks, ^x / ^{..} eksponent */
+function richParse(s){const out=[];let it=false,i=0;
+  while(i<s.length){const c=s[i];
+    if(c==='*'){it=!it;i++;continue;}
+    if((c==='_'||c==='^')&&i+1<s.length){let t;if(s[i+1]==='{'){const j=s.indexOf('}',i+2);t=s.slice(i+2,j);i=j+1;}else{t=s[i+1];i+=2;}
+      t.split('*').forEach((p,k)=>{if(p)out.push({t:p,it:k%2===1,m:c});});continue;}
+    let j=i;while(j<s.length&&s[j]!=='*'&&s[j]!=='_'&&s[j]!=='^')j++;out.push({t:s.slice(i,j),it,m:''});i=j;}
+  return out;}
+function richW(g,s,sz){let W=0;richParse(s).forEach(sg=>{g.font=(sg.it?'italic ':'')+(sg.m?Math.round(sz*0.72):sz)+'px '+SERIF;W+=g.measureText(sg.t).width;});return W;}
+function rich(g,s,x,y,sz,col,align,halo,bold){const segs=richParse(s);let W=0;
+  const fnt=sg=>(sg.it?'italic ':'')+(bold?'bold ':'')+(sg.m?Math.round(sz*0.72):sz)+'px '+SERIF;
+  segs.forEach(sg=>{g.font=fnt(sg);sg.w=g.measureText(sg.t).width;W+=sg.w;});
+  let x0=align==='center'?x-W/2:align==='right'?x-W:x;g.textBaseline='alphabetic';g.textAlign='left';
+  segs.forEach(sg=>{g.font=fnt(sg);const dy=sg.m==='_'?sz*0.28:sg.m==='^'?-sz*0.42:0;
+    if(halo){g.lineWidth=4;g.strokeStyle='rgba(255,255,255,.92)';g.lineJoin='round';g.strokeText(sg.t,x0,y+dy);}
+    g.fillStyle=col||'#1d2430';g.fillText(sg.t,x0,y+dy);x0+=sg.w;});return W;}
+function label(g,s,x,y,col,font,align,base){g.font=font||'600 13px '+FONT;g.textAlign=align||'center';g.textBaseline=base||'middle';
+  g.lineWidth=4;g.strokeStyle='rgba(255,255,255,.92)';g.lineJoin='round';g.strokeText(s,x,y);g.fillStyle=col||'#1d2430';g.fillText(s,x,y);return g.measureText(s).width;}
+function glowRing(g,x,y,r,t){const a=.75+.25*Math.sin(t*5);g.save();g.strokeStyle='rgba(224,149,42,'+(a*.3)+')';g.lineWidth=16;g.beginPath();g.arc(x,y,r+4,0,2*PI);g.stroke();
+  g.strokeStyle='rgba(224,149,42,'+a+')';g.lineWidth=3;g.beginPath();g.arc(x,y,r+4,0,2*PI);g.stroke();g.restore();}
+function glowRect(g,x,y,w,h,t){const a=.75+.25*Math.sin(t*5);g.save();g.strokeStyle='rgba(224,149,42,'+a+')';g.lineWidth=3;g.strokeRect(x,y,w,h);g.strokeStyle='rgba(224,149,42,'+(a*.3)+')';g.lineWidth=10;g.strokeRect(x-4,y-4,w+8,h+8);g.restore();}
+function niceStep(range,n){const raw=range/n,e=Math.pow(10,Math.floor(lg(raw))),f=raw/e;return(f<1.5?1:f<3?2:f<7?5:10)*e;}
+const NICE=[1,1.2,1.5,2,2.5,3,4,5,6,8,10];
+function niceUp(v){const e=Math.pow(10,Math.floor(lg(v)));for(const n of NICE)if(n*e>=v*0.9999)return n*e;return 10*e;}
+function niceDown(v){const e=Math.pow(10,Math.floor(lg(v)));const f=v/e;return(f>=5?5:f>=2?2:1)*e;}
+const decOf=st=>Math.max(0,Math.ceil(-lg(st)-1e-9));
+const COLA='#d35400',COLB='#1f6fb2';
+
+/* ---------- kurverne ---------- */
+function curves(){const cs=[{key:'A',T:S.TA,col:COLA}];if(S.cmp)cs.push({key:'B',T:S.TB,col:COLB});return cs;}
+function effMode(){if(!S.cmp)return'lin';if(S.mode===2&&S.sub==='b')return'lin';if(S.ax!=='auto')return S.ax;const r=Math.max(S.TA,S.TB)/Math.min(S.TA,S.TB);return r>3?'log':'lin';}
+const magOn=()=>!(S.mode===2&&S.sub==='b');
+
+/* ---------- akserne: vælges selv (med hysterese) og glider ---------- */
+let AXT={mode:null},AXD={mode:'lin',x1:2.5e-6,y1:1e14},AXA=null;
+function updateAxes(instant){const m=effMode(),cs=curves();let changed=false;
+  if(m!==AXT.mode){AXT={mode:m};instant=true;}
+  if(m==='lin'){const lam=Math.max.apply(null,cs.map(c=>lamMax(c.T))),pk=Math.max.apply(null,cs.map(c=>Mpk(c.T)));
+    if(!S.lock||!AXT.x1){if(!AXT.x1||lam/AXT.x1<0.12||lam/AXT.x1>0.42){AXT.x1=niceUp(lam*4.2);changed=true;}
+      if(!AXT.y1||pk/AXT.y1<0.3||pk/AXT.y1>0.95){AXT.y1=niceUp(pk*1.15);changed=true;}}}
+  else{const ls=cs.map(c=>lamMax(c.T));const a=Math.floor(lg(Math.min.apply(null,ls)/3)),b=Math.ceil(lg(Math.max.apply(null,ls)*6));
+    if(!S.lock||AXT.lx0===undefined){if(a!==AXT.lx0||b!==AXT.lx1){AXT.lx0=a;AXT.lx1=b;changed=true;}}}
+  if(instant||reduce){AXD=Object.assign({},AXT);AXA=null;return;}
+  if(changed){AXA={from:Object.assign({},AXD),to:Object.assign({},AXT),t0:performance.now()};}}
+function tickAxes(now){if(!AXA)return false;const f=clamp((now-AXA.t0)/550,0,1),e=f*f*(3-2*f);const a=AXA.from,b=AXA.to;
+  if(b.mode==='lin'){AXD={mode:'lin',x1:Math.exp(lerp(Math.log(a.x1),Math.log(b.x1),e)),y1:Math.exp(lerp(Math.log(a.y1),Math.log(b.y1),e))};}
+  else AXD={mode:'log',lx0:lerp(a.lx0,b.lx0,e),lx1:lerp(a.lx1,b.lx1,e)};
+  if(f>=1){AXD=Object.assign({},b);AXA=null;}return true;}
+
+/* ---------- grafen ---------- */
+/* opt: {cs, ax, peak, curOn, cur, hl, now, mag, area, atm, toa, sunLines} */
+function drawSpec(o,opt){const g=o.g,W=o.w,H=o.h;g.fillStyle='#fff';g.fillRect(0,0,W,H);
+  const hl=opt.hl||[],now=opt.now||0,ax=opt.ax,cs=opt.cs,mode=ax.mode,sm=W<520;
+  const L=sm?52:70,R=W-(sm?10:18),T=sm?36:40,B=H-(sm?36:42);
+  let X,Xi,ud,uname;
+  if(mode==='lin'){ud=ax.x1<=3.0001e-6?1e-9:1e-6;uname=ud===1e-9?'nm':'µm';X=l=>L+l/ax.x1*(R-L);Xi=x=>(x-L)/(R-L)*ax.x1;}
+  else{ud=1e-6;uname='µm';X=l=>L+(lg(l)-ax.lx0)/(ax.lx1-ax.lx0)*(R-L);Xi=x=>Math.pow(10,ax.lx0+(x-L)/(R-L)*(ax.lx1-ax.lx0));}
+  const lmin=mode==='lin'?ax.x1/2000:Math.pow(10,ax.lx0),lmaxX=mode==='lin'?ax.x1:Math.pow(10,ax.lx1);
+  const pk=cs.map(c=>Mpk(c.T));let fac=cs.map(()=>1),magI=-1,magF=1;
+  if(mode==='log')fac=pk.map(p=>1/p);
+  else if(cs.length>1&&opt.mag){const si=pk[0]>=pk[1]?0:1,wi=1-si,r=pk[si]/pk[wi];if(r>2.5){magF=niceDown(r/1.05);fac[wi]=magF;magI=wi;}}
+  const ymax=mode==='log'?1.12:ax.y1,Y=v=>B-v/ymax*(B-T);
+  /* gitter og tal */
+  g.lineWidth=1;g.font=(sm?'10px ':'11px ')+FONT;g.fillStyle='#5b6575';g.strokeStyle='#e6e9ee';
+  let yUnit='';
+  if(mode==='lin'){const xs=niceStep(ax.x1/ud,sm?4:6),dx=decOf(xs);for(let v=0;v<=ax.x1/ud*1.0001;v+=xs){const x=X(v*ud);g.beginPath();g.moveTo(x,T);g.lineTo(x,B);g.stroke();g.textAlign='center';g.textBaseline='top';g.fillText(v<1e9?(dx?fmt(v,dx):grp(v)):'',x,B+5);}
+    const yu=ax.y1*1e-6,PF=[[1e12,'T'],[1e9,'G'],[1e6,'M'],[1e3,'k'],[1,''],[1e-3,'m'],[1e-6,'µ'],[1e-9,'n']];let p=PF[PF.length-1];for(const q of PF)if(yu/q[0]>=1){p=q;break;}
+    yUnit=p[1];const ys=niceStep(yu/p[0],5),dy=decOf(ys);for(let v=0;v<=yu/p[0]*1.0001;v+=ys){const y=Y(v*p[0]*1e6);g.beginPath();g.moveTo(L,y);g.lineTo(R,y);g.stroke();g.textAlign='right';g.textBaseline='middle';g.fillText(dy?fmt(v,dy):grp(v),L-5,y);}}
+  else{for(let d=Math.floor(ax.lx0);d<Math.ceil(ax.lx1)+1;d++)for(let m=1;m<10;m++){const l=m*Math.pow(10,d),x=X(l);if(x<L-0.5||x>R+0.5)continue;
+      g.strokeStyle=m===1?'#dde1e8':'#f0f2f5';g.beginPath();g.moveTo(x,T);g.lineTo(x,B);g.stroke();
+      if(m===1||m===2||m===5){const v=l/ud;g.textAlign='center';g.textBaseline='top';g.fillText(v<1?fmt(v,decOf(v)):grp(v),x,B+5);}}
+    g.strokeStyle='#e6e9ee';for(let v=0;v<=1.0001;v+=0.2){const y=Y(v);g.beginPath();g.moveTo(L,y);g.lineTo(R,y);g.stroke();g.textAlign='right';g.textBaseline='middle';g.fillText(fmt(v,1),L-5,y);}}
+  /* atmosfærens absorption (skematisk) */
+  if(opt.atm&&mode==='log'){g.save();g.beginPath();g.rect(L,T,R-L,B-T);g.clip();
+    ATM.forEach(b=>{const x0=Math.max(L,X(b.a*1e-6)),x1=Math.min(R,X(b.b*1e-6));if(x1<=x0)return;g.fillStyle='rgba(91,101,117,.16)';g.fillRect(x0,T,x1-x0,B-T);
+      if(x1-x0>14){g.save();g.translate((x0+x1)/2,T+6);label(g,b.n,0,8,'#3d4654','600 '+(sm?10:12)+'px '+FONT);g.restore();}});
+    const w0=X(8e-6),w1=X(13e-6);if(w1>L&&w0<R){g.strokeStyle='rgba(31,122,67,.55)';g.setLineDash([4,4]);g.beginPath();g.moveTo(w0,T+22);g.lineTo(w0,B);g.moveTo(w1,T+22);g.lineTo(w1,B);g.stroke();g.setLineDash([]);
+      label(g,'vinduet',(w0+w1)/2,T+14,'#1f7a43','600 '+(sm?10:12)+'px '+FONT);}
+    g.restore();}
+  /* kurverne */
+  const N=mode==='lin'?520:620;const lamAt=k=>mode==='lin'?lmaxX*(k+0.5)/N:Math.pow(10,ax.lx0+(ax.lx1-ax.lx0)*k/N);
+  const P=[];
+  g.save();g.beginPath();g.rect(L,T-2,R-L,B-T+2);g.clip();
+  cs.forEach((c,i)=>{const pts=[];for(let k=0;k<=N;k++){const l=lamAt(k);pts.push([X(l),Y(Mlam(l,c.T)*fac[i])]);}P.push(pts);
+    /* areal */
+    if(opt.area){g.beginPath();g.moveTo(pts[0][0],B);pts.forEach(p=>g.lineTo(p[0],p[1]));g.lineTo(pts[pts.length-1][0],B);g.closePath();g.fillStyle=i?'rgba(31,111,178,.16)':'rgba(211,84,0,.16)';g.fill();}
+    /* synligt lys under kurven */
+    const v0=X(380e-9),v1=X(750e-9);if(v1>L&&v0<R&&v1-v0>1.5){const gr=g.createLinearGradient(v0,0,v1,0);for(let nm=380;nm<=750;nm+=10){const c3=wlRGB(nm);gr.addColorStop((nm-380)/370,'rgba('+c3.join(',')+',.55)');}
+      g.beginPath();g.moveTo(v0,B);const nS=90;for(let k=0;k<=nS;k++){const l=(380+370*k/nS)*1e-9;g.lineTo(X(l),Y(Mlam(l,c.T)*fac[i]));}g.lineTo(v1,B);g.closePath();g.fillStyle=gr;g.fill();}
+    /* Jorden set fra rummet */
+    if(opt.toa&&c.T>230&&c.T<340){const q=[];for(let k=0;k<=N*2;k++){const l=lamAt(k/2);q.push([X(l),Y(Mlam(l,Teff(l,c.T))*fac[i])]);}
+      g.beginPath();pts.forEach((p,k)=>k?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));for(let k=q.length-1;k>=0;k--)g.lineTo(q[k][0],q[k][1]);g.closePath();g.fillStyle='rgba(91,101,117,.28)';g.fill();
+      g.beginPath();q.forEach((p,k)=>k?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.strokeStyle='#3d4654';g.lineWidth=1.8;g.stroke();
+      if(hl.indexOf('toa')>=0){g.save();g.globalAlpha=.35;g.strokeStyle='#e0952a';g.lineWidth=12;g.stroke();g.restore();}}
+    /* glød om kurven */
+    if(hl.indexOf('curve'+c.key)>=0){const a=.75+.25*Math.sin(now*5);g.beginPath();pts.forEach((p,k)=>k?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.strokeStyle='rgba(224,149,42,'+(a*.45)+')';g.lineWidth=14;g.lineJoin='round';g.stroke();}
+    g.beginPath();pts.forEach((p,k)=>k?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.strokeStyle=c.col;g.lineWidth=2.6;g.lineJoin='round';if(i===magI)g.setLineDash([9,5]);g.stroke();g.setLineDash([]);
+    /* Solens målte spektrum */
+    if(opt.sunLines&&Math.abs(c.T-5772)<3){g.beginPath();const n2=1800;for(let k=0;k<=n2;k++){const l=mode==='lin'?lmaxX*(k+0.5)/n2:Math.pow(10,ax.lx0+(ax.lx1-ax.lx0)*k/n2);const x=X(l),y=Y(Mlam(l,c.T)*fSun(l)*fac[i]);k?g.lineTo(x,y):g.moveTo(x,y);}
+      g.strokeStyle='#1d2430';g.lineWidth=1.3;g.stroke();if(hl.indexOf('sun')>=0){g.save();g.globalAlpha=.35;g.strokeStyle='#e0952a';g.lineWidth=12;g.stroke();g.restore();}}});
+  g.restore();
+  /* akser */
+  g.strokeStyle='#1d2430';g.lineWidth=1.2;g.beginPath();g.moveTo(L,T-4);g.lineTo(L,B);g.lineTo(R,B);g.stroke();
+  const xl='*λ*/'+uname;const xw=rich(g,xl,R,B+(sm?32:36),sm?13:15,'#c0392b','right',true);
+  g.save();g.translate(sm?12:15,(T+B)/2);g.rotate(-PI/2);
+  let yw;if(mode==='lin'){g.font=(sm?'11px ':'12.5px ')+FONT;g.fillStyle='#5b6575';g.textAlign='center';g.textBaseline='middle';g.fillText('udstråling per bølgelængde',0,0);
+    yw=rich(g,'*M*_{*λ*}/('+yUnit+'W·m^{−2}·µm^{−1})',0,sm?14:19,sm?13:15,'#c0392b','center',true);yw=Math.max(yw,g.measureText('udstråling per bølgelængde').width);}
+  else{g.font=(sm?'11px ':'12.5px ')+FONT;g.fillStyle='#c0392b';g.textAlign='center';g.textBaseline='middle';const s='udstråling i forhold til toppen';g.fillText(s,0,sm?6:10);yw=g.measureText(s).width;}
+  g.restore();
+  if(hl.indexOf('yaxis')>=0)glowRect(g,2,(T+B)/2-yw/2-4,sm?30:38,yw+8,now);
+  if(hl.indexOf('xaxis')>=0)glowRect(g,L,B+2,R-L,sm?34:40,now);
+  /* spektrum-bånd øverst */
+  const sy=T-(sm?17:19),sh=8,v0=X(380e-9),v1=X(750e-9);
+  g.fillStyle='#e9ebef';g.fillRect(L,sy,R-L,sh);
+  if(v1>L&&v0<R){const a0=Math.max(L,v0),a1=Math.min(R,v1);const gr=g.createLinearGradient(v0,0,Math.max(v1,v0+1),0);for(let nm=380;nm<=750;nm+=10)gr.addColorStop((nm-380)/370,'rgb('+wlRGB(nm).join(',')+')');g.fillStyle=gr;g.fillRect(a0,sy,Math.max(1.5,a1-a0),sh);}
+  const fs='600 '+(sm?10:11)+'px '+FONT;g.font=fs;g.textBaseline='middle';
+  let irX=Math.max(L,v1)+4,uvX=Math.min(R,v0)-4;
+  if(v1-v0>70){g.fillStyle='#1d2430';g.textAlign='center';g.fillText('synligt lys',(v0+v1)/2,sy-7);}
+  else if(v1>L&&v0<R){const sw=g.measureText('synligt').width,cx=clamp((v0+v1)/2,L+sw/2,R-sw/2);g.fillStyle='#1d2430';g.textAlign='center';g.fillText('synligt',cx,sy-7);irX=Math.max(irX,cx+sw/2+10);uvX=Math.min(uvX,cx-sw/2-8);}
+  if(uvX-L>18){g.fillStyle='#7a5ab5';g.textAlign='right';g.fillText('UV',uvX,sy-7);}
+  if(R-irX>80){g.fillStyle='#a33b2a';g.textAlign='left';g.fillText('infrarødt (IR)',irX,sy-7);}
+  if(hl.indexOf('band')>=0)glowRect(g,Math.max(L,v0)-4,sy-14,Math.max(16,Math.min(R,v1)-Math.max(L,v0))+8,sh+16,now);
+  /* toppe og navne */
+  const tops=[];
+  cs.forEach((c,i)=>{const lp=lamMax(c.T),x=X(lp),vp=Mpk(c.T)*fac[i],y=Y(vp),yc=Math.max(T,y);tops.push({x,y,yc,vis:x>=L-1&&x<=R+1});
+    if(!(x>=L-1&&x<=R+1))return;
+    if(opt.peak){g.strokeStyle=c.col;g.lineWidth=1.3;g.setLineDash([5,4]);g.beginPath();g.moveTo(x,yc);g.lineTo(x,B);g.stroke();g.setLineDash([]);
+      if(y>=T){g.beginPath();g.arc(x,y,4.5,0,2*PI);g.fillStyle='#fff';g.fill();g.strokeStyle=c.col;g.lineWidth=2.4;g.stroke();}
+      const ty=B-10-i*20,right=x>R-(sm?110:150),pl='*λ*_{max} = '+fLamR(lp),pw=richW(g,pl,sm?13:15)+10;g.fillStyle='rgba(255,255,255,.86)';g.fillRect(right?x-7-pw+5:x+2,ty-(sm?14:16),pw,sm?19:22);rich(g,'*λ*_{max} = '+fLamR(lp),x+(right?-7:7),ty,sm?13:15,c.col,right?'right':'left',true,true);}
+    if(hl.indexOf('peak'+c.key)>=0)glowRing(g,x,yc,6,now);
+    /* navn ved kurven */
+    const lines=[];const nm=preName(c.T);lines.push((cs.length>1?c.key+': ':'')+(nm||fT(c.T).replace(/\u202F/g,' ')));if(nm)lines.push(fT(c.T).replace(/\u202F/g,' '));
+    if(i===magI)lines.push('forstørret × '+(magF<1e7?grp(magF):sciT(magF,1)));
+    let ly=Math.max(T+8+lines.length*16,yc-12);let lx=x,al='center';if(x>R-70){lx=x-8;al='right';}else if(x<L+60){lx=x+8;al='left';}
+    if(cs.length>1&&i===1&&Math.abs(tops[0].x-x)<90&&Math.abs(tops[0].yc-yc)<60){ly=Math.min(B-50,yc+lines.length*16+16);}
+    for(let k=lines.length-1;k>=0;k--){label(g,lines[k],lx,ly-(lines.length-1-k)*16,c.col,(k===0?'700 ':'600 ')+(sm?11:13)+'px '+FONT,al);}});
+  /* aflæsningslinje */
+  let curX=null;
+  if(opt.curOn&&opt.cur){const x=X(opt.cur);if(x>=L&&x<=R){curX=x;g.strokeStyle='#e0952a';g.lineWidth=2;g.beginPath();g.moveTo(x,T);g.lineTo(x,B);g.stroke();
+      cs.forEach((c,i)=>{const y=Y(Mlam(opt.cur,c.T)*fac[i]);if(y<T||y>B)return;g.beginPath();g.arc(x,y,4,0,2*PI);g.fillStyle=c.col;g.fill();g.strokeStyle='#fff';g.lineWidth=1.5;g.stroke();});
+      const s='*λ* = '+fLamR(opt.cur);g.font='bold 15px '+SERIF;const w=richW(g,s,sm?13:15)+18;const bx=clamp(x-w/2,L+2,R-w-2),by=T+4;
+      g.fillStyle='#fff';g.strokeStyle='#e0952a';g.lineWidth=2;g.beginPath();g.moveTo(bx+6,by);g.arcTo(bx+w,by,bx+w,by+24,6);g.arcTo(bx+w,by+24,bx,by+24,6);g.arcTo(bx,by+24,bx,by,6);g.arcTo(bx,by,bx+w,by,6);g.closePath();g.fill();g.stroke();
+      rich(g,s,bx+9,by+17,sm?13:15,'#7a4500','left',false,true);
+      g.beginPath();g.arc(x,B,8,0,2*PI);g.fillStyle='#fff';g.fill();g.strokeStyle='#e0952a';g.lineWidth=3;g.stroke();
+      g.strokeStyle='#e0952a';g.lineWidth=1.5;g.beginPath();g.moveTo(x-3,B);g.lineTo(x+3,B);g.stroke();
+      if(hl.indexOf('cursor')>=0)glowRing(g,x,B,8,now);}}
+  return{X,Xi,L,R,T,B,mode,magI,magF,curX,lmin,lmaxX};}
+
+/* ---------- styring ---------- */
+const sl=v=>lg(v);
+function setT(key,T,opts){T=clamp(T,TMIN,TMAX);delete TW[key];S[key]=T;}
+function roundT(T){return S.unit==='C'?Math.round(T-273.15)+273.15:Math.round(T);}
+function chipRow(host,key){host.innerHTML='';PRE.forEach(p=>{const b=document.createElement('button');b.type='button';b.dataset.T=p.T;b.dataset.k=p.k;b.addEventListener('click',()=>{userTouch(key);tweenT(key,p.T,0.9);kick();});host.appendChild(b);});}
+chipRow($('chA'),'TA');chipRow($('chB'),'TB');
+function chipLabels(){['chA','chB'].forEach(h=>{[...$(h).children].forEach(b=>{const p=PRE.find(q=>q.k===b.dataset.k);b.textContent=p.n+' ('+fT(p.T).replace(/\u202F/g,' ')+')';});});}
+function tinVal(T){return S.unit==='C'?grp(Math.round(T-273.15)):grp(Math.round(T));}
+function onSlide(key,inp){inp.addEventListener('input',()=>{userTouch(key);S[key]=clamp(roundT(Math.pow(10,+inp.value)),TMIN,TMAX);kick();});}
+onSlide('TA',$('sA'));onSlide('TB',$('sB'));
+function numIn(s){s=String(s).trim().replace(/\s|\u202F/g,'').replace(',','.').replace('−','-');if(!/^[-+]?\d*\.?\d+$/.test(s))return NaN;return parseFloat(s);}
+function onTin(key,el){const go=()=>{const v=numIn(el.value);if(!isFinite(v)){el.value=tinVal(S[key]);return;}let T=S.unit==='C'?v+273.15:v;
+    if(T<TMIN||T>TMAX){toast('Appletten går fra 50 K til 30 000 K ('+grp(TMIN-273.15)+' °C til '+grp(TMAX-273.15)+' °C).');T=clamp(T,TMIN,TMAX);}
+    userTouch(key);tweenT(key,T,0.6);el.blur();kick();};
+  el.addEventListener('change',go);el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go();}});}
+onTin('TA',$('iA'));onTin('TB',$('iB'));
+$('uK').addEventListener('click',()=>{narPause();S.unit='K';kick();});
+$('uC').addEventListener('click',()=>{narPause();S.unit='C';kick();});
+$('cCmp').addEventListener('change',e=>{userTouch();setCmp(e.target.checked);kick();});
+function setCmp(on){S.cmp=on;if(!on&&S.mode===2&&S.sub!=='c'){}updateAxes(true);}
+$('cPeak').addEventListener('change',e=>{userTouch();S.peak=e.target.checked;kick();});
+$('cCur').addEventListener('change',e=>{userTouch();S.curOn=e.target.checked;if(S.curOn&&!S.cur)S.cur=defaultCur();kick();});
+$('cLock').addEventListener('change',e=>{userTouch();S.lock=e.target.checked;if(!S.lock)updateAxes(false);kick();});
+$('axLin').addEventListener('click',()=>{userTouch();S.ax='lin';updateAxes(true);kick();});
+$('axLog').addEventListener('click',()=>{userTouch();S.ax='log';updateAxes(true);kick();});
+function defaultCur(){return AXD.mode==='lin'?Number((AXD.x1*0.72).toPrecision(2)):Math.pow(10,lerp(AXD.lx0,AXD.lx1,0.75));}
+/* Del 2-indstillinger */
+$('oAtm').addEventListener('change',e=>{S.atm=e.target.checked;kick();});
+$('oNoGH').addEventListener('change',e=>{S.noGH=e.target.checked;if(!S.cmp)setCmp(true);tweenT('TB',S.noGH?255.15:288.15,1.2);kick();});
+$('oArea').addEventListener('change',e=>{S.area=e.target.checked;kick();});
+$('oSun').addEventListener('change',e=>{S.sunLines=e.target.checked;if(S.sunLines&&Math.abs(S.TA-5772)>=3&&!(S.cmp&&Math.abs(S.TB-5772)<3)){tweenT('TA',5772,1);}kick();});
+$('oToa').addEventListener('change',e=>{S.toa=e.target.checked;if(S.toa){if(!S.cmp){S.cmp=true;}if(!(S.TB>230&&S.TB<340))tweenT('TB',288.15,1);if(S.ax==='lin')S.ax='auto';updateAxes(true);}kick();});
+document.querySelectorAll('#realList details').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)document.querySelectorAll('#realList details').forEach(o=>{if(o!==d)o.open=false;});fitSoon();}));
+
+/* tween af temperaturer (logaritmisk) og af aflæsningslinjen */
+function tweenT(key,to,dur){if(key!=='cur')to=clamp(to,TMIN,TMAX);if(reduce||!dur){S[key]=to;delete TW[key];if(key!=='cur')updateAxes(false);return;}
+  let from=S[key];if(key==='cur'&&!from)from=to*1.6;TW[key]={from,to,t0:performance.now(),dur:dur*1000};}
+function tickTW(now){let act=false;for(const k in TW){const w=TW[k],f=clamp((now-w.t0)/w.dur,0,1),e=f<.5?2*f*f:1-Math.pow(-2*f+2,2)/2;
+    S[k]=Math.exp(lerp(Math.log(w.from),Math.log(w.to),e));if(f>=1){S[k]=w.to;delete TW[k];}act=true;}return act;}
+
+/* træk i grafen */
+let geo=null;
+function local(el,e){const r=el.getBoundingClientRect();return[(e.clientX-r.left)*el.clientWidth/r.width,(e.clientY-r.top)*el.clientHeight/r.height];}
+(()=>{const el=$('cvG');let on=false;
+  const set=p=>{if(!geo)return;const x=clamp(p[0],geo.L,geo.R);const l=geo.Xi(x);S.cur=Number(Math.max(l,1e-9).toPrecision(3));S.curOn=true;delete TW.cur;kick();};
+  el.addEventListener('pointerdown',e=>{if(!geo)return;const p=local(el,e);if(p[0]<geo.L-10||p[1]>geo.B+30)return;on=true;narPause();try{el.setPointerCapture(e.pointerId);}catch(_){}e.preventDefault();set(p);});
+  el.addEventListener('pointermove',e=>{const p=local(el,e);if(on){set(p);return;}if(geo)el.style.cursor=(geo.curX!==null&&Math.abs(p[0]-geo.curX)<12)?'ew-resize':'crosshair';});
+  const up=()=>{on=false;};el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);
+  el.addEventListener('keydown',e=>{if(!geo||!S.curOn||!S.cur)return;if(e.key==='ArrowLeft'||e.key==='ArrowRight'){const x=geo.X(S.cur)+(e.key==='ArrowRight'?2:-2);set([x,0]);e.preventDefault();e.stopPropagation();}});})();
+
+/* ---------- kort og beregninger ---------- */
+const lamH='<span class="m"><i>λ</i><sub>max</sub></span>';
+function crow(id,k,v,cls){return'<div class="crow'+(cls?' '+cls:'')+'" id="'+id+'"><span class="k">'+k+'</span><span class="v">'+v+'</span></div>';}
+function twoLines(f){const cs=curves();return cs.map(c=>'<div'+(cs.length>1?' class="c'+c.key+'"':'')+'>'+(cs.length>1?c.key+': ':'')+f(c.T)+'</div>').join('');}
+let lastKey='';
+function renderCards(){const key=[S.TA,S.TB,S.cmp,S.unit,S.mode,S.sub,S.peak].join('|');if(key===lastKey)return;lastKey=key;
+  const hid='<span style="color:var(--muted);font-weight:400">skjult – aflæs selv</span>';
+  $('vLam').innerHTML=S.peak?twoLines(T=>fLam(lamMax(T))):hid;
+  $('vOmr').innerHTML=S.peak?twoLines(T=>{const l=lamMax(T),r=region(l);return r.s==='synligt'?'synligt lys ('+lamName(l*1e9)+')':r.t;}):hid;
+  $('vFarve').innerHTML=twoLines(T=>'<span class="sw" style="background:rgb('+bbRGB(T).join(',')+')"></span>'+bbName(T));
+  const cs=curves();let h=crow('wForm','Wiens forskydningslov','<span class="m"><i>λ</i><sub>max</sub> = <i>b</i>/<i>T</i></span>  med  <span class="m"><i>b</i> = 2,898·10<sup>−3</sup> m·K</span>','form');
+  if(!S.peak)h+=crow('wHid','','Beregningen er skjult, når <b>Vis '+lamH+'</b> er slået fra.');else cs.forEach(c=>{const l=lamMax(c.T);h+=crow('w'+c.key,(cs.length>1?'<b class="c'+c.key+'">'+c.key+'</b>: ':'')+'<span class="m"><i>T</i></span> = '+fTK(c.T)+NB+'K','<span class="m"><i>λ</i><sub>max</sub> = 2,898·10<sup>−3</sup> m·K / '+fTK(c.T)+NB+'K = '+sciH(l,3)+NB+'m = '+fLam(l)+'</span>');});
+  if(S.unit==='C')h+=crow('wNote','Husk','Temperaturen skal være i kelvin: '+fT(cs[0].T,'C')+' = '+fTK(cs[0].T)+NB+'K','warn');
+  $('wienBody').innerHTML=h;
+  /* Stefan–Boltzmann */
+  let s=crow('sbForm','Stefan–Boltzmanns lov','<span class="m"><i>M</i> = <i>σ</i>·<i>T</i><sup> 4</sup></span>  med  <span class="m"><i>σ</i> = 5,67·10<sup>−8</sup> W·m<sup>−2</sup>·K<sup>−4</sup></span>','form');
+  cs.forEach(c=>{s+=crow('sb'+c.key,'<b class="c'+c.key+'">'+c.key+'</b>: '+fTK(c.T)+NB+'K','<span class="m"><i>M</i><sub>'+c.key+'</sub> = 5,67·10<sup>−8</sup> W·m<sup>−2</sup>·K<sup>−4</sup>·('+fTK(c.T)+NB+'K)<sup>4</sup> = '+sciH(SIG*Math.pow(c.T,4),3)+NB+'W/m<sup>2</sup></span>');});
+  if(cs.length>1)s+=crow('sbR','Forholdet','<span class="m"><i>M</i><sub>A</sub>/<i>M</i><sub>B</sub> = (<i>T</i><sub>A</sub>/<i>T</i><sub>B</sub>)<sup>4</sup> = ('+fTK(cs[0].T)+'/'+fTK(cs[1].T)+')<sup>4</sup> = '+sigF(Math.pow(cs[0].T/cs[1].T,4),3)+'</span>');
+  $('sbBody').innerHTML=s;fitSoon();}
+
+/* ---------- TEGNELØKKE ---------- */
+let running=false;
+function specOpt(now){return{cs:curves(),ax:AXD,peak:S.peak,curOn:S.curOn,cur:S.cur,hl:HL,now,mag:magOn(),area:S.mode===2&&S.sub==='b'&&S.area,atm:S.mode===2&&S.sub==='a'&&S.atm,toa:S.mode===2&&S.sub==='c'&&S.toa,sunLines:S.mode===2&&S.sub==='c'&&S.sunLines};}
+function loop(ts){let act=false;const now=ts/1000;
+  if(tickTW(ts)){act=true;}updateAxes(false);if(tickAxes(ts))act=true;
+  if(narTick(ts))act=true;
+  geo=drawSpec(CV.cvG,specOpt(now));if(HL.length)act=true;
+  syncUI();if(OP.open){OP.sync();if(OP.pulsing)act=true;}
+  if(act)requestAnimationFrame(loop);else running=false;}
+function kick(){if(!running){running=true;requestAnimationFrame(loop);}}
+function userTouch(key){if(key)delete TW[key];narPause();}
+const HLEL={sliderA:'rowA',rowB:'rowB',lockT:'tglLock',unit:'segUnit',bOpg:'bOpg',peakT:'tglPeak',curT:'tglCur',cmpT:'tglCmp',axSeg:'segAx',wForm:'wForm',wA:'wA',wB:'wB',noGH:'tglNoGH',atmT:'tglAtm',cLam:'cLam',cOmr:'cOmr',cFarve:'cFarve',chA:'chA'};
+function syncUI(){const cs=curves();
+  $('sA').value=sl(S.TA);$('sB').value=sl(S.TB);
+  if(document.activeElement!==$('iA'))$('iA').value=tinVal(S.TA);if(document.activeElement!==$('iB'))$('iB').value=tinVal(S.TB);
+  $('uA').textContent=$('uB').textContent=S.unit==='C'?'°C':'K';
+  $('uK').classList.toggle('on',S.unit==='K');$('uC').classList.toggle('on',S.unit==='C');
+  if(syncUI.u!==S.unit){syncUI.u=S.unit;chipLabels();lastKey='';}
+  [['chA','TA'],['chB','TB']].forEach(([h,k])=>[...$(h).children].forEach(b=>b.classList.toggle('on',Math.abs(+b.dataset.T-S[k])<0.3)));
+  $('lbA').textContent=S.cmp?'Spektrum A':'Temperatur';
+  $('cCmp').checked=S.cmp;$('blkB').hidden=!S.cmp;$('cPeak').checked=S.peak;$('cCur').checked=S.curOn;$('cLock').checked=S.lock;
+  const em=effMode();$('segAx').hidden=!S.cmp||(S.mode===2&&S.sub==='b');$('axLin').classList.toggle('on',em==='lin');$('axLog').classList.toggle('on',em==='log');
+  $('oAtm').checked=S.atm;$('oNoGH').checked=S.noGH;$('oArea').checked=S.area;$('oSun').checked=S.sunLines;$('oToa').checked=S.toa;
+  for(const k in HLEL){const el=$(HLEL[k]);if(el)el.classList.toggle('hlel',HL.indexOf(k)>=0);}
+  renderCards();
+  let n;if(AXD.mode==='log')n='Logaritmisk λ-akse: der er lige langt fra 1 til 10 µm som fra 10 til 100 µm. Hver kurve er skaleret, så toppene er lige høje.';
+  else if(geo&&geo.magI>=0)n='Kurve '+(geo.magI?'B':'A')+' er forstørret '+(geo.magF<1e7?grp(geo.magF):sciT(geo.magF,1))+' gange op ad andenaksen, så den kan ses. Den stiplede linje er forstørret.';
+  else n=S.lock?'Akserne er låst. Fjern fluebenet ved »Lås akserne«, så skifter de selv igen.':'Akserne skifter selv, så hele kurven altid kan ses. Klik i grafen for at aflæse en bølgelængde.';
+  if(S.mode===2&&S.sub==='a'&&S.atm)n='De grå områder viser skematisk, hvor atmosfærens gasser absorberer meget af strålingen.';
+  if(S.mode===2&&S.sub==='c'&&(S.toa||S.sunLines))n='Skematisk – ikke målte data. '+(S.toa?'Det grå område er den stråling fra overfladen, som atmosfæren holder tilbage. ':'')+(S.sunLines?'Absorptionslinjerne er tegnet bredere, end de er.':'');
+  if($('gNote').textContent!==n)$('gNote').textContent=n;}
+
+/* =====================================================================
+   DEL 1: FORTÆLLING (speak)
+   Hver linje er ét afsnit i speaken. »say« er det, Jeppe siger; »show« er skærmteksten.
+   ===================================================================== */
+const ST1=['Hvad ser du?','Toppen','Varmere og koldere','Kelvin og celsius','Jorden','Solen og Jorden','Wiens forskydningslov','Din tur'];
+const lm='<span class="m"><i>λ</i><sub>max</sub></span>';
+const SEG=[
+ {s:0,show:'Alle ting udsender stråling, fordi de har en temperatur. Kurven viser strålingen fra et sort legeme, der er lige så varmt som Solens overflade.',a:{f:['secG'],hl:['curveA'],TA:5772,cmp:false,unit:'K',peak:false,curOn:false,cur:null,lock:false,ax:'auto'}},
+ {s:0,show:'Ud ad førsteaksen er bølgelængden <span class="m"><i>λ</i></span> i vakuum, målt i nanometer.',say:'Ud ad første-aksen er bølgelængden lambda i vakuum, målt i nanometer.',a:{hl:['xaxis']}},
+ {s:0,show:'Op ad andenaksen er udstrålingen per bølgelængde. Jo højere kurven er, jo mere stråling udsendes der.',say:'Op ad anden-aksen er udstrålingen per bølgelængde. Jo højere kurven er, jo mere stråling udsendes der.',a:{hl:['yaxis']}},
+ {s:0,show:'Det farvede bånd er synligt lys. Ved kortere bølgelængder er strålingen ultraviolet, og ved længere er den infrarød.',a:{hl:['band']}},
+ {s:1,show:'Kurven har en top. Bølgelængden ved toppen kaldes '+lm+'. Her er udstrålingen størst.',say:'Kurven har en top. Bølgelængden ved toppen kaldes lambda-max. Her er udstrålingen størst.',a:{f:['secG'],peak:true,hl:['peakA']}},
+ {s:1,show:'For Solen er '+lm+' = 502 nm. Det svarer til blågrønt lys.',say:'For Solen er lambda-max lig med 502 nanometer. Det svarer til blågrønt lys.',a:{f:['secG','secCards'],hl:['peakA','cLam','cOmr']}},
+ {s:1,show:'Solen ser alligevel hvid ud, fordi den udsender alle farver af synligt lys.',a:{f:['secG','secCards'],hl:['band','cFarve']}},
+ {s:1,show:'Du kan også selv aflæse en bølgelængde. Træk i den orange aflæsningslinje.',a:{f:['secG'],curOn:true,cur:[[1.6e-6,502e-9],2.5],hl:['cursor','curT']},min:3},
+ {s:2,show:'Nu låser vi akserne og skruer op for temperaturen.',a:{f:['secG','secCtl'],curOn:false,lock:true,hl:['lockT','sliderA']}},
+ {s:2,show:'Ved 7 000 K bliver kurven meget højere, og toppen flytter mod kortere bølgelængder.',say:'Ved 7000 kelvin bliver kurven meget højere, og toppen flytter mod kortere bølgelængder.',a:{TA:[7000,3],hl:['peakA','sliderA']},min:4},
+ {s:2,show:'Ved 3 500 K er kurven meget lavere, og toppen flytter ud i det infrarøde.',say:'Ved 3500 kelvin er kurven meget lavere, og toppen flytter ud i det infrarøde.',a:{TA:[3500,3],hl:['peakA','sliderA']},min:4},
+ {s:2,show:'Jo varmere legemet er, jo kortere er bølgelængden ved toppen, og jo mere stråling udsender det.',a:{hl:['peakA','curveA']}},
+ {s:2,show:'Når akserne ikke er låst, skifter de selv, så hele kurven altid kan ses.',a:{lock:false,hl:['lockT','yaxis']}},
+ {s:3,show:'Temperaturen kan skrives i kelvin eller i grader celsius.',a:{f:['secCtl'],TA:[5772,1.5],hl:['unit']}},
+ {s:3,show:'0 K er det absolut koldeste, og det svarer til −273,15 °C.',say:'Nul kelvin er det absolut koldeste, og det svarer til minus 273 komma 15 grader celsius.',a:{hl:['unit']}},
+ {s:3,show:'Man omregner fra grader celsius til kelvin ved at lægge 273,15 til: <span class="m"><i>T</i>/K = <i>t</i>/°C + 273,15</span>.',say:'Man omregner fra grader celsius til kelvin ved at lægge 273 komma 15 til.',a:{hl:['unit']}},
+ {s:3,show:'Solens overflade er 5 772 K. Det er 5 499 °C.',say:'Solens overflade er 5772 kelvin. Det er 5499 grader celsius.',a:{unit:'C',hl:['sliderA']}},
+ {s:4,show:'Jordens overflade har en middeltemperatur på cirka 15 °C.',say:'Jordens overflade har en middeltemperatur på cirka 15 grader celsius.',a:{f:['secG','secCtl'],unit:'C',TA:[288.15,3.5],hl:['sliderA','curveA']},min:4.5},
+ {s:4,show:'Se, hvordan akserne har skiftet. Nu er bølgelængden målt i mikrometer.',a:{f:['secG'],hl:['xaxis']}},
+ {s:4,show:'Jordens '+lm+' er cirka 10 µm. Det er infrarød stråling, som vi ikke kan se.',say:'Jordens lambda-max er cirka 10 mikrometer. Det er infrarød stråling, som vi ikke kan se.',a:{f:['secG','secCards'],hl:['peakA','cOmr']}},
+ {s:4,show:'Kurven er også meget lavere end Solens. Jorden udsender meget mindre stråling per kvadratmeter.',a:{f:['secG'],hl:['yaxis']}},
+ {s:5,show:'Nu sammenligner vi Solen og Jorden i samme graf.',a:{f:['secG','secCtl'],cmp:true,TA:5772,TB:288.15,ax:'log',unit:'K',hl:['curveA','curveB','cmpT']}},
+ {s:5,show:'Førsteaksen er nu logaritmisk. Så er der plads til både meget korte og meget lange bølgelængder.',say:'Første-aksen er nu logaritmisk. Så er der plads til både meget korte og meget lange bølgelængder.',a:{f:['secG'],hl:['xaxis','axSeg']}},
+ {s:5,show:'Hver kurve er gjort lige høj, så man kan se, hvor toppene ligger.',a:{hl:['yaxis','peakA','peakB']}},
+ {s:5,show:'Solens stråling er mest synligt lys, mens Jordens stråling er infrarød. Kurverne overlapper næsten ikke.',a:{hl:['band','curveB']}},
+ {s:5,show:'Det er nøglen til drivhuseffekten. Den kan du læse mere om i Del 2 af appletten.',a:{hl:[]}},
+ {s:6,show:'Der er en enkel sammenhæng mellem '+lm+' og temperaturen. Den kaldes Wiens forskydningslov.',say:'Der er en enkel sammenhæng mellem lambda-max og temperaturen. Den kaldes Wiens forskydningslov.',a:{f:['secWien'],hl:['wForm']}},
+ {s:6,show:lm+' er lig med Wiens konstant divideret med temperaturen <span class="m"><i>T</i></span> målt i kelvin.',say:'Lambda-max er lig med Wiens konstant divideret med temperaturen te målt i kelvin.',a:{hl:['wForm']}},
+ {s:6,show:'Wiens konstant er 2,898·10<sup>−3</sup> m·K.',say:'Wiens konstant er 2 komma 898 gange 10 i minus tredje meter gange kelvin.',a:{hl:['wForm']}},
+ {s:6,show:'Brug aldrig grader celsius i formlen. For Jorden giver det 10,1 µm.',say:'Brug aldrig grader celsius i formlen. For Jorden giver det 10 komma 1 mikrometer.',a:{f:['secWien','secG'],hl:['wB','peakB']}},
+ {s:7,show:'Nu er det din tur. Tryk på Opgaver, og løs opgaverne til din portfolio.',a:{f:[],hl:['bOpg']}}
+];
+/* Jeppes udtale: fælles erstatninger for speak, browserstemme og tidsmærker */
+function SAYFIX(s){return String(s).replace(/<[^>]+>/g,'').replace(/\u202F/g,' ').replace(/\bJord/g,'Jor').replace(/\bjord/g,'jor').replace(/\bnoten\b/g,'nooten').replace(/rækkefølge/g,'ræjkefølge');}
+SEG.forEach(x=>{x.say=SAYFIX(x.say||x.show);});
+const STEP1=ST1.map((_,i)=>SEG.findIndex(x=>x.s===i));
+/* Når Jeppes lyd er lagt ind: TIMES = starttid (sek.) for hver linje i SEG */
+const TIMES=[];
+const au=$('tale');
+(()=>{try{if(!AUDIO_B64)return;const bin=atob(AUDIO_B64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);au.src=URL.createObjectURL(new Blob([u],{type:'audio/mp4'}));au.load();}catch(e){}})();
+const hasAudio=()=>!!(au.getAttribute('src'))&&TIMES.length===SEG.length;
+let ttsV=null;function pickV(){try{const vs=speechSynthesis.getVoices();ttsV=vs.find(v=>/^da/i.test(v.lang))||null;}catch(e){ttsV=null;}}
+if('speechSynthesis'in window){pickV();try{speechSynthesis.onvoiceschanged=pickV;}catch(e){}}
+const N={i:-1,playing:false,mode:'none',t0:0,est:3,done:true,wd:null};
+function estDur(x){return Math.max(x.min||0,1.2+x.say.length*0.062);}
+function applyAct(a,instant){if(!a)return;
+  ['cmp','unit','peak','curOn','lock','ax'].forEach(k=>{if(k in a)S[k]=a[k];});
+  ['TA','TB'].forEach(k=>{if(k in a){const v=a[k],to=Array.isArray(v)?v[0]:v,dur=Array.isArray(v)?v[1]:1.2;if(instant)setT(k,to);else tweenT(k,to,dur);}});
+  if('cur'in a){const v=a.cur;if(v===null){S.cur=null;delete TW.cur;}else if(Array.isArray(v)){const fr=Array.isArray(v[0])?v[0][0]:null,to=Array.isArray(v[0])?v[0][1]:v[0];
+      if(instant){S.cur=to;delete TW.cur;}else{if(fr)S.cur=fr;tweenT('cur',to,v[1]);}}else{S.cur=v;delete TW.cur;}}
+  if('hl'in a)HL=a.hl.slice();if('f'in a)focusEls(a.f);
+  if(instant)updateAxes(true);fitSoon();}
+function replayTo(i){HL=[];for(let k=0;k<i;k++)applyAct(SEG[k].a,true);}
+function focusEls(ids){document.querySelectorAll('.card').forEach(c=>{c.classList.toggle('focus',ids.indexOf(c.id)>=0);});}
+function capRender(){const i=N.i<0?0:N.i,s=SEG[i].s,first=STEP1[s];$('caph1').textContent='Trin '+(s+1)+' af '+ST1.length+' · '+ST1[s];
+  const parts=[];for(let k=first;k<SEG.length&&SEG[k].s===s;k++){const cls=!N.playing?'':(k<i?'past':k===i?'cur':'fut');parts.push('<span data-k="'+k+'" class="'+cls+'">'+SEG[k].show+'</span>');}
+  $('capt1').innerHTML=parts.join(' ');$('capt1').classList.toggle('clickable',!N.playing);$('nPrev1').disabled=s===0;$('nNext1').textContent=s===ST1.length-1?'Forfra ↺':'Næste ▶';}
+/* uden lyd: klik på en sætning for at se dens markering */
+$('capt1').addEventListener('click',e=>{if(N.playing)return;const sp=e.target.closest('span[data-k]');if(!sp)return;const k=+sp.dataset.k;
+  let h=null,f=null;for(let j=k;j>=STEP1[SEG[k].s];j--){const a=SEG[j].a||{};if(!h&&a.hl)h=a.hl;if(!f&&a.f)f=a.f;}HL=(h||[]).slice();if(f)focusEls(f);
+  [...$('capt1').children].forEach(c=>c.classList.toggle('cur',c===sp));kick();});
+function progRender(now){let f=0;if(N.i>=0){let fr=0;if(N.playing&&N.mode==='audio'){const t=au.currentTime,a=TIMES[N.i],b=TIMES[N.i+1]||au.duration||a+3;fr=clamp((t-a)/(b-a),0,1);}
+    else if(N.playing)fr=clamp((now-N.t0)/1000/N.est,0,1);else fr=1;f=(N.i+fr)/SEG.length;}
+  $('fill1').style.width=(f*100)+'%';$('prog1').setAttribute('aria-valuenow',Math.round(f*100));}
+function ttsText(s){return s.replace(/\bJor\b/g,'Jord').replace(/\bJoren/g,'Jorden').replace(/\bjor\b/g,'jord').replace(/\bJorens/g,'Jordens').replace(/nooten/g,'noten').replace(/ræjkefølge/g,'rækkefølge');}
+function speakSeg(i){if(N.mode!=='tts')return;N.done=false;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(ttsText(SEG[i].say));u.lang='da-DK';if(ttsV)u.voice=ttsV;u.rate=0.95;
+    const fin=()=>{if(N.i===i)N.done=true;};u.onend=fin;u.onerror=fin;speechSynthesis.speak(u);}catch(e){N.done=true;}
+  clearTimeout(N.wd);N.wd=setTimeout(()=>{if(N.i===i)N.done=true;},(estDur(SEG[i])*2+4)*1000);}
+function goSeg(i,instantPrev){N.i=i;if(instantPrev)replayTo(i);applyAct(SEG[i].a,false);N.t0=performance.now();N.est=estDur(SEG[i]);N.done=N.mode!=='tts';
+  if(N.playing)speakSeg(i);if(N.playing&&N.mode==='audio'&&Math.abs(au.currentTime-TIMES[i])>0.4)au.currentTime=TIMES[i];capRender();playBtn();kick();}
+function narTick(now){if(S.mode!==1)return false;progRender(now);if(!N.playing)return false;
+  if(N.mode==='audio'){const t=au.currentTime;let k=0;while(k+1<SEG.length&&TIMES[k+1]<=t)k++;
+    if(k!==N.i){N.i=k;applyAct(SEG[k].a,false);capRender();}if(au.ended)narStop(true);return true;}
+  const el=(now-N.t0)/1000;if(N.done&&el>=Math.max(SEG[N.i].min||0,N.mode==='tts'?0.35:N.est)){
+    if(N.i+1<SEG.length)goSeg(N.i+1);else narStop(true);}
+  return true;}
+function narPlay(){if(S.mode!==1)setMode(1);if(OP.open)OP.close();N.mode=hasAudio()?'audio':(ttsV?'tts':'silent');N.playing=true;
+  if(N.i<0||N.i>=SEG.length-1)N.i=0;
+  if(N.mode==='audio'){au.currentTime=TIMES[N.i]||0;const p=au.play();if(p&&p.catch)p.catch(()=>{N.mode='silent';});}
+  goSeg(N.i,true);playBtn();}
+function narPause(){if(!N.playing)return;N.playing=false;try{speechSynthesis.cancel();}catch(e){}try{au.pause();}catch(e){}capRender();playBtn();}
+function narStop(end){N.playing=false;try{speechSynthesis.cancel();}catch(e){}try{au.pause();}catch(e){}if(end){HL=[];focusEls([]);}capRender();playBtn();}
+function playBtn(){$('nPlay').textContent=N.playing?'❚❚ Pause':(N.i>0?'▶ Fortsæt':'▶ Hør forklaringen');
+  $('vnote').textContent=hasAudio()?'Stemme: Jeppe':(ttsV?'Midlertidig computerstemme – Jeppes oplæsning kommer senere. Pil højre/venstre skifter trin.':'Ingen dansk stemme fundet: teksten kører uden lyd. Pil højre/venstre skifter trin.');}
+function gotoStep(s){const i=STEP1[s];if(N.playing){goSeg(i,true);}else{N.i=i;replayTo(i);
+    for(let k=i;k<SEG.length&&SEG[k].s===s;k++)applyAct(SEG[k].a,true);
+    const a0=SEG[i].a||{};HL=(a0.hl||[]).slice();if(a0.f)focusEls(a0.f);N.i=i;capRender();playBtn();kick();}}
+$('nPlay').addEventListener('click',()=>{if(N.playing)narPause();else narPlay();});
+$('nNext1').addEventListener('click',()=>{const s=SEG[Math.max(0,N.i)].s;gotoStep(s<ST1.length-1?s+1:0);});
+$('nPrev1').addEventListener('click',()=>{const s=SEG[Math.max(0,N.i)].s;gotoStep(Math.max(0,s-1));});
+(()=>{const p=$('prog1');ST1.forEach((_,s)=>{if(!s)return;const t=document.createElement('div');t.className='tick';t.style.left=(STEP1[s]/SEG.length*100)+'%';p.appendChild(t);});
+  p.addEventListener('click',e=>{const r=p.getBoundingClientRect(),f=clamp((e.clientX-r.left)/r.width,0,0.999);let s=0;for(let k=0;k<ST1.length;k++)if(STEP1[k]/SEG.length<=f)s=k;gotoStep(s);});})();
+/* speak-eksport (kun med #speak i adressen) */
+(()=>{if(location.hash!=='#speak')return;const a=document.createElement('a');a.textContent=' · Hent speak (speak_sortlegeme.txt)';a.href='#speak';
+  a.addEventListener('click',e=>{e.preventDefault();const txt=SEG.map(x=>x.say).join('\n\n')+'\n';const u=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));const d=document.createElement('a');d.href=u;d.download='speak_sortlegeme.txt';document.body.appendChild(d);d.click();setTimeout(()=>{URL.revokeObjectURL(u);d.remove();},2000);});
+  $('spk').appendChild(a);})();
+
+/* =====================================================================
+   DEL 2
+   ===================================================================== */
+const STEPS2={
+ a:[{h:'Sollys ind',p:'Solens overflade er 5 772 K. Næsten al Solens stråling har bølgelængder under 4 µm, og toppen ligger i synligt lys. Den kaldes kortbølget stråling.',a:{TA:5772,TB:288.15,noGH:false,atm:false,hl:['curveA','band']}},
+    {h:'Varmestråling ud',p:'Jordens overflade er i middel 15 °C. Næsten al Jordens stråling har bølgelængder over 4 µm, og toppen ligger ved 10 µm i det infrarøde. Den kaldes langbølget stråling. De to kurver overlapper næsten ikke.',a:{TB:288.15,noGH:false,atm:false,hl:['curveB','peakB']}},
+    {h:'Atmosfæren',p:'Synligt lys slipper næsten uhindret gennem atmosfæren. Men vanddamp (H₂O) og CO₂ absorberer meget af den infrarøde stråling – se de grå områder. Kun gennem »vinduet« fra 8 til 13 µm slipper meget af Jordens varmestråling direkte ud i rummet.',a:{atm:true,noGH:false,TB:288.15,hl:['curveB','atmT']}},
+    {h:'Drivhuseffekten',p:'Molekylerne, der har absorberet varmestrålingen, udsender selv infrarød stråling i alle retninger – også tilbage mod Jorden. Derfor er overfladen varmere, end den ellers ville være. Sæt flueben ved »Jorden uden drivhuseffekt«: Så ville middeltemperaturen være cirka −18 °C, og toppen ville flytte lidt mod længere bølgelængder.',a:{atm:true,hl:['noGH','peakB']}},
+    {h:'Mere CO₂',p:'Med mere CO₂ i atmosfæren bliver det sværere for varmestrålingen at slippe ud. Så stiger temperaturen, indtil Jorden igen udstråler lige så meget energi, som den modtager fra Solen. Under »Hvor rigtig er modellen?« kan du se Jordens udstråling set fra rummet.',a:{atm:true,noGH:false,TB:288.15,hl:[]}}],
+ b:[{h:'Arealet under kurven',p:'Arealet under kurven er den samlede udstråling per areal <span class="m"><i>M</i></span>: den effekt, som én kvadratmeter af overfladen udsender. Den måles i W/m<sup>2</sup>. Her er A 6 000 K og B 3 000 K.',a:{TA:6000,TB:3000,area:true,hl:['curveA','curveB']}},
+    {h:'Stefan–Boltzmanns lov',p:'Udstrålingen per areal afhænger kun af temperaturen: <span class="m"><i>M</i> = <i>σ</i>·<i>T</i><sup> 4</sup></span>, hvor <span class="m"><i>σ</i> = 5,67·10<sup>−8</sup> W·m<sup>−2</sup>·K<sup>−4</sup></span> er Stefan–Boltzmanns konstant. Temperaturen skal være i kelvin.',a:{TA:6000,TB:3000,hl:[]}},
+    {h:'Dobbelt så varm',p:'A er dobbelt så varm som B. Derfor udsender A 2<sup>4</sup> = 16 gange så meget per kvadratmeter. Sammenlign de to farvede arealer.',a:{TA:6000,TB:3000,area:true,hl:['curveA']}},
+    {h:'Sirius A og Solen',p:'Sirius A udsender (9 940/5 772)<sup>4</sup> = 8,8 gange så meget per kvadratmeter som Solen. Hele stjernens effekt afhænger også af overfladens areal: <span class="m"><i>P</i> = 4π·<i>R</i><sup>2</sup>·<i>σ</i>·<i>T</i><sup> 4</sup></span> (se opgave 5).',a:{TA:9940,TB:5772,hl:['curveA','curveB']}}]};
+let step2=0;
+function showStep2(i){const L2=STEPS2[S.sub];if(!L2)return;step2=clamp(i,0,L2.length-1);const s=L2[step2];
+  $('caph2').textContent='Trin '+(step2+1)+' af '+L2.length+' · '+s.h;$('capt2').innerHTML=s.p;
+  const a=s.a||{};['atm','noGH','area'].forEach(k=>{if(k in a)S[k]=a[k];});['TA','TB'].forEach(k=>{if(k in a)tweenT(k,a[k],1.1);});
+  if('noGH'in a&&!('TB'in a))tweenT('TB',S.noGH?255.15:288.15,1.1);
+  HL=(a.hl||[]).slice();
+  const d=$('dots2');d.innerHTML='';L2.forEach((x,k)=>{const sp=document.createElement('span');sp.title=x.h;sp.classList.toggle('cur',k===step2);sp.addEventListener('click',()=>showStep2(k));d.appendChild(sp);});
+  $('nPrev2').disabled=step2===0;$('nNext2').textContent=step2===L2.length-1?'Forfra ↺':'Næste ▶';fitSoon();kick();}
+$('nNext2').addEventListener('click',()=>{const L2=STEPS2[S.sub];showStep2(step2<L2.length-1?step2+1:0);});
+$('nPrev2').addEventListener('click',()=>{if(step2>0)showStep2(step2-1);});
+function setSub(x){S.sub=x;['a','b','c'].forEach(k=>{root.classList.toggle('s'+k,x===k);});
+  $('stabA').classList.toggle('cur',x==='a');$('stabB').classList.toggle('cur',x==='b');$('stabC').classList.toggle('cur',x==='c');
+  focusEls([]);HL=[];
+  if(x==='a'){S.cmp=true;S.ax='log';S.lock=false;updateAxes(true);showStep2(0);}
+  else if(x==='b'){S.cmp=true;S.lock=false;updateAxes(true);showStep2(0);}
+  else{updateAxes(true);}
+  fitSoon();kick();}
+function setMode(m){if(m!==1)narPause();S.mode=m;root.classList.toggle('m2',m===2);$('tab1').classList.toggle('cur',m===1);$('tab2').classList.toggle('cur',m===2);
+  if(m===2)setSub(S.sub);else{['a','b','c'].forEach(k=>root.classList.remove('s'+k));HL=[];focusEls([]);updateAxes(true);}
+  lastKey='';fitSoon();kick();}
+document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>setMode(+b.dataset.mode)));
+document.querySelectorAll('[data-sub]').forEach(b=>b.addEventListener('click',()=>setSub(b.dataset.sub)));
+
+/* =====================================================================
+   OPGAVER TIL PORTFOLIEN
+   ===================================================================== */
+const APP='sortlegeme',APPT='Sortlegemestråling';
+const near=(a,b,t)=>Math.abs(a-b)<=t;
+const curAtPeak=T=>S.curOn&&!!S.cur&&Math.abs(S.cur/lamMax(T)-1)<0.03;
+const LVL={basic:['Basic','lv-basic'],adv:['Avanceret ★','lv-adv'],b:['B-niveau ★★','lv-b']};
+const TASKS=[
+ {id:'sol',lvl:'basic',short:'1 · Solens top',h:'Opgave 1 · Solens top',
+  intro:'Vælg <b>Solen</b>. Fjern fluebenet ved <b>Vis '+lm+'</b>, sæt flueben ved <b>Aflæsningslinje</b>, og træk linjen hen til toppen af kurven.',
+  chk:[{t:'Temperaturen er Solens (5 772 K)',ok:()=>near(S.TA,5772,1),el:'chA'},{t:'Vis λ<sub>max</sub> er slået fra',ok:()=>!S.peak,el:'tglPeak'},{t:'Aflæsningslinjen står ved toppen',ok:()=>curAtPeak(S.TA),el:()=>S.curOn?'cvG':'tglCur'}],
+  q:'Hvilken bølgelængde har Solens maksimale udstråling? Hvilken farve har lys med den bølgelængde – og hvorfor ser Solen alligevel hvid ud?',
+  go:()=>{setMode(1);S.cmp=false;S.curOn=false;S.peak=true;tweenT('TA',3000,0.8);updateAxes(true);}},
+ {id:'jord',lvl:'basic',short:'2 · Jordens top',h:'Opgave 2 · Jordens top',
+  intro:'Skift til <b>celsius</b>, og skriv Jordens middeltemperatur 15 °C i feltet ved skyderen. Flyt aflæsningslinjen hen til toppen.',
+  chk:[{t:'Temperaturen vises i celsius',ok:()=>S.unit==='C',el:'segUnit'},{t:'Temperaturen er 15 °C',ok:()=>near(S.TA,288.15,0.6),el:'rowA'},{t:'Aflæsningslinjen står ved toppen',ok:()=>curAtPeak(S.TA),el:()=>S.curOn?'cvG':'tglCur'}],
+  q:'Hvilken bølgelængde har Jordens maksimale udstråling? Hvilken type elektromagnetisk stråling er det, og hvorfor kan vi ikke se, at Jorden lyser?',
+  go:()=>{setMode(1);S.cmp=false;S.unit='K';S.curOn=false;updateAxes(true);}},
+ {id:'drivhus',lvl:'adv',short:'3 · Solen og Jorden',h:'Opgave 3 · Solen og Jorden',
+  intro:'Sæt flueben ved <b>Sammenlign med spektrum B</b>. Vælg Solen som spektrum A og Jorden som spektrum B, og vælg <b>Logaritmisk λ-akse</b>.',
+  chk:[{t:'Spektrum A er Solen, og spektrum B er Jorden',ok:()=>S.cmp&&near(S.TA,5772,1)&&near(S.TB,288.15,0.6),el:()=>!S.cmp?'tglCmp':(!near(S.TA,5772,1)?'chA':'chB')},{t:'Logaritmisk λ-akse',ok:()=>S.cmp&&effMode()==='log',el:'segAx'}],
+  q:'Forklar ud fra grafen, hvorfor sollyset kan slippe gennem atmosfæren, mens en stor del af Jordens varmestråling holdes tilbage. Brug ordene synligt lys, infrarød stråling og drivhusgasser.',
+  go:()=>{setMode(1);}},
+ {id:'betel',lvl:'adv',short:'4 · Betelgeuse',h:'Opgave 4 · Find temperaturen',
+  intro:'Den røde kæmpestjerne Betelgeuse har maksimal udstråling ved <span class="m"><i>λ</i><sub>max</sub> = 805 nm</span>. Indstil temperaturen, så toppen ligger ved 805 nm.',
+  chk:[{t:'Vis λ<sub>max</sub> er slået til',ok:()=>S.peak,el:'tglPeak'},{t:'Toppen ligger ved 805 nm',ok:()=>Math.abs(lamMax(S.TA)/805e-9-1)<0.01,el:'rowA'}],
+  q:'Beregn Betelgeuses overfladetemperatur med Wiens forskydningslov, og sammenlign med den temperatur, du har indstillet. Hvilken farve har Betelgeuse på himlen?',
+  go:()=>{setMode(1);S.cmp=false;S.curOn=false;updateAxes(true);}},
+ {id:'sirius',lvl:'b',short:'5 · Sirius A',h:'Opgave 5 · Sirius A mod Solen',
+  intro:'Sammenlign <b>Sirius A</b> (spektrum A) med <b>Solen</b> (spektrum B) på almindelig λ-akse.',
+  chk:[{t:'Spektrum A er Sirius A, og spektrum B er Solen',ok:()=>S.cmp&&near(S.TA,9940,1)&&near(S.TB,5772,1),el:()=>!S.cmp?'tglCmp':(!near(S.TA,9940,1)?'chA':'chB')},{t:'Almindelig λ-akse',ok:()=>S.cmp&&effMode()==='lin',el:'segAx'}],
+  q:'Sirius A har en radius, der er 1,71 gange Solens. Brug Stefan–Boltzmanns lov P = 4π·R²·σ·T⁴ til at beregne, hvor mange gange større effekt Sirius A udsender end Solen. Forklar også ud fra grafen, hvorfor Sirius ser blålig hvid ud.',
+  go:()=>{setMode(1);}}];
+function infoLine(){const cs=curves();return cs.map(c=>(cs.length>1?c.key+': ':'')+'*T* = '+fT(c.T,'K').replace(/\u202F/g,' ')+(S.unit==='C'?' = '+fT(c.T,'C').replace(/\u202F/g,' '):'')+(preName(c.T)?' ('+preName(c.T)+')':'')+', *λ*_{max} = '+fLamR(lamMax(c.T))).join('    ')+(curVisible()?'    Aflæsningslinje: *λ* = '+fLamR(S.cur):'')+'    '+(AXD.mode==='log'?'logaritmisk λ-akse':'almindelig λ-akse');}
+function curVisible(){if(!S.curOn||!S.cur)return false;return AXD.mode==='lin'?S.cur<=AXD.x1:(lg(S.cur)>=AXD.lx0&&lg(S.cur)<=AXD.lx1);}
+const OP=(()=>{let cur=0,store={ans:{},done:{}},name='',warned='',pulsing=false;const IM={};
+  const skey=()=>'mq_opg_'+APP+'|'+name.trim().toLowerCase();
+  function load(){try{name=localStorage.getItem('mq_navn')||'';}catch(e){}$('oName').value=name;loadStore();}
+  function loadStore(){store={ans:{},done:{}};try{const d=JSON.parse(localStorage.getItem(skey())||'null');if(d)store=Object.assign(store,d);}catch(e){}}
+  function save(){try{localStorage.setItem(skey(),JSON.stringify(store));}catch(e){}}
+  function tabs(){const h=$('oTabs');h.innerHTML='';TASKS.forEach((t,k)=>{const b=document.createElement('button');b.type='button';b.className='ttab l-'+t.lvl+(k===cur?' cur':'')+(store.done[t.id]?' done':'');b.textContent=t.short;b.title=LVL[t.lvl][0];b.addEventListener('click',()=>pick(k));h.appendChild(b);});}
+  function pick(k){cur=k;warned='';const t=TASKS[k];$('oLvl').textContent=LVL[t.lvl][0];$('oLvl').className='lvl '+LVL[t.lvl][1];$('oH').textContent=t.h;$('oIntro').innerHTML=t.intro;
+    $('oChk').innerHTML=t.chk.map((c,i)=>'<li id="ock'+i+'">'+c.t+'</li>').join('');$('oQ').textContent=t.q;$('oAns').value=store.ans[t.id]||'';$('oMsg').textContent=IM[t.id]?'Du har taget et billede. Tag et nyt, hvis du har ændret noget.':'';
+    $('oShow').disabled=!IM[t.id];$('oZip').disabled=!Object.keys(IM).length;narPause();t.go();tabs();fitSoon();kick();}
+  function els(){document.querySelectorAll('.pulse').forEach(e=>e.classList.remove('pulse'));}
+  function sync(){const t=TASKS[cur];let first=-1;t.chk.forEach((c,i)=>{const ok=!!c.ok();const li=$('ock'+i);if(li)li.classList.toggle('ok',ok);if(!ok&&first<0)first=i;});
+    els();pulsing=false;if(first>=0){const c=t.chk[first];const id=typeof c.el==='function'?c.el():c.el;const e=$(id);if(e&&!e.hidden){(id==='cvG'?$('secG'):e).classList.add('pulse');pulsing=true;}}
+    else{$('oShot').classList.add('pulse');pulsing=true;}}
+  function open(){OPo.open=true;root.classList.add('opg');$('opg').hidden=false;$('bOpg').classList.add('on');narPause();pick(cur);}
+  function close(){OPo.open=false;root.classList.remove('opg');$('opg').hidden=true;$('bOpg').classList.remove('on');els();fitSoon();kick();}
+  /* billedet */
+  function wrap(g,s,maxW){const out=[];String(s).split('\n').forEach(par=>{const w=par.split(' ');let line='';for(const x of w){const test=line?line+' '+x:x;if(g.measureText(test).width>maxW&&line){out.push(line);line=x;}else line=test;}out.push(line);});return out;}
+  function shoot(note){const t=TASKS[cur],W=1400,M=50,GW=1300,GH=Math.round(GW*0.56);
+    const gc=document.createElement('canvas');gc.width=GW;gc.height=GH;const gg=gc.getContext('2d');drawSpec({g:gg,w:GW,h:GH},Object.assign(specOpt(0),{hl:[],ax:Object.assign({},AXT)}));
+    const c0=document.createElement('canvas').getContext('2d');c0.font='22px '+FONT;const ans=(store.ans[t.id]||'').trim()||'(intet svar skrevet)';const al=wrap(c0,ans,W-2*M);c0.font='600 22px '+FONT;const ql=wrap(c0,t.q,W-2*M);const nl=note?wrap(c0,'Bemærk: '+note,W-2*M):[];
+    const segs=infoLine().split('    '),il=[];let cl='';segs.forEach(s=>{const tst=cl?cl+'    '+s:s;if(richW(c0,tst,21)>W-2*M&&cl){il.push(cl);cl=s;}else cl=tst;});il.push(cl);
+    const H=110+GH+30+il.length*34+10+nl.length*32+ql.length*32+18+al.length*32+70;const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,W,H);
+    g.fillStyle='#1d2430';g.fillRect(0,0,W,92);g.fillStyle='#fff';g.textBaseline='alphabetic';g.textAlign='left';g.font='700 30px '+FONT;g.fillText(t.h,M,44);
+    g.font='19px '+FONT;g.fillStyle='#cfd5df';const d=new Date();g.fillText(APPT+' · '+LVL[t.lvl][0]+'   ·   Navn: '+(name.trim()||'–')+'   ·   '+d.toLocaleDateString('da-DK')+' kl. '+d.toLocaleTimeString('da-DK',{hour:'2-digit',minute:'2-digit'}),M,76);
+    g.drawImage(gc,M,110);g.strokeStyle='#d4d9e1';g.strokeRect(M,110,GW,GH);let y=110+GH+40;
+    il.forEach(l=>{rich(g,l,M,y,21,'#1d2430','left');y+=34;});y+=10;
+    if(note){g.font='600 22px '+FONT;g.fillStyle='#9a5a00';nl.forEach(l=>{g.fillText(l,M,y);y+=32;});y+=6;}
+    g.font='600 22px '+FONT;g.fillStyle='#1d2430';ql.forEach(l=>{g.fillText(l,M,y);y+=32;});y+=18;
+    g.font='22px '+FONT;g.fillStyle='#222';al.forEach(l=>{g.fillText(l,M,y);y+=32;});
+    g.font='16px '+FONT;g.fillStyle='#999';g.fillText(APPT+' · MQfysik · Version '+VERSION,M,H-22);
+    return c;}
+  const safeN=s=>String(s).replace(/[^\wæøåÆØÅ-]+/g,'_');
+  function fileName(t){return APP+'_'+t.id+'_'+safeN(name.trim()||'elev')+'.png';}
+  function take(){const t=TASKS[cur];store.ans[t.id]=$('oAns').value;save();
+    if(!name.trim()){toast('Skriv dit navn først – det kommer på billedet.');$('oName').focus();return;}
+    const bad=t.chk.filter(c=>!c.ok());let note='';
+    if(bad.length){if(warned!==t.id){warned=t.id;toast('Indstillingen passer ikke helt: '+bad[0].t.replace(/<[^>]+>/g,'')+'. Tryk igen for at tage billedet alligevel.');return;}note='Indstillingen passer ikke helt med opgaven ('+bad.map(c=>c.t.replace(/<[^>]+>/g,'')).join('; ')+').';}
+    warned='';if(!bad.length){store.done[t.id]=true;save();}
+    const c=shoot(note);c.toBlob(b=>{if(!b)return;b.arrayBuffer().then(buf=>{IM[t.id]={blob:b,u8:new Uint8Array(buf),name:fileName(t)};$('oShow').disabled=false;$('oZip').disabled=false;
+        $('oMsg').textContent='Billedet er taget'+(note?' (med en bemærkning)':' ✓')+'. Tryk Vis billede for at gemme det.';tabs();preview(t.id);});},'image/png');}
+  function dl(blob,fn){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(u);a.remove();},3000);}
+  function preview(id){const im=IM[id];if(!im)return;const u=URL.createObjectURL(im.blob);const ov=document.createElement('div');ov.className='pv';
+    ov.innerHTML='<div class="pvbox"><img alt="Dit billede til portfolien"><div class="playrow" style="margin:0"><button type="button" class="primary" data-a="save">⬇ Gem som PNG</button><button type="button" data-a="copy">📋 Kopiér billede</button><button type="button" data-a="close">Luk</button><span class="small" data-a="msg"></span></div></div>';
+    ov.querySelector('img').src=u;document.body.appendChild(ov);const fin=()=>{ov.remove();URL.revokeObjectURL(u);};
+    ov.addEventListener('click',e=>{const a=e.target.dataset&&e.target.dataset.a;if(e.target===ov||a==='close')fin();
+      if(a==='save'){dl(im.blob,im.name);ov.querySelector('[data-a=msg]').textContent='Gemt i din mappe med overførsler.';}
+      if(a==='copy'){try{navigator.clipboard.write([new ClipboardItem({'image/png':im.blob})]).then(()=>{ov.querySelector('[data-a=msg]').textContent='Kopieret ✓';},()=>{ov.querySelector('[data-a=msg]').textContent='Kopiering er ikke tilladt her – brug Gem som PNG.';});}catch(_){ov.querySelector('[data-a=msg]').textContent='Kopiering er ikke tilladt her – brug Gem som PNG.';}}});}
+  /* ZIP uden komprimering */
+  const CRT=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
+  function crc32(u){let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=CRT[(c^u[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0;}
+  function makeZip(files){const enc=new TextEncoder(),parts=[],cen=[];let off=0;const d=new Date();
+    const dt=((d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1))&0xFFFF,dd=(((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate())&0xFFFF;
+    files.forEach(f=>{const nm=enc.encode(f.name),crc=crc32(f.data),sz=f.data.length;
+      const h=new DataView(new ArrayBuffer(30));h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,0,true);h.setUint16(10,dt,true);h.setUint16(12,dd,true);h.setUint32(14,crc,true);h.setUint32(18,sz,true);h.setUint32(22,sz,true);h.setUint16(26,nm.length,true);h.setUint16(28,0,true);
+      parts.push(new Uint8Array(h.buffer),nm,f.data);
+      const c=new DataView(new ArrayBuffer(46));c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(10,0,true);c.setUint16(12,dt,true);c.setUint16(14,dd,true);c.setUint32(16,crc,true);c.setUint32(20,sz,true);c.setUint32(24,sz,true);c.setUint16(28,nm.length,true);c.setUint32(42,off,true);
+      cen.push(new Uint8Array(c.buffer),nm);off+=30+nm.length+sz;});
+    let cs=0;cen.forEach(p=>cs+=p.length);const e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cs,true);e.setUint32(16,off,true);
+    return new Blob(parts.concat(cen,[new Uint8Array(e.buffer)]),{type:'application/zip'});}
+  function zipAll(){const fs=TASKS.filter(t=>IM[t.id]).map(t=>({name:IM[t.id].name,data:IM[t.id].u8}));if(!fs.length){toast('Tag mindst ét billede først.');return;}dl(makeZip(fs),APP+'_'+safeN(name.trim()||'elev')+'.zip');}
+  $('oName').addEventListener('input',()=>{name=$('oName').value;try{localStorage.setItem('mq_navn',name.trim());}catch(e){}clearTimeout(load.t);load.t=setTimeout(()=>{const a=$('oAns').value;loadStore();if(!store.ans[TASKS[cur].id]&&a)store.ans[TASKS[cur].id]=a;$('oAns').value=store.ans[TASKS[cur].id]||'';tabs();},350);});
+  $('oAns').addEventListener('input',()=>{store.ans[TASKS[cur].id]=$('oAns').value;clearTimeout(save.t);save.t=setTimeout(save,400);});
+  $('oShot').addEventListener('click',take);$('oShow').addEventListener('click',()=>preview(TASKS[cur].id));$('oZip').addEventListener('click',zipAll);$('oClose').addEventListener('click',close);
+  $('bOpg').addEventListener('click',()=>{if(OPo.open)close();else open();});
+  load();
+  const OPo={open:false,sync,close,openP:open,pick,get pulsing(){return pulsing;},get cur(){return cur;},take,IM,shoot};return OPo;})();
+
+/* ---------- diverse ---------- */
+function toast(t){let el=$('toast');if(!el){el=document.createElement('div');el.id='toast';el.className='toast';document.body.appendChild(el);}el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>{el.hidden=true;},4200);}
+document.addEventListener('keydown',e=>{const tg=e.target&&e.target.tagName;if(tg==='INPUT'||tg==='TEXTAREA')return;if(document.querySelector('.pv'))return;
+  if(e.key===' '&&S.mode===1&&tg!=='BUTTON'){e.preventDefault();$('nPlay').click();}
+  if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();(S.mode===1?$('nNext1'):$('nNext2')).click();}
+  if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();(S.mode===1?$('nPrev1'):$('nPrev2')).click();}});
+let fitT=null;function fitSoon(){clearTimeout(fitT);fitT=setTimeout(()=>{if(window.__fit)window.__fit();},30);}
+
+/* ---------- start ---------- */
+chipLabels();size();N.i=0;replayTo(0);applyAct(SEG[0].a,true);HL=[];focusEls([]);updateAxes(true);capRender();playBtn();kick();
+if('speechSynthesis'in window)setTimeout(()=>{pickV();playBtn();},600);
+function explore(){N.i=0;S.peak=true;HL=[];focusEls([]);capRender();playBtn();kick();}
+function startApp(voice){$('startOv').hidden=true;if(voice)narPlay();else explore();}
+function start(voice){if($('startFs').checked&&window.__startFs){const r=window.__startFs(voice);
+    if(r==='tab'){const m=$('startMsg');m.hidden=false;m.textContent='Appletten kører nu i en ny fane.';return;}}
+  startApp(voice);}
+$('startVoice').addEventListener('click',()=>start(true));$('startMute').addEventListener('click',()=>start(false));
+
+/* ---------- fuld skærm – i Google Sites er fuld skærm blokeret, så åbnes appletten i en ny fane i stedet ---------- */
+(()=>{const b=$('fs'),d=document,el=d.documentElement;b.hidden=false;
+  const inFrame=(()=>{try{return window.self!==window.top;}catch(e){return true;}})();
+  const can=!!(d.fullscreenEnabled||d.webkitFullscreenEnabled);
+  const isFs=()=>d.fullscreenElement||d.webkitFullscreenElement;
+  const msg=t=>{b.textContent=t;setTimeout(upd,4000);};
+  function openTab(voice){const html=window.__SRC.replace('<head>','<head><script>window.__AUTO='+JSON.stringify({voice:!!voice}).replace(/</g,'\\u003c')+';<\/script>');
+    try{const w=window.open('','_blank');if(w){try{w.document.open();w.document.write(html);w.document.close();return true;}catch(e){try{w.close();}catch(_){}}}}catch(e){}
+    try{const url=URL.createObjectURL(new Blob([html],{type:'text/html'}));if(window.open(url,'_blank'))return true;}catch(e){}
+    return false;}
+  b.addEventListener('click',()=>{if(isFs()){(d.exitFullscreen||d.webkitExitFullscreen).call(d);return;}
+    const fallback=()=>{if(inFrame&&openTab(N.playing))narPause();else msg('Ikke tilladt her – brug browserens fuld skærm');};
+    if(!can){fallback();return;}
+    try{const p=(el.requestFullscreen||el.webkitRequestFullscreen).call(el);if(p&&p.catch)p.catch(fallback);}catch(e){fallback();}});
+  window.__startFs=voice=>{if(isFs())return'none';
+    if(can){try{const p=(el.requestFullscreen||el.webkitRequestFullscreen).call(el);if(p&&p.catch)p.catch(()=>{});return'fs';}catch(e){return'none';}}
+    if(inFrame&&openTab(voice))return'tab';return'none';};
+  const cb=$('startFs'),cbt=$('startFsTxt');
+  try{if(localStorage.getItem(APP+'_startFs')==='0')cb.checked=false;}catch(e){}
+  cb.addEventListener('change',()=>{try{localStorage.setItem(APP+'_startFs',cb.checked?'1':'0');}catch(e){}});
+  if(!can&&inFrame)cbt.textContent='Vis i hele vinduet (ny fane)';
+  if(!can&&!inFrame)cb.closest('label').hidden=true;
+  function upd(){b.textContent=isFs()?'Afslut fuld skærm':(can||!inFrame?'Fuld skærm':'Åbn i ny fane ↗');}
+  d.addEventListener('fullscreenchange',upd);d.addEventListener('webkitfullscreenchange',upd);upd();})();
+
+/* ---------- tilpas til boksen (fast design, skaleres som ét billede; bred visning bliver bredere, så figuren fylder) ---------- */
+(()=>{const w=document.querySelector('.wrap');
+  function fitStage(){
+    if(innerWidth<700){root.classList.remove('fitmode','wide');w.style.transform='';w.style.width='';window.__fitScale=1;size();kick();return;}
+    root.classList.add('fitmode');const wide=innerWidth/innerHeight>=1.15;root.classList.toggle('wide',wide);
+    w.style.transform='none';w.style.width='';window.__fitScale=1;size();
+    if(wide){const r=innerWidth/innerHeight;let Wd=1280;for(let k=0;k<8;k++){w.style.width=Wd+'px';size();const H0=w.scrollHeight;const tgt=clamp(H0*r,1280,1900);if(Math.abs(tgt-Wd)<4)break;Wd=lerp(Wd,tgt,0.6);}}
+    const W0=w.offsetWidth,H0=w.scrollHeight;const s=Math.min(innerWidth/W0,innerHeight/H0,3);
+    const dx=Math.max(0,(innerWidth-W0*s)/2),dy=Math.max(0,(innerHeight-H0*s)/2);
+    w.style.transform='translate('+dx+'px,'+dy+'px) scale('+s+')';window.__fitScale=s;size();kick();}
+  window.__fit=fitStage;addEventListener('resize',fitStage);
+  document.addEventListener('fullscreenchange',()=>setTimeout(fitStage,60));document.addEventListener('webkitfullscreenchange',()=>setTimeout(fitStage,60));
+  fitStage();setTimeout(fitStage,300);})();
+
+/* ---------- ny fane åbnet fra Google Sites ---------- */
+(()=>{const A=window.__AUTO;if(!A)return;const d=document,el=d.documentElement;$('startOv').hidden=true;explore();
+  const ban=d.createElement('button');ban.id='autoBan';ban.type='button';ban.textContent=A.voice?'🔊 Klik for at starte med oplæsning i fuld skærm':'⛶ Klik for fuld skærm';d.body.appendChild(ban);
+  function first(e){d.removeEventListener('click',first,true);ban.hidden=true;
+    try{const rq=el.requestFullscreen||el.webkitRequestFullscreen;if(!(d.fullscreenElement||d.webkitFullscreenElement)&&rq){const p=rq.call(el);if(p&&p.catch)p.catch(()=>{});}}catch(_){}
+    if(A.voice&&e.target===ban)narPlay();}
+  d.addEventListener('click',first,true);})();
+</script>
+</body>
+</html>
