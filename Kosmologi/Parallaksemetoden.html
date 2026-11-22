@@ -377,10 +377,10 @@ html.wide .view{grid-template-columns:minmax(600px,1fr) 626px!important}
       <div class="pane" id="paneCalc" hidden>
         <p>Aflæs den gule stjernes plads på dine to fotos, og beregn. Husk vejledningen i at anvende formler fra Note_Introduktion.</p>
         <div class="ig" data-hl="inputs">
-          <div class="it"><span>Aflæsning, forår</span><input id="iS" inputmode="decimal" autocomplete="off"><span>·10<sup>−6</sup>°</span><span class="mk" id="kS"></span></div>
-          <div class="it"><span>Aflæsning, efterår</span><input id="iA" inputmode="decimal" autocomplete="off"><span>·10<sup>−6</sup>°</span><span class="mk" id="kA"></span></div>
-          <div class="it"><span>Vinklen <span class="sym">y</span></span><input id="iY" inputmode="decimal" autocomplete="off"><span>·10<sup>−6</sup>°</span><span class="mk" id="kY"></span></div>
-          <div class="it"><span>Parallaksen <span class="sym">φ</span></span><input id="iP" inputmode="decimal" autocomplete="off"><span>·10<sup>−6</sup>°</span><span class="mk" id="kP"></span></div>
+          <div class="it"><span>Aflæsning, forår</span><input id="iS" inputmode="decimal" autocomplete="off"><span>·10<sup>−6</sup> grader</span><span class="mk" id="kS"></span></div>
+          <div class="it"><span>Aflæsning, efterår</span><input id="iA" inputmode="decimal" autocomplete="off"><span>·10<sup>−6</sup> grader</span><span class="mk" id="kA"></span></div>
+          <div class="it"><span>Vinklen <span class="sym">y</span></span><input id="iY" inputmode="decimal" autocomplete="off"><span>·10<sup>−6</sup> grader</span><span class="mk" id="kY"></span></div>
+          <div class="it"><span>Parallaksen <span class="sym">φ</span></span><input id="iP" inputmode="decimal" autocomplete="off"><span>·10<sup>−6</sup> grader</span><span class="mk" id="kP"></span></div>
           <div class="it"><span>Afstanden <span class="sym">r</span></span><input id="iRm" inputmode="decimal" autocomplete="off">·10<input id="iRe" class="ex" inputmode="numeric" autocomplete="off" aria-label="tierpotens"> m<span class="mk" id="kR"></span></div>
           <div class="it"><span>Afstanden <span class="sym">r</span></span><input id="iRly" class="lng" inputmode="decimal" autocomplete="off"> ly<span class="mk" id="kL"></span></div>
         </div>
@@ -511,7 +511,7 @@ function MQFIT(w,sizeFn){
 </script>
 <script>
 window.__SRC='<!doctype html>\n'+document.documentElement.outerHTML;
-const VERSION='3.3',VDATE='20.11.2026';
+const VERSION='3.4',VDATE='22.11.2026';
 const $=id=>document.getElementById(id);
 $('ver').textContent='Version '+VERSION+' · '+VDATE;
 const PI=Math.PI,D2R=PI/180,R2D=180/PI;
@@ -543,8 +543,8 @@ const grp=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202F');
 function sig3(v){if(v>=100){const e=Math.floor(Math.log10(v))-2;return Math.round(v/Math.pow(10,e))*Math.pow(10,e);}return v;}
 function lyTxt(r){if(r>=1e6)return fmt(r/1e6,1)+' mio. ly';if(r>=100)return grp(Math.round(sig3(r)))+' ly';if(r>=10)return fmt(r,1)+' ly';return fmt(r,2)+' ly';}
 function lyTxtShort(r){if(r>=1e6)return fmt(r/1e6,r>=1e7?0:1)+' mio.';if(r>=1)return grp(Math.round(r));return fmt(r,r>=0.1?1:2);}
-const degH=(p,d)=>sciH(p,d)+'°';
-const degU=(p,d)=>sciU(p,d)+'°';
+const degH=(p,d)=>sciH(p,d)+' grader';
+const degU=(p,d)=>sciU(p,d)+' grader';
 function numIn(s){s=String(s||'').trim().replace(/\s/g,'').replace('−','-').replace(',','.');if(!s)return NaN;return /^[-+]?\d*\.?\d+$/.test(s)?parseFloat(s):NaN;}
 
 /* ---------- tilstand ---------- */
@@ -742,7 +742,7 @@ function drawRuler(o,now){const g=o.g,W=o.w,H=o.h;g.fillStyle='#fff';g.fillRect(
     g.strokeStyle='#b9b0d6';g.lineWidth=1;g.beginPath();g.moveTo(x,yA);g.lineTo(x,yy-6);g.stroke();
     rtxt(g,ob.n,ax,yy,11,'#5b4b8a',al,true);});
   // instrumenter
-  const rows=[['tycho','Tycho Brahe, uden kikkert (1/60°)'],['ground','Teleskop på Jorden (3·10⁻⁶°)'],['gaia','Satellitten Gaia (3·10⁻⁸°)']];
+  const rows=[['tycho','Tycho Brahe, uden kikkert (1/60°)'],['ground','Teleskop på Jorden (3·10⁻⁶ grader)'],['gaia','Satellitten Gaia (3·10⁻⁸ grader)']];
   const yr0=yA+52,dy=(yB-30-yr0)/2.2;
   rows.forEach(([k,n],i)=>{const y=yr0+i*dy,xl=X(rOfPhi(TEL[k].p)),sel=S.tel2===k;
     g.fillStyle='#eceff3';g.fillRect(x0,y,x1-x0,14);
@@ -754,10 +754,10 @@ function drawRuler(o,now){const g=o.g,W=o.w,H=o.h;g.fillStyle='#fff';g.fillRect(
     if(xl-x0>64)rtxt(g,'kan måles',x0+4,y+7,10.5,'#0d3b20','left',false,'600');
     if(xl<x1-150)rtxt(g,'for lille vinkel',Math.min(x1-4,xl+150),y+7,10.5,'#5b6575','right',false,'600');});
   // parallakse-akse
-  rtxt(g,'Parallakse *φ*',x0,H-9,12.5,'#1d2430','left',false,'700');
+  rtxt(g,'Parallakse *φ* / grader',x0,H-9,12.5,'#1d2430','left',false,'700');
   g.strokeStyle='#1d2430';g.lineWidth=1.3;g.beginPath();g.moveTo(x0,yB);g.lineTo(x1,yB);g.stroke();
   for(let e=-1;e>=-10;e--){const rr=rOfPhi(Math.pow(10,e));if(rr<Math.pow(10,L0)||rr>Math.pow(10,L1))continue;const x=X(rr);
-    g.beginPath();g.moveTo(x,yB-5);g.lineTo(x,yB+5);g.stroke();rtxt(g,'10'+supU(e)+'°',x,yB+14,11,'#1d2430','center',false,'500');}
+    g.beginPath();g.moveTo(x,yB-5);g.lineTo(x,yB+5);g.stroke();rtxt(g,'10'+supU(e),x,yB+14,11,'#1d2430','center',false,'500');}
   // stjernen
   const xs=X(S.r2);g.strokeStyle='#e0952a';g.lineWidth=2.5;g.beginPath();g.moveTo(xs,yA-2);g.lineTo(xs,yB+2);g.stroke();
   star(g,xs,yA,10,'#ffd60a','#8a6d00');
@@ -884,7 +884,7 @@ $('bCheck2').addEventListener('click',check2);
 /* ---------- opgave 3: grænsen ---------- */
 $('bLim').addEventListener('click',()=>{if(S.tel!=='ground'){setTel('ground');toast('Teleskopet er nu sat til På Jorden. Flyt stjernen, og prøv igen.');return;}
   T.tries3++;const r=S.r;T.lim=r;
-  if(r>=270&&r<=340){fb('fb3','Rigtigt ✓ Grænsen er cirka '+lyTxt(r).replace(' ly',' lysår')+'. Der er φ ≈ 3·10⁻⁶°. Prøv nu opgave 3b med Gaia.',true);if(!T.ok3){T.ok3=true;onSolved('t3');}}
+  if(r>=270&&r<=340){fb('fb3','Rigtigt ✓ Grænsen er cirka '+lyTxt(r).replace(' ly',' lysår')+'. Der er φ ≈ 3·10⁻⁶ grader. Prøv nu opgave 3b med Gaia.',true);if(!T.ok3){T.ok3=true;onSolved('t3');}}
   else if(r>340)fb('fb3','Skiverne overlapper stadig ved '+lyTxt(r)+'. Flyt stjernen tættere på.',false);
   else fb('fb3','Ved '+lyTxt(r)+' er der stadig god plads mellem skiverne. Flyt stjernen længere væk.',false);
   saveT();updStat();kick();});
@@ -894,14 +894,14 @@ function marksFac(){const el=$('kFac');el.textContent=T.triesF?(T.ok3bF?'✓':'�
 function upd3b(){const was=T.ok3b;T.ok3b=T.ok3bL&&T.ok3bF;if(T.ok3b&&!was)onSolved('t3b');}
 $('bLimG').addEventListener('click',()=>{if(S.tel!=='gaia'){setTel('gaia');toast('Teleskopet er nu sat til Gaia i rummet. Flyt stjernen, og prøv igen.');return;}
   T.tries3b++;const r=S.r;T.limG=r;
-  if(r>=27000&&r<=34000){fb('fb3b','Rigtigt ✓ Gaias grænse er cirka '+lyTxt(r).replace(' ly',' lysår')+'. Der er φ ≈ 3·10⁻⁸°. Besvar nu spørgsmålet herunder.',true);T.ok3bL=true;}
+  if(r>=27000&&r<=34000){fb('fb3b','Rigtigt ✓ Gaias grænse er cirka '+lyTxt(r).replace(' ly',' lysår')+'. Der er φ ≈ 3·10⁻⁸ grader. Besvar nu spørgsmålet herunder.',true);T.ok3bL=true;}
   else if(r>34000)fb('fb3b','Skiverne overlapper stadig ved '+lyTxt(r)+'. Flyt stjernen tættere på.',false);
   else fb('fb3b','Ved '+lyTxt(r)+' er der stadig god plads mellem skiverne. Flyt stjernen længere væk.',false);
   upd3b();saveT();updStat();kick();});
 $('bCheckFac').addEventListener('click',()=>{T.fac=$('iFac').value;const v=numIn(T.fac);T.triesF++;
   const own=T.ok3&&T.ok3bL&&T.lim&&T.limG?T.limG/T.lim:null;
   const ok=isFinite(v)&&(Math.abs(v-100)<=10||(own&&Math.abs(v-own)<=0.05*own));T.ok3bF=ok;marksFac();
-  if(ok)fb('fb3c','Rigtigt ✓ Gaia måler vinkler 100 gange mere præcist end et teleskop på Jorden (3·10⁻⁸° mod 3·10⁻⁶°). Derfor kan den måle afstande, der er 100 gange større.',true);
+  if(ok)fb('fb3c','Rigtigt ✓ Gaia måler vinkler 100 gange mere præcist end et teleskop på Jorden (3·10⁻⁸ grader mod 3·10⁻⁶ grader). Derfor kan den måle afstande, der er 100 gange større.',true);
   else if(isFinite(v)&&v>0&&v<1)fb('fb3c','Gaia når længere ud end teleskopet på Jorden, så tallet skal være større end 1. Dividér Gaias grænse med grænsen fra Jorden.',false);
   else fb('fb3c','Ikke helt. Dividér Gaias grænse med grænsen fra Jorden.'+(T.ok3?'':' Find grænsen fra Jorden i opgave 3a først.'),false);
   upd3b();saveT();updStat();});
@@ -910,7 +910,7 @@ $('iFac').addEventListener('input',()=>{T.fac=$('iFac').value;clearTimeout(saveT
 /* ---------- ekstraopgave: Proxima Centauri ---------- */
 $('bCheckX').addEventListener('click',()=>{T.x={m:$('xM').value,e:$('xE').value};const v=numIn(T.x.m)*Math.pow(10,numIn(T.x.e)),t=phiOf(4.24);T.triesX++;
   const ok=isFinite(v)&&Math.abs(v-t)<=0.03*t;T.okX=T.okX||ok;$('kX').textContent=ok?'✓':'✗';$('kX').className='mk '+(ok?'y':'n');
-  if(ok)fb('fbX','Rigtigt ✓ φ = 2,14·10⁻⁴°. Det er cirka 1/4700° – langt under Tycho Brahes 1/60°.',true);
+  if(ok)fb('fbX','Rigtigt ✓ φ = 2,14·10⁻⁴ grader. Det er cirka 1/4700° – langt under Tycho Brahes 1/60°.',true);
   else if(isFinite(v)&&Math.abs(v-3.73e-6)<0.05*3.73e-6)fb('fbX','Det er sin(φ). Husk at tage arcsin – og at lommeregneren skal regne i grader.',false);
   else if(isFinite(v)&&Math.abs(v-t*D2R)<0.05*t*D2R)fb('fbX','Det ligner radianer. Skift lommeregneren til grader.',false);
   else fb('fbX','Ikke helt. Omregn 4,24 ly til meter først, og brug φ = arcsin(149,6·10⁹ m / r).',false);
@@ -941,8 +941,8 @@ function handIn(){saveT();const W=1600,M=50;
   const row=(lab,val,unit,mk)=>{rtxt(g,lab,x2,yy-8,22,'#444','left',false,'400');g.textBaseline='alphabetic';g.textAlign='left';g.fillStyle='#1d2430';g.font='600 23px '+FONT;g.fillText((val||'–')+(val?unit:''),x2+250,yy);
     if(mk!==undefined){g.fillStyle=mk?'#1f7a43':'#c0392b';g.fillText(mk?'✓':'✗',x2+520,yy);}yy+=34;};
   const I=T.in,K=T.mk2,chk=T.tries2>0;
-  row('Aflæsning, forår',I.iS,'·10⁻⁶°',chk?K.s:undefined);row('Aflæsning, efterår',I.iA,'·10⁻⁶°',chk?K.a:undefined);
-  row('Vinklen *y*',I.iY,'·10⁻⁶°',chk?K.y:undefined);row('Parallaksen *φ*',I.iP,'·10⁻⁶°',chk?K.p:undefined);
+  row('Aflæsning, forår',I.iS,'·10⁻⁶ grader',chk?K.s:undefined);row('Aflæsning, efterår',I.iA,'·10⁻⁶ grader',chk?K.a:undefined);
+  row('Vinklen *y*',I.iY,'·10⁻⁶ grader',chk?K.y:undefined);row('Parallaksen *φ*',I.iP,'·10⁻⁶ grader',chk?K.p:undefined);
   row('Afstanden *r*',I.iRm?I.iRm+'·10'+supU(String(I.iRe||'').replace('−','-').trim()):'',' m',chk?K.r:undefined);row('Afstanden *r*',I.iRly,' ly',chk?K.l:undefined);
   g.font='23px '+FONT;g.fillStyle=T.ok2?'#1f7a43':'#9a5a00';g.fillText(chk?(T.ok2?'Alle rigtige ✓':'Ikke alle rigtige')+' · '+T.tries2+' forsøg':'Ikke tjekket endnu',x2,yy);yy+=48;
   // opgave 3
@@ -950,7 +950,7 @@ function handIn(){saveT();const W=1600,M=50;
   g.fillStyle=T.ok3?'#1f7a43':'#9a5a00';g.fillText('3a · '+(T.lim?'Grænse fra Jorden: '+lyTxt(T.lim)+(T.ok3?' ✓':' (ikke rigtig endnu)')+' · '+T.tries3+' forsøg':'Grænse fra Jorden: ikke løst endnu'),x2,yy);yy+=34;
   g.fillStyle=T.ok3bL?'#1f7a43':'#9a5a00';g.fillText('3b · '+(T.limG?'Grænse for Gaia: '+lyTxt(T.limG)+(T.ok3bL?' ✓':' (ikke rigtig endnu)')+' · '+T.tries3b+' forsøg':'Grænse for Gaia: ikke løst endnu'),x2,yy);yy+=34;
   if(T.triesF){g.fillStyle=T.ok3bF?'#1f7a43':'#9a5a00';g.fillText('      Gaia når '+(T.fac||'?')+' gange længere ud end fra Jorden'+(T.ok3bF?' ✓':' ✗'),x2,yy);yy+=34;}
-  if(T.okX){g.fillStyle='#1f7a43';g.fillText('Ekstraopgave Proxima Centauri: φ = '+T.x.m+'·10'+supU(String(T.x.e).replace('−','-').trim())+'° ✓',x2,yy);yy+=34;}
+  if(T.okX){g.fillStyle='#1f7a43';g.fillText('Ekstraopgave Proxima Centauri: φ = '+T.x.m+'·10'+supU(String(T.x.e).replace('−','-').trim())+' grader ✓',x2,yy);yy+=34;}
   // forklaring
   y=Math.max(y+650,yy+30);g.fillStyle='#1d2430';g.font='700 28px '+FONT;g.fillText('Min forklaring af parallaksemetoden',M,y);y+=40;
   g.font='24px '+FONT;g.fillStyle='#222';lines.forEach(l=>{g.fillText(l,M,y);y+=34;});
@@ -983,7 +983,7 @@ function syncUI(){
     $('sR').value=sliderOf(clamp(S.r,RMIN,SMAX));$('vR').textContent=lyTxt(S.r);$('sR').disabled=lock;
     document.querySelectorAll('[data-r]').forEach(b=>b.disabled=lock);$('ctlLock').hidden=!lock;
     document.querySelectorAll('[data-tel]').forEach(b=>{b.classList.toggle('on',b.dataset.tel===S.tel);b.disabled=mine;});
-    const ok=p>=TEL[S.tel].p;$('telTxt').textContent=mine?'':(S.tel==='ground'?'kan måle φ ned til 3·10⁻⁶°':'kan måle φ ned til 3·10⁻⁸°')+(ok?' ✓':' ✗ for lille vinkel');
+    const ok=p>=TEL[S.tel].p;$('telTxt').textContent=mine?'':(S.tel==='ground'?'kan måle φ ned til 3·10⁻⁶ grader':'kan måle φ ned til 3·10⁻⁸ grader')+(ok?' ✓':' ✗ for lille vinkel');
     $('telTxt').style.color=ok?'':'#c0392b';
     const pu0=mine?-6:photoParams().unit;
     $('telName').textContent=mine?'Dine fotos':'Teleskop: '+(S.tel==='ground'?'på Jorden':'Gaia i rummet')+(pu0<-6?' · gradskala forstørret '+(pu0===-7?'10':'100')+' gange':'');
@@ -1039,8 +1039,8 @@ const SEG=[
  {s:2,show:'Gradskalaen måler vinkler i milliontedele grader. Om foråret står stjernen ved 6, og om efteråret ved 3.',a:{hl:['scale','posS','posA']}},
  {s:2,show:'Se Jorden gå et helt år omkring Solen. På det sidste foto glider stjernen frem og tilbage.',a:{f:['secFig','secPhoto'],hl:['phO'],year:9},min:9},
  {s:3,show:'De to linjer krydser hinanden ved stjernen. Vinklen mellem dem kaldes y og er tegnet med grønt.',a:{mode:'model',r:R21,f:['secFig'],hl:['y']}},
- {s:3,show:'6 minus 3 er lig med 3. Vinklen y er altså 3·10⁻⁶°.',say:'6 minus 3 er lig med 3. Vinklen y er altså 3 milliontedele grad.',a:{f:['secPhoto','secCalc'],hl:['yO','cY']}},
- {s:3,show:'Parallaksen φ, også kaldet den årlige parallakse, er halvdelen af y. Her er φ = 1,5·10⁻⁶°.',say:'Parallaksen fi, også kaldet den årlige parallakse, er halvdelen af y. Her er fi lig med 1 komma 5 milliontedele grad.',a:{f:['secFig','secCalc'],hl:['phi','cPhi']}},
+ {s:3,show:'6 minus 3 er lig med 3. Vinklen y er altså 3·10⁻⁶ grader.',say:'6 minus 3 er lig med 3. Vinklen y er altså 3 milliontedele grad.',a:{f:['secPhoto','secCalc'],hl:['yO','cY']}},
+ {s:3,show:'Parallaksen φ, også kaldet den årlige parallakse, er halvdelen af y. Her er φ = 1,5·10⁻⁶ grader.',say:'Parallaksen fi, også kaldet den årlige parallakse, er halvdelen af y. Her er fi lig med 1 komma 5 milliontedele grad.',a:{f:['secFig','secCalc'],hl:['phi','cPhi']}},
  {s:3,show:'Afstanden fra Jorden til stjernen kaldes r. Den vil vi gerne beregne.',say:'Afstanden fra Joren til stjernen kaldes ær. Den vil vi gerne beregne.',a:{f:['secFig','secCalc'],hl:['r','cR']}},
  {s:4,show:'Prøv selv: Træk stjernen op og ned i figuren, eller brug skyderen.',a:{mode:'model',f:['secFig','secCtl'],hl:['drag','sR']}},
  {s:4,show:'Jo længere væk stjernen er, des mindre er φ, og des mindre flytter stjernen sig på fotoene.',say:'Jo længere væk stjernen er, des mindre er fi, og des mindre flytter stjernen sig på fotoene.',a:{f:['secFig','secPhoto'],hl:['phi','phO'],anim:[R21,2600,9]},min:9},
@@ -1051,13 +1051,13 @@ const SEG=[
  {s:6,show:'Den korte side er afstanden fra Jorden til Solen, 149,6·10⁹ m. Den ligger over for vinklen φ.',say:'Den korte side er afstanden fra Joren til Solen, 149 komma 6 gange 10 i niende meter. Den ligger over for vinklen fi.',a:{hl:['base','phi']}},
  {s:6,show:'Afstanden r er hypotenusen. Derfor er sin(φ) lig med 149,6·10⁹ m divideret med r.',say:'Afstanden ær er hypotenusen. Derfor er sinus til fi lig med 149 komma 6 gange 10 i niende meter, divideret med ær.',a:{f:['secFig','secCalc'],hl:['r','cSin']}},
  {s:7,show:'Isolerer vi r, får vi parallakseformlen: r er lig med 149,6·10⁹ m divideret med sin(φ).',say:'Isolerer vi ær, får vi parallakseformlen. Ær er lig med 149 komma 6 gange 10 i niende meter, divideret med sinus til fi.',a:{mode:'model',r:R21,f:['secCalc'],hl:['cF']}},
- {s:7,show:'I eksemplet er φ = 1,5·10⁻⁶°. Det giver r = 5,7·10¹⁸ m.',say:'I eksemplet er fi lig med 1 komma 5 milliontedele grad. Det giver ær lig med 5 komma 7 gange 10 i attende meter.',a:{hl:['cV']}},
+ {s:7,show:'I eksemplet er φ = 1,5·10⁻⁶ grader. Det giver r = 5,7·10¹⁸ m.',say:'I eksemplet er fi lig med 1 komma 5 milliontedele grad. Det giver ær lig med 5 komma 7 gange 10 i attende meter.',a:{hl:['cV']}},
  {s:7,show:'Et lysår er 9,46·10¹⁵ m. Vi omregner med omskrivningsregel 2 og får cirka 600 lysår.',say:'Et lysår er 9 komma 46 gange 10 i femtende meter. Vi omregner med omskrivningsregel 2 og får cirka 600 lysår.',a:{hl:['cLy']}},
  {s:7,show:'Husk at lommeregneren skal regne i grader, når du tager sinus.',a:{hl:[]}},
  {s:8,show:'Nu får du din egen stjerne, med dine egne fotos fra foråret og efteråret.',a:{mode:'mine',tab:'calc',f:['secPhoto','secTask'],hl:['phS','phA']}},
  {s:8,show:'Aflæs stjernens plads på de to fotos. Beregn y, φ og afstanden r, både i meter og i lysår.',say:'Aflæs stjernens plads på de to fotos. Beregn y, fi og afstanden ær, både i meter og i lysår.',a:{hl:['inputs']}},
  {s:8,show:'Skriv dine resultater i felterne, og tryk på Tjek.',a:{hl:['check2']},wait:'t2'},
- {s:9,show:'Vinklerne er meget små. Et teleskop på Jorden kan ikke måle vinkler, der er mindre end cirka 3·10⁻⁶°.',say:'Vinklerne er meget små. Et teleskop på Joren kan ikke måle vinkler, der er mindre end cirka 3 milliontedele grad.',a:{mode:'model',tab:null,tel:'ground',r:R21,f:['secCtl','secPhoto'],hl:['telG']}},
+ {s:9,show:'Vinklerne er meget små. Et teleskop på Jorden kan ikke måle vinkler, der er mindre end cirka 3·10⁻⁶ grader.',say:'Vinklerne er meget små. Et teleskop på Joren kan ikke måle vinkler, der er mindre end cirka 3 milliontedele grad.',a:{mode:'model',tab:null,tel:'ground',r:R21,f:['secCtl','secPhoto'],hl:['telG']}},
  {s:9,show:'Usikkerheden er tegnet som en gul skive omkring stjernen. Stjernens plads kan kun bestemmes inden for skiven.',a:{f:['secPhoto'],hl:['disc']}},
  {s:9,show:'Når de to skiver overlapper, kan man ikke længere måle y. Det gælder stjernen i figur 21.',a:{hl:['phO','fig21']}},
  {s:10,show:'Find selv grænsen: Flyt stjernen, til de to skiver på det sidste foto netop rører hinanden.',a:{mode:'model',tab:'limit',tel:'ground',r:R21,f:['secPhoto','secCtl','secTask'],hl:['sR','phO']}},
@@ -1159,9 +1159,9 @@ $('nPrev1').addEventListener('click',()=>{const s=SEG[Math.max(0,N.i)].s;gotoSte
    ===================================================================== */
 const STEPS2=[
  {h:'Tycho Brahe (1546–1601)',p:'Tycho Brahe målte uden kikkert og kunne bestemme vinkler med en usikkerhed på cirka 1/60°. Den nærmeste stjerne, Proxima Centauri, har en parallakse på kun cirka 1/4700°. Tycho kunne derfor ikke se nogen parallakse – og det brugte han som et argument for, at Jorden står stille.',s:{r2:4.24,tel2:'tycho'}},
- {h:'Den første parallakse',p:'Først i 1838 lykkedes det Friedrich Bessel at måle parallaksen for en stjerne, 61 Cygni, der er cirka 11 lysår væk. I dag kan teleskoper på Jorden måle vinkler ned til cirka 3·10⁻⁶° og dermed afstande på nogle få hundrede lysår.',s:{r2:11.4,tel2:'ground'}},
- {h:'Satellitten Gaia',p:'Gaia blev opsendt af ESA i 2013. Uden luften foran kan den måle vinkler ned til cirka 3·10⁻⁸° – 100 gange mindre end fra Jorden. Den har målt parallaksen for mere end en milliard stjerner og kan bestemme afstande op til cirka 30 000 lysår.',s:{r2:20000,tel2:'gaia'}},
- {h:'Andre galakser',p:'Andromedagalaksen er cirka 2,5 mio. lysår væk. Dens parallakse er cirka 3,6·10⁻¹⁰° – 100 gange mindre end det, Gaia kan måle. Derfor bruger man andre metoder, for eksempel cepheidemetoden i afsnit 1.5. Den bygger på afstande, der er målt med parallaksemetoden.',s:{r2:2.5e6,tel2:'gaia'}},
+ {h:'Den første parallakse',p:'Først i 1838 lykkedes det Friedrich Bessel at måle parallaksen for en stjerne, 61 Cygni, der er cirka 11 lysår væk. I dag kan teleskoper på Jorden måle vinkler ned til cirka 3·10⁻⁶ grader og dermed afstande på nogle få hundrede lysår.',s:{r2:11.4,tel2:'ground'}},
+ {h:'Satellitten Gaia',p:'Gaia blev opsendt af ESA i 2013. Uden luften foran kan den måle vinkler ned til cirka 3·10⁻⁸ grader – 100 gange mindre end fra Jorden. Den har målt parallaksen for mere end en milliard stjerner og kan bestemme afstande op til cirka 30 000 lysår.',s:{r2:20000,tel2:'gaia'}},
+ {h:'Andre galakser',p:'Andromedagalaksen er cirka 2,5 mio. lysår væk. Dens parallakse er cirka 3,6·10⁻¹⁰ grader – 100 gange mindre end det, Gaia kan måle. Derfor bruger man andre metoder, for eksempel cepheidemetoden i afsnit 1.5. Den bygger på afstande, der er målt med parallaksemetoden.',s:{r2:2.5e6,tel2:'gaia'}},
  {h:'Ekstraopgave',p:'Beregn selv parallaksen for Proxima Centauri, som er 4,24 lysår væk – ligesom i eksempel 1.3.3.2. Skriv dit resultat i ekstraopgaven og tryk på Tjek. Bagefter kan du kontrollere det ved at klikke på Proxima Centauri under Styr selv.',s:{r2:R21,tel2:'ground'},f:['secX']}];
 let step2=0;
 STEPS2.forEach((s,i)=>{const d=document.createElement('span');d.title=s.h;d.addEventListener('click',()=>showStep2(i));$('dots2').appendChild(d);});
